@@ -26,9 +26,40 @@
   --red-bg:#F8E9E9;
   --amber:#B5791B;
   --amber-bg:#FBF0DC;
+  --blue:#2A5C99;
+  --blue-bg:#E8EFF8;
+  --yellow:#9C8A12;
+  --yellow-bg:#FBF7D9;
+  --teal:#0E7C86;
+  --teal-bg:#E4F3F3;
+  --purple:#6E4FA8;
+  --purple-bg:#EFE9F7;
   --border:#E3DFD3;
   --shadow: 0 8px 24px rgba(27,42,74,0.08);
   --radius: 14px;
+}
+body.dark-mode{
+  --bg:#12172A;
+  --paper:#1B2340;
+  --ink:#EDEFF5;
+  --ink-2:#C7CEDD;
+  --ink-soft:#9AA3B8;
+  --gold:#E4C15A;
+  --gold-light:#3A331B;
+  --gold-deep:#C9A227;
+  --green-bg:#1D3A2C;
+  --red-bg:#3A2020;
+  --amber-bg:#3A2C10;
+  --blue-bg:#1C2C44;
+  --yellow-bg:#33301A;
+  --teal-bg:#123435;
+  --purple-bg:#241C36;
+  --border:#2E3654;
+  --shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+body.dark-mode{ background-image:
+    radial-gradient(circle at 100% 0%, rgba(201,162,39,0.08), transparent 40%),
+    radial-gradient(circle at 0% 100%, rgba(255,255,255,0.03), transparent 40%);
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
@@ -98,6 +129,14 @@ body{
   cursor:pointer;transition:.15s;white-space:nowrap;
 }
 .ghost-btn:hover{background:var(--ink);color:#fff;}
+.dark-toggle-btn{
+  border:1.5px solid var(--border);background:var(--bg);color:var(--ink);
+  width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:transform .15s ease, box-shadow .15s ease, background .15s;
+}
+.dark-toggle-btn:hover{transform:translateY(-2px);box-shadow:0 8px 16px rgba(0,0,0,0.14);}
+.dark-toggle-btn:active{transform:translateY(1px);}
 
 /* ---------- Active Visitors Widget ---------- */
 .visitors-widget{
@@ -117,11 +156,13 @@ body{
 }
 .visitors-label{font-weight:700;color:var(--green);opacity:.85;}
 .visitors-dropdown{
-  display:none;position:absolute;top:100%;right:0;margin-top:10px;min-width:210px;
+  display:block;position:absolute;top:100%;right:0;margin-top:10px;min-width:210px;
   background:var(--paper);border:1px solid var(--border);border-radius:10px;
   box-shadow:0 12px 30px rgba(0,0,0,0.14);padding:10px;z-index:50;cursor:default;
+  opacity:0;visibility:hidden;transform:translateY(-8px);pointer-events:none;
+  transition:opacity .18s ease, transform .18s ease, visibility .18s;
 }
-.visitors-dropdown.open{display:block;}
+.visitors-dropdown.open{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto;}
 .visitors-dropdown-title{
   font-size:11px;color:var(--ink-soft);font-weight:800;margin-bottom:6px;
   text-transform:uppercase;letter-spacing:.5px;
@@ -148,20 +189,39 @@ body{
 .main-nav{
   display:flex;gap:6px;margin-bottom:20px;background:var(--paper);
   border-radius:12px;padding:6px;box-shadow:var(--shadow);width:fit-content;
+  position:relative;z-index:60;
 }
 .nav-tab{
   border:none;background:transparent;color:var(--ink-soft);font-family:'Tajawal';
   font-weight:800;font-size:14px;padding:10px 22px;border-radius:9px;cursor:pointer;transition:.15s;
+  position:relative;
 }
 .nav-tab.active{background:var(--ink);color:#fff;}
 .nav-tab:not(.active):hover{background:var(--bg);color:var(--ink);}
+/* Distinct accent color per main tab, shown as an underline chip beneath the tab */
+.nav-tab::after{
+  content:'';position:absolute;left:14px;right:14px;bottom:3px;height:3px;border-radius:3px;
+  background:transparent;transition:.15s;
+}
+.nav-tab[data-view="grades"].active::after{background:var(--gold);}
+.nav-tab[data-view="attendance"].active{background:var(--amber);}
+.nav-tab[data-view="attendance"].active::after{background:var(--gold-light);}
+.nav-tab[data-view="reports"].active{background:var(--teal);}
+.nav-tab[data-view="reports"].active::after{background:var(--gold-light);}
+.nav-tab[data-view="dashboard"].active{background:var(--blue);}
+.nav-tab[data-view="dashboard"].active::after{background:var(--gold-light);}
+.nav-tab[data-view="config"].active{background:var(--purple);}
+.nav-tab[data-view="config"].active::after{background:var(--gold-light);}
+.nav-tab:not(.active)::after{background:transparent;}
 .nav-dropdown{position:relative;}
 .nav-dropdown-menu{
-  display:none;position:absolute;top:100%;left:0;margin-top:8px;min-width:230px;
+  display:block;position:absolute;top:100%;left:0;margin-top:8px;min-width:230px;
   background:var(--paper);border:1px solid var(--border);border-radius:10px;
-  box-shadow:0 12px 30px rgba(0,0,0,0.14);padding:8px;z-index:40;
+  box-shadow:0 12px 30px rgba(0,0,0,0.14);padding:8px;z-index:200;
+  opacity:0;visibility:hidden;transform:translateY(-8px);pointer-events:none;
+  transition:opacity .18s ease, transform .18s ease, visibility .18s;
 }
-.nav-dropdown-menu.open{display:block;}
+.nav-dropdown-menu.open{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto;}
 .term-group-btn{ font-weight:800; display:flex; align-items:center; justify-content:space-between; }
 .term-group-btn .arrow{ transition:transform .15s; font-size:12px; }
 .term-group-btn.expanded .arrow{ transform:rotate(90deg); }
@@ -190,6 +250,35 @@ body{
   padding:14px 16px;border-bottom:1px solid var(--border);gap:12px;
 }
 .user-item:last-child{border-bottom:none;}
+
+/* ---------- Activity & Login Log ---------- */
+.log-filter-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.log-filter-row select{
+  border:1.5px solid var(--border);border-radius:8px;padding:9px 10px;font-family:'Tajawal';
+  font-size:13.5px;color:var(--ink);min-width:160px;background:#fff;
+}
+.log-table-wrap{max-height:420px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;}
+.log-table{width:100%;border-collapse:collapse;font-size:13px;}
+.log-table th{
+  position:sticky;top:0;background:var(--paper);color:var(--ink-soft);text-align:left;
+  font-weight:800;padding:10px 12px;border-bottom:2px solid var(--border);white-space:nowrap;
+}
+.log-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+.log-table tr:last-child td{border-bottom:none;}
+.log-ts{white-space:nowrap;color:var(--ink-soft);font-weight:600;font-size:12px;}
+.log-user{font-weight:800;color:var(--ink);white-space:nowrap;}
+.log-role{font-size:11px;color:var(--ink-soft);}
+.log-type-pill{
+  display:inline-block;padding:3px 10px;border-radius:20px;font-weight:800;font-size:11px;
+  white-space:nowrap;
+}
+.log-type-login{background:var(--green-bg);color:var(--green);}
+.log-type-logout{background:var(--bg);color:var(--ink-soft);}
+.log-type-add{background:var(--blue-bg);color:var(--blue);}
+.log-type-edit{background:var(--amber-bg);color:var(--amber);}
+.log-type-delete{background:var(--red-bg);color:var(--red);}
+.log-type-import{background:var(--purple-bg);color:var(--purple);}
+.log-empty{padding:26px;text-align:center;color:var(--ink-soft);font-weight:600;}
 .user-info{flex:1;}
 .user-name{font-weight:700;color:var(--ink);margin-bottom:4px;}
 .user-role{font-size:12px;color:var(--ink-soft);}
@@ -232,18 +321,69 @@ body{
 }
 .db-filters select:focus{outline:none;border-color:var(--gold);}
 
+/* ---------- Cycle Dashboard ---------- */
+.db-summary-row{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
+.db-stat-card{
+  flex:1; min-width:150px; background:var(--paper); border-radius:12px; padding:16px 18px;
+  box-shadow:var(--shadow); text-align:center;
+}
+.db-stat-num{ font-size:24px; font-weight:800; color:var(--ink); }
+.db-stat-num small{ font-size:13px; font-weight:700; color:var(--ink-soft); }
+.db-stat-label{ font-size:12px; font-weight:700; color:var(--ink-soft); margin-top:4px; }
+.db-charts-grid{ display:grid; grid-template-columns:1.3fr 1fr; gap:18px; }
+@media (max-width:900px){ .db-charts-grid{ grid-template-columns:1fr; } }
+.db-chart-card{ background:var(--paper); border-radius:12px; padding:18px; box-shadow:var(--shadow); }
+.db-chart-card h4{ margin:0 0 12px; font-size:14.5px; color:var(--ink); }
+.db-legend{ display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+.db-legend-item{ font-size:12.5px; color:var(--ink-soft); display:flex; align-items:center; gap:8px; }
+.db-legend-dot{ width:10px; height:10px; border-radius:50%; display:inline-block; flex-shrink:0; }
+
+/* ---------- Exams Analysis (Score Range) ---------- */
+.exam-analysis-table{ width:100%; border-collapse:collapse; font-size:13px; min-width:640px; }
+.exam-analysis-table th, .exam-analysis-table td{ border:1px solid var(--border); padding:8px 10px; text-align:center; white-space:nowrap; }
+.exam-analysis-table thead th{ background:var(--ink); color:#fff; font-weight:800; font-size:12.5px; }
+.exam-analysis-table thead tr:nth-child(2) th{ background:var(--ink-2); font-size:11.5px; }
+.exam-analysis-table td.range-cell, .exam-analysis-table th.range-cell{ background:var(--ink); color:#fff; font-weight:700; text-align:left; padding-left:14px; }
+.exam-analysis-table tr.total-row td{ background:var(--gold-light); color:var(--ink); font-weight:800; }
+.exam-analysis-table tr.total-row td.range-cell{ background:var(--gold-deep); color:#fff; }
+body.dark-mode .exam-analysis-table th, body.dark-mode .exam-analysis-table td{ border-color:var(--border); }
+
+/* ---------- Mark Entry Report ---------- */
+.mark-entry-table{ width:100%; border-collapse:collapse; font-size:13px; min-width:640px; }
+.mark-entry-table th, .mark-entry-table td{ border:1px solid var(--border); padding:7px 10px; text-align:center; }
+.mark-entry-table thead th{ background:var(--ink); color:#fff; font-weight:800; font-size:12.5px; }
+.mark-entry-table td.me-subject-cell{ background:var(--ink-2); color:#fff; font-weight:800; vertical-align:middle; }
+.mark-entry-table td.me-subject-cell small{ display:block; font-weight:700; opacity:0.85; margin-top:3px; }
+.mark-entry-table tr.me-subtotal-row td{ background:var(--gold-light); color:var(--ink); font-weight:800; }
+.mark-entry-table td.me-item-cell{ text-align:left; padding-left:14px; }
+.db-student-banner{
+  display:flex; align-items:center; gap:12px; background:var(--paper); border-radius:12px;
+  padding:14px 18px; box-shadow:var(--shadow); margin-bottom:16px;
+}
+.db-student-name{ font-weight:800; font-size:15.5px; color:var(--ink); }
+.db-student-meta{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+
 /* ---------- Stepper ---------- */
 .stepper{
   display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;
+  position:relative;z-index:55;
 }
 .step{
   flex:1;min-width:190px;background:var(--paper);border-radius:12px;
   padding:14px 16px;box-shadow:var(--shadow);position:relative;
-  border:2px solid transparent;transition:.15s;
+  border:2px solid transparent;transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
 }
 .step.active{border-color:var(--gold);}
 .step.done{cursor:pointer;}
+.step.done:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(27,42,74,0.16);}
+.step.done:active{transform:translateY(-1px);box-shadow:0 6px 14px rgba(27,42,74,0.14);}
 .step.locked{opacity:.45;}
+/* Connector line linking each step's number to the next, so the stepper reads as one path */
+.step:not(:last-child)::before{
+  content:'';position:absolute;top:24px;right:-11px;width:11px;height:3px;
+  background:var(--border);z-index:2;
+}
+.step.done:not(:last-child)::before{background:linear-gradient(90deg,var(--green),var(--gold));}
 .step-label{
   display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-soft);
   font-weight:700;letter-spacing:.3px;margin-bottom:8px;
@@ -251,16 +391,19 @@ body{
 .step-num{
   width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;
   display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;
+  position:relative;z-index:3;
 }
 .step.done .step-num{background:var(--green);}
 .step-value{font-size:16px;font-weight:800;color:var(--ink);min-height:20px;}
 .step-value.placeholder{color:#C4C0B4;font-weight:500;font-size:13px;}
 .step-options{
-  display:none;position:absolute;top:100%;right:0;left:0;margin-top:8px;
+  display:block;position:absolute;top:100%;right:0;left:0;margin-top:8px;
   background:var(--paper);border:1px solid var(--border);border-radius:10px;
-  box-shadow:0 12px 30px rgba(0,0,0,0.14);padding:8px;z-index:30;
+  box-shadow:0 12px 30px rgba(0,0,0,0.14);padding:8px;z-index:200;
+  opacity:0;visibility:hidden;transform:translateY(-8px);pointer-events:none;
+  transition:opacity .18s ease, transform .18s ease, visibility .18s;
 }
-.step-options.open{display:block;}
+.step-options.open{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto;}
 .opt-btn{
   display:block;width:100%;text-align:left;background:none;border:none;
   padding:9px 10px;border-radius:7px;font-family:'Tajawal';font-size:14px;font-weight:600;
@@ -282,6 +425,13 @@ body{
 .classbar-crumbs{display:flex;gap:8px;flex-wrap:wrap;font-size:14px;}
 .crumb{background:rgba(255,255,255,0.12);padding:5px 12px;border-radius:20px;font-weight:600;}
 .crumb.subj{background:var(--gold);color:var(--ink);font-weight:800;}
+/* Stage badge dot: quick visual identification of Primary/Prep/Secondary anywhere in the UI */
+.crumb.stage-primary::before,.crumb.stage-prep::before,.crumb.stage-secondary::before{
+  content:'';display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:middle;
+}
+.crumb.stage-primary::before{background:#59D98C;}
+.crumb.stage-prep::before{background:#5FA8F5;}
+.crumb.stage-secondary::before{background:#C79BF0;}
 .classbar-count{font-family:'Aref Ruqaa',serif;font-size:20px;color:var(--gold-light);}
 
 .toolbar{
@@ -289,9 +439,12 @@ body{
 }
 .btn{
   border:none;border-radius:9px;padding:10px 18px;font-family:'Tajawal';font-weight:700;
-  font-size:13.5px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:.15s;
+  font-size:13.5px;cursor:pointer;display:flex;align-items:center;gap:7px;
+  transition:transform .12s ease, box-shadow .12s ease, background .15s, color .15s;
   box-shadow:0 2px 6px rgba(0,0,0,0.06);
 }
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 16px rgba(0,0,0,0.14);}
+.btn:active{transform:translateY(1px);box-shadow:0 2px 4px rgba(0,0,0,0.12);}
 .btn-gold{background:var(--gold);color:var(--ink);}
 .btn-gold:hover{background:var(--gold-deep);color:#fff;}
 .btn-ink{background:var(--ink);color:#fff;}
@@ -387,6 +540,10 @@ tbody tr:hover{background:#FCFBF7;}
 .badge.good{background:#E7EEF6;color:var(--ink-2);}
 .badge.pass{background:var(--amber-bg);color:var(--amber);}
 .badge.fail{background:var(--red-bg);color:var(--red);}
+.badge.color-blue{background:var(--blue-bg);color:var(--blue);}
+.badge.color-green{background:var(--green-bg);color:var(--green);}
+.badge.color-yellow{background:var(--yellow-bg);color:var(--yellow);}
+.badge.color-red{background:var(--red-bg);color:var(--red);}
 .del-btn{
   background:none;border:none;color:#C4C0B4;font-size:17px;cursor:pointer;padding:4px 8px;
   border-radius:6px;
@@ -651,6 +808,14 @@ tbody tr:hover{background:#FCFBF7;}
   border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'Tajawal';
   font-size:13.5px;min-width:150px;
 }
+.uf-section-title{
+  font-size:12.5px;font-weight:800;color:var(--ink);text-transform:uppercase;letter-spacing:.4px;
+  margin:2px 0 8px;padding-top:12px;border-top:1px solid var(--border);
+}
+.uf-students-panel{
+  background:var(--gold-light);border:1.5px solid var(--gold);border-radius:10px;padding:14px;
+}
+.uf-students-panel .uf-section-title{border-top:none;padding-top:0;color:var(--gold-deep);}
 .users-table{width:100%;border-collapse:collapse;font-size:13.5px;}
 .users-table th{
   text-align:left;background:var(--bg);color:var(--ink-soft);font-size:11.5px;font-weight:800;
@@ -752,21 +917,43 @@ tbody tr:hover{background:#FCFBF7;}
           <option value="fr">French Section</option>
         </select>
       </div>
-      <button class="btn btn-gold" onclick="saveUserFromForm()" id="ufSubmitBtn">＋ Add User</button>
-      <button class="btn btn-outline" onclick="resetUserForm()" id="ufCancelBtn" style="display:none;">Cancel</button>
 
       <div class="field" id="ufScopeField" style="min-width:100%;flex-basis:100%;">
+        <p class="uf-section-title">Teacher access scope</p>
         <label>Assigned Subjects (leave all unchecked = no subjects yet)</label>
         <div class="perm-grid" id="ufSubjectsWrap"></div>
         <label style="margin-top:10px;display:block;">Assigned Classes <span style="color:#B8B2A0;font-weight:500;">(comma-separated, e.g. 3/A, 4/B — must match the "Class" values used in Grade Book)</span></label>
         <input type="text" id="ufClassrooms" placeholder="e.g. 3/A, 4/B" style="width:100%;margin-top:5px;">
       </div>
+
+      <div class="field uf-students-panel" id="ufStudentsField" style="min-width:100%;flex-basis:100%;display:none;">
+        <p class="uf-section-title">Which student(s) can this account see?</p>
+        <p class="foot-note" style="margin:0 0 10px;">This Parent/Student account will only see report cards, grades &amp; attendance for the student(s) checked below — never their classmates.</p>
+        <input type="text" id="ufStudentSearch" placeholder="🔍 Search by student name or ID (e.g. STU-0012)…" oninput="renderUfStudentPicker()" style="width:100%;margin-bottom:8px;">
+        <div class="perm-grid" id="ufStudentsWrap" style="max-height:200px;overflow:auto;display:block;"></div>
+        <p class="foot-note" id="ufStudentsSelectedNote" style="margin-top:8px;font-weight:700;"></p>
+      </div>
+
+      <div style="min-width:100%;flex-basis:100%;display:flex;gap:10px;margin-top:6px;">
+        <button class="btn btn-gold" onclick="saveUserFromForm()" id="ufSubmitBtn">＋ Add User</button>
+        <button class="btn btn-outline" onclick="resetUserForm()" id="ufCancelBtn" style="display:none;">Cancel</button>
+      </div>
     </div>
 
-    <div class="perm-grid" id="usersExcelRow" style="margin-bottom:16px;border-top:1px dashed var(--border);padding-top:14px;">
+    <div class="perm-grid" id="usersExcelRow" style="margin-bottom:12px;border-top:1px dashed var(--border);padding-top:14px;">
       <button class="btn btn-outline" onclick="downloadUserTemplate()">⬇ Download Users Import Template</button>
       <button class="btn btn-ink" onclick="document.getElementById('usersExcelInput').click()">⇪ Add Users from Excel</button>
       <input type="file" id="usersExcelInput" accept=".xlsx,.xls,.csv" onchange="importUsersExcel(this.files[0])">
+    </div>
+
+    <div class="perm-grid" id="parentLinkExcelRow" style="margin-bottom:16px;border-top:1px dashed var(--border);padding-top:14px;">
+      <div style="min-width:100%;flex-basis:100%;">
+        <p class="uf-section-title" style="margin-bottom:4px;">Bulk-link Parents to Students (Excel)</p>
+        <p class="foot-note" style="margin:0 0 8px;">For linking many Parent/Student accounts at once. Each row: a <b>Username</b> (must already exist as a Parent/Student account) and one or more <b>Student ID(s)</b> (the "STU-####" ID shown in Student Database exports) — separate multiple IDs in one cell with a semicolon.</p>
+      </div>
+      <button class="btn btn-outline" onclick="downloadParentLinkTemplate()">⬇ Download Linking Template</button>
+      <button class="btn btn-ink" onclick="document.getElementById('parentLinkExcelInput').click()">⇪ Link Parents from Excel</button>
+      <input type="file" id="parentLinkExcelInput" accept=".xlsx,.xls,.csv" onchange="importParentLinksExcel(this.files[0])">
     </div>
 
     <table class="users-table">
@@ -804,6 +991,43 @@ tbody tr:hover{background:#FCFBF7;}
   </div>
 </div>
 
+<!-- ================= ACTIVITY & LOGIN LOG MODAL ================= -->
+<div class="overlay-bg" id="activityLogOverlay">
+  <div class="users-modal" style="max-width:820px;">
+    <button class="close-x" onclick="closeActivityLogModal()">✕</button>
+    <h2>🕒 Activity &amp; Login Log</h2>
+    <p class="sub">Every sign-in and every change made in the system — who did it, and when.</p>
+
+    <div class="log-filter-row">
+      <select id="logFilterUser" onchange="renderActivityLogTable()">
+        <option value="">All users</option>
+      </select>
+      <select id="logFilterType" onchange="renderActivityLogTable()">
+        <option value="">All activity types</option>
+        <option value="login">Login</option>
+        <option value="logout">Logout</option>
+        <option value="add">Added</option>
+        <option value="edit">Edited</option>
+        <option value="delete">Deleted</option>
+        <option value="import">Imported</option>
+      </select>
+    </div>
+
+    <div class="log-table-wrap">
+      <table class="log-table">
+        <thead>
+          <tr><th>Date &amp; Time</th><th>User</th><th>Action</th><th>Details</th></tr>
+        </thead>
+        <tbody id="activityLogTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="perm-grid" style="margin-top:16px;">
+      <button class="btn btn-outline" id="clearActivityLogBtn" onclick="clearActivityLog()">🗑 Clear Log</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap" id="appWrap" style="display:none;">
 
   <div class="masthead">
@@ -819,6 +1043,7 @@ tbody tr:hover{background:#FCFBF7;}
       </div>
     </div>
     <div class="masthead-right">
+      <button class="dark-toggle-btn" id="darkToggleBtn" onclick="toggleDarkMode()" title="Toggle dark mode">🌙</button>
       <div class="dtw-widget" id="dtwWidget">
         <div class="dtw-block">
           <div class="dtw-clock" id="dtwClock">--:--:--</div>
@@ -858,11 +1083,11 @@ tbody tr:hover{background:#FCFBF7;}
   </div>
 
   <div class="main-nav" id="mainNav">
-    <button class="nav-tab active" data-view="database" id="navTabDatabase" onclick="switchView('database')">Student Database</button>
-    <button class="nav-tab" data-view="grades" id="navTabGrades" onclick="switchView('grades')">Grade Book</button>
-    <button class="nav-tab" data-view="attendance" id="navTabAttendance" onclick="switchView('attendance')">Absence</button>
+    <button class="nav-tab active" data-view="database" id="navTabDatabase" onclick="switchView('database')">🗂 Student Database</button>
+    <button class="nav-tab" data-view="grades" id="navTabGrades" onclick="switchView('grades')">📘 Grade Book</button>
+    <button class="nav-tab" data-view="attendance" id="navTabAttendance" onclick="switchView('attendance')">📅 Absence</button>
     <div class="nav-dropdown" id="reportsDropdownWrap">
-      <button class="nav-tab" data-view="reports" id="navTabReports" onclick="toggleReportsMenu(event)">Reports ▾</button>
+      <button class="nav-tab" data-view="reports" id="navTabReports" onclick="toggleReportsMenu(event)">📊 Reports ▾</button>
       <div class="nav-dropdown-menu" id="reportsMenu">
         <button class="opt-btn term-group-btn" id="termGroupBtn_term1" onclick="toggleTermGroup(event,'term1')">Term 1 <span class="arrow">▸</span></button>
         <div class="term-group" id="termGroup_term1">
@@ -870,6 +1095,7 @@ tbody tr:hover{background:#FCFBF7;}
           <button class="opt-btn" onclick="openReport('term1','month2')">Second Month Report Card</button>
           <button class="opt-btn" onclick="openReport('term1','coursework')">Total Coursework Report Card</button>
           <button class="opt-btn" onclick="openReport('term1','reportcard')">First Term Report Card</button>
+          <button class="opt-btn" onclick="openReport('term1','markentry')">Mark Entry Report</button>
         </div>
         <button class="opt-btn term-group-btn" id="termGroupBtn_term2" onclick="toggleTermGroup(event,'term2')">Term 2 <span class="arrow">▸</span></button>
         <div class="term-group" id="termGroup_term2">
@@ -877,13 +1103,47 @@ tbody tr:hover{background:#FCFBF7;}
           <button class="opt-btn" onclick="openReport('term2','month2')">Second Month Report Card</button>
           <button class="opt-btn" onclick="openReport('term2','coursework')">Total Coursework Report Card</button>
           <button class="opt-btn" onclick="openReport('term2','endyear')">End-of-Year Report Card</button>
+          <button class="opt-btn" onclick="openReport('term2','markentry')">Mark Entry Report</button>
+        </div>
+      </div>
+    </div>
+    <div class="nav-dropdown" id="dashboardDropdownWrap">
+      <button class="nav-tab" data-view="dashboard" id="navTabDashboard" onclick="toggleDashboardMenu(event)">📈 Dashboard ▾</button>
+      <div class="nav-dropdown-menu" id="dashboardMenu">
+        <button class="opt-btn term-group-btn" id="dashTermGroupBtn_term1" onclick="toggleDashTermGroup(event,'term1')">Term 1 <span class="arrow">▸</span></button>
+        <div class="term-group" id="dashTermGroup_term1">
+          <button class="opt-btn" onclick="openDashboard('term1','cycle1')">Cycle 1</button>
+          <button class="opt-btn" onclick="openDashboard('term1','cycle1vs2')">Cycle 1 Vs Cycle 2</button>
+        </div>
+        <button class="opt-btn term-group-btn" id="dashTermGroupBtn_term2" onclick="toggleDashTermGroup(event,'term2')">Term 2 <span class="arrow">▸</span></button>
+        <div class="term-group" id="dashTermGroup_term2">
+          <button class="opt-btn" onclick="openDashboard('term2','cycle1')">Cycle 1</button>
+          <button class="opt-btn" onclick="openDashboard('term2','cycle1vs2')">Cycle 1 Vs Cycle 2</button>
+        </div>
+      </div>
+    </div>
+    <div class="nav-dropdown" id="examsDropdownWrap">
+      <button class="nav-tab" data-view="examsAnalysis" id="navTabExamsAnalysis" onclick="toggleExamsMenu(event)">🧮 Exams Analysis ▾</button>
+      <div class="nav-dropdown-menu" id="examsMenu">
+        <button class="opt-btn term-group-btn" id="examsTermGroupBtn_term1" onclick="toggleExamsTermGroup(event,'term1')">Term 1 <span class="arrow">▸</span></button>
+        <div class="term-group" id="examsTermGroup_term1">
+          <button class="opt-btn" onclick="openExamsAnalysis('term1','cycle1')">Cycle 1</button>
+          <button class="opt-btn" onclick="openExamsAnalysis('term1','cycle2')">Cycle 2</button>
+          <button class="opt-btn" onclick="openExamsAnalysis('term1','finalexam')">First Term Exam Paper</button>
+        </div>
+        <button class="opt-btn term-group-btn" id="examsTermGroupBtn_term2" onclick="toggleExamsTermGroup(event,'term2')">Term 2 <span class="arrow">▸</span></button>
+        <div class="term-group" id="examsTermGroup_term2">
+          <button class="opt-btn" onclick="openExamsAnalysis('term2','cycle1')">Cycle 1</button>
+          <button class="opt-btn" onclick="openExamsAnalysis('term2','cycle2')">Cycle 2</button>
+          <button class="opt-btn" onclick="openExamsAnalysis('term2','finalexam')">End-of-Year Exam Paper</button>
         </div>
       </div>
     </div>
     <div class="nav-dropdown" id="configDropdownWrap">
-      <button class="nav-tab" data-view="config" id="navTabConfig" onclick="toggleConfigMenu(event)">⚙ Configuration</button>
+      <button class="nav-tab" data-view="config" id="navTabConfig" onclick="toggleConfigMenu(event)">⚙ Configuration ▾</button>
       <div class="nav-dropdown-menu" id="configMenu">
         <button class="opt-btn" onclick="openUsersModal()">👤 Manage Users</button>
+        <button class="opt-btn" onclick="openActivityLogModal()">🕒 Activity &amp; Login Log</button>
       </div>
     </div>
   </div>
@@ -960,7 +1220,7 @@ tbody tr:hover{background:#FCFBF7;}
   <div class="workspace show" id="introState">
     <div class="empty-state">
       <div class="seal-lg">1</div>
-      <h3>Start by selecting the Section, Stage, Grade, Term and Subject</h3>
+      <h3>Start by selecting the Academic Term, Section, Stage, Grade, Class, Mark Entry and Subject</h3>
       <p>Use the steps above in order to display the grade sheet for the class.</p>
     </div>
   </div>
@@ -1004,7 +1264,7 @@ tbody tr:hover{background:#FCFBF7;}
     <div class="workspace show" id="attendanceIntroState">
       <div class="empty-state">
         <div class="seal-lg">1</div>
-        <h3>Start by selecting the Section, Stage, Grade and Class</h3>
+        <h3>Start by selecting the Academic Term, Section, Stage, Grade and Class</h3>
         <p>Use the steps above in order to display the attendance sheet for the class.</p>
       </div>
     </div>
@@ -1027,6 +1287,26 @@ tbody tr:hover{background:#FCFBF7;}
         <h3>Select Section, Stage, Grade and Term to view this report</h3>
         <p>Use the steps above in order to display the report for the class.</p>
       </div>
+    </div>
+  </div>
+
+  <div id="dashboardView" style="display:none;">
+    <div class="classbar">
+      <div class="classbar-crumbs" id="dashboardCrumbs"></div>
+    </div>
+    <div class="workspace show" id="dashboardWorkspace">
+      <div class="db-filters" id="dashboardFilters"></div>
+      <div id="dashboardChartsArea"></div>
+    </div>
+  </div>
+
+  <div id="examsAnalysisView" style="display:none;">
+    <div class="classbar">
+      <div class="classbar-crumbs" id="examsCrumbs"></div>
+    </div>
+    <div class="workspace show" id="examsAnalysisWorkspace">
+      <div class="db-filters" id="examsFilters"></div>
+      <div id="examsTableArea"></div>
     </div>
   </div>
 
@@ -1164,7 +1444,19 @@ const STAGES = {
   }
 };
 
-let state = { section:null, stage:null, grade:null, term:null, academicTerm:null, subject:null, reportTerm:'term1', reportType:null, attMonth:null };
+// Absence tab keeps its OWN independent copies of the Section/Stage/Grade lists.
+// These start out identical to SECTIONS/STAGES above, but editing one set (e.g. adding a
+// section/stage/grade here or in the Grade Book lists) will NOT affect the other — they are
+// completely separate lists, only the selected VALUES (state vs attState) were already independent.
+const ATT_SECTIONS = JSON.parse(JSON.stringify(SECTIONS));
+const ATT_STAGES = JSON.parse(JSON.stringify(STAGES));
+
+let state = { termPeriod:null, section:null, stage:null, grade:null, term:null, academicTerm:null, subject:null, reportTerm:'term1', reportType:null, attMonth:null,
+  dashboardTerm:null, dashboardMode:null, dashboardSection:null, dashboardStage:null, dashboardGrade:null, dashboardClassroom:null, dashboardStudent:null,
+  examsTerm:null, examsMode:null, examsSection:null, examsStage:null, examsGrade:null, examsClassroom:null };
+// Absence tab keeps its own independent selections (Academic Term / Section / Stage / Grade / Class),
+// completely separate from the Grade Book tab's selections above.
+let attState = { termPeriod:null, section:null, stage:null, grade:null, term:null };
 let openStep = null;
 let currentView = 'database';
 
@@ -1181,23 +1473,22 @@ const MILS_LOGO_B64 = "/9j/4AAQSkZJRgABAQEAeAB4AAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFB
 const EEP_LOGO_B64 = "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";
 
 function classKey(){ return `${state.section}|${state.stage}|${state.grade}`; }
-// Mark-entry sub-mode within an academic term, e.g. 'term1-month1' -> 'month1'
+// Mark-entry sub-mode: 'month1' | 'month2' | 'coursework' (Term 1 / Term 2 is tracked separately in state.termPeriod)
 function academicSubMode(){
-  if(!state.academicTerm) return null;
-  const parts = state.academicTerm.split('-');
-  return parts[1] || null; // 'month1' | 'month2' | 'coursework'
+  return state.academicTerm || null;
 }
 // First Month / Second Month / Total Coursework are just different entry SCREENS for the
 // same subject+term data (Total Coursework needs the Month 1 & Month 2 figures to compute its
-// totals), so they all share one score bucket keyed by the base term (term1 / term2) only.
+// totals), so they all share one score bucket keyed by the term period (term1 / term2) only.
 function subjKey(){
-  const baseTerm = state.academicTerm ? state.academicTerm.split('-')[0] : state.academicTerm;
-  return `${classKey()}|${baseTerm}|${state.subject}`;
+  return `${classKey()}|${state.termPeriod}|${state.subject}`;
 }
 function isPrimary(){ return state.stage === 'primary'; }
+// Grade 1 & Grade 2 Primary use an extended mark-entry structure (Q.Av./C.W./H.W./Oral out of 20/20/20/10, Total out of 75).
+function isJuniorPrimary(){ return isPrimary() && (state.grade==='g1' || state.grade==='g2'); }
 function nextDisplayId(){ return 'STU-' + String(studentIdCounter++).padStart(4,'0'); }
-// Attendance is tracked per Class (not per subject), so its key stops at the classroom (state.term)
-function attClassKey(){ return `${classKey()}|${state.term}`; }
+// Attendance is tracked per Class within its own Academic Term selection (attState), fully independent of the Grade Book tab
+function attClassKey(){ return `${attState.section}|${attState.stage}|${attState.grade}|${attState.termPeriod}|${attState.term}`; }
 
 function classKeyLabels(ck){
   const [sec, stg, grd] = ck.split('|');
@@ -1222,10 +1513,14 @@ function switchView(view){
   document.getElementById('databaseView').style.display = view==='database' ? '' : 'none';
   document.getElementById('reportsView').style.display = view==='reports' ? '' : 'none';
   document.getElementById('attendanceView').style.display = view==='attendance' ? '' : 'none';
+  document.getElementById('dashboardView').style.display = view==='dashboard' ? '' : 'none';
+  document.getElementById('examsAnalysisView').style.display = view==='examsAnalysis' ? '' : 'none';
   document.querySelectorAll('.nav-tab').forEach(b=> b.classList.toggle('active', b.dataset.view===view));
   if(view==='database') renderDatabase();
   if(view==='reports'){ renderReportsStepper(); renderReportWorkspace(); }
   if(view==='attendance'){ renderAttendanceStepper(); renderAttendanceWorkspace(); }
+  if(view==='dashboard'){ renderDashboard(); }
+  if(view==='examsAnalysis'){ renderExamsAnalysis(); }
 }
 
 let openTermGroup = null;
@@ -1243,6 +1538,7 @@ function toggleTermGroup(e, term){
 function openReport(term, type){
   state.reportTerm = term;
   state.reportType = type;
+  state.termPeriod = term; // keep the hidden "Academic Term" requirement satisfied for the Reports stepper
   const menu = document.getElementById('reportsMenu');
   if(menu) menu.classList.remove('open');
   openTermGroup = null;
@@ -1250,44 +1546,58 @@ function openReport(term, type){
 }
 
 /* ================== STEPPER ================== */
-function getClassesInGrade(){
-  if(!state.section || !state.stage || !state.grade) return [];
-  const classKey_ = `${state.section}|${state.stage}|${state.grade}`;
+function getClassesInGrade(st){
+  st = st || state;
+  if(!st.section || !st.stage || !st.grade) return [];
+  const classKey_ = `${st.section}|${st.stage}|${st.grade}`;
   const roster = students[classKey_] || [];
   const classes = [...new Set(roster.map(s => s.classroom).filter(c => c && c !== ''))];
   return classes.sort();
 }
 
-function stepConfig(){
+function makeStepConfig(st, sectionsData, stagesData){
+  sectionsData = sectionsData || SECTIONS;
+  stagesData = stagesData || STAGES;
   return [
-    { key:'section', title:'Section', getLabel:()=> state.section ? SECTIONS[state.section].label : null,
-      options: Object.entries(SECTIONS).filter(([id])=>scopeSectionAllowed(id)).map(([id,v])=>({id,label:v.label})) },
-    { key:'stage', title:'Stage', getLabel:()=> state.stage ? STAGES[state.stage].label : null,
-      options: Object.entries(STAGES).map(([id,v])=>({id,label:v.label})), requires:['section'] },
-    { key:'grade', title:'Grade', getLabel:()=>{
-        if(!state.grade) return null;
-        const g = STAGES[state.stage].grades.find(g=>g.id===state.grade);
+    { key:'termPeriod', title:'Academic Term', state: st, getLabel:()=> st.termPeriod ? TERM_LABELS[st.termPeriod] : null,
+      options: [
+        { id:'term1', label:'Term 1' },
+        { id:'term2', label:'Term 2' }
+      ] },
+    { key:'section', title:'Section', state: st, getLabel:()=> st.section ? sectionsData[st.section].label : null,
+      options: Object.entries(sectionsData).filter(([id])=>scopeSectionAllowed(id)).map(([id,v])=>({id,label:v.label})), requires:['termPeriod'] },
+    { key:'stage', title:'Stage', state: st, getLabel:()=> st.stage ? stagesData[st.stage].label : null,
+      options: Object.entries(stagesData).map(([id,v])=>({id,label:v.label})), requires:['termPeriod','section'] },
+    { key:'grade', title:'Grade', state: st, getLabel:()=>{
+        if(!st.grade) return null;
+        const g = stagesData[st.stage].grades.find(g=>g.id===st.grade);
         return g ? g.label : null;
-      }, options: ()=> state.stage ? STAGES[state.stage].grades.map(g=>({id:g.id,label:g.label})) : [], requires:['section','stage'] },
-    { key:'term', title:'Class', getLabel:()=> state.term ? state.term : null,
-      options: ()=> getClassesInGrade().filter(c=>scopeClassroomAllowed(c)).map(c=>({id:c,label:c})), requires:['section','stage','grade'] },
-    { key:'academicTerm', title:'Academic Term', getLabel:()=> state.academicTerm ? state.academicTerm : null,
-      options: ()=> [
-        { id:'term1', label:'Term 1', submenu: [
-          { id:'term1-month1', label:'First Month Mark Entry' },
-          { id:'term1-month2', label:'Second Month Mark Entry' },
-          { id:'term1-coursework', label:'Total Coursework Mark Entry' }
-        ]},
-        { id:'term2', label:'Term 2', submenu: [
-          { id:'term2-month1', label:'First Month Mark Entry' },
-          { id:'term2-month2', label:'Second Month Mark Entry' },
-          { id:'term2-coursework', label:'Total Coursework Mark Entry' }
-        ]}
+      }, options: ()=> st.stage ? stagesData[st.stage].grades.map(g=>({id:g.id,label:g.label})) : [], requires:['termPeriod','section','stage'] },
+    { key:'term', title:'Class', state: st, getLabel:()=> st.term ? st.term : null,
+      options: ()=> getClassesInGrade(st).filter(c=>scopeClassroomAllowed(c)).map(c=>({id:c,label:c})), requires:['termPeriod','section','stage','grade'] },
+    { key:'academicTerm', title:'Mark Entry', state: st, getLabel:()=>{
+        const labels = { month1:'First Month Mark Entry', month2:'Second Month Mark Entry', coursework:'Total Coursework Mark Entry' };
+        return st.academicTerm ? labels[st.academicTerm] : null;
+      },
+      options: [
+        { id:'month1', label:'First Month Mark Entry' },
+        { id:'month2', label:'Second Month Mark Entry' },
+        { id:'coursework', label:'Total Coursework Mark Entry' }
       ],
-      requires:['section','stage','grade','term'] },
-    { key:'subject', title:'Subject', getLabel:()=> state.subject || null,
-      options: ()=> state.stage ? STAGES[state.stage].subjects.filter(s=>scopeSubjectAllowed(s)).map(s=>({id:s,label:s})) : [], requires:['section','stage','grade','term','academicTerm'] }
+      requires:['termPeriod','section','stage','grade','term'] },
+    { key:'subject', title:'Subject', state: st, getLabel:()=> st.subject || null,
+      options: ()=> st.stage ? stagesData[st.stage].subjects.filter(s=>scopeSubjectAllowed(s)).map(s=>({id:s,label:s})) : [], requires:['termPeriod','section','stage','grade','term','academicTerm'] }
   ];
+}
+
+function stepConfig(){
+  return makeStepConfig(state, SECTIONS, STAGES);
+}
+
+// Absence tab uses its own independent ATT_SECTIONS / ATT_STAGES lists — editing either
+// list (Grade Book's or Absence's) never affects the other.
+function attStepConfig(){
+  return makeStepConfig(attState, ATT_SECTIONS, ATT_STAGES).slice(0,5);
 }
 
 function renderStepper(){
@@ -1297,14 +1607,14 @@ function renderStepper(){
 function renderReportsStepper(){
   const holder = document.getElementById('reportsStepper');
   if(!holder) return;
-  buildStepperHTML('reportsStepper', stepConfig().slice(0,4), 'r-');
+  buildStepperHTML('reportsStepper', stepConfig().slice(1,5), 'r-');
 }
 
-// Attendance reuses the same Section / Stage / Grade / Class dropdowns as Grade Book entry
+// The Absence tab has its own independent Academic Term / Section / Stage / Grade / Class selections
 function renderAttendanceStepper(){
   const holder = document.getElementById('attendanceStepper');
   if(!holder) return;
-  buildStepperHTML('attendanceStepper', stepConfig().slice(0,4), 'a-');
+  buildStepperHTML('attendanceStepper', attStepConfig(), 'a-');
 }
 
 function buildStepperHTML(holderId, cfgs, idPrefix){
@@ -1312,7 +1622,8 @@ function buildStepperHTML(holderId, cfgs, idPrefix){
   if(!holder) return;
   holder.innerHTML = '';
   cfgs.forEach((cfg, idx)=>{
-    const ready = cfg.requires ? cfg.requires.every(r=>state[r]) : true;
+    const cst0 = cfg.state || state;
+    const ready = cfg.requires ? cfg.requires.every(r=>cst0[r]) : true;
     const val = cfg.getLabel();
     const stepKey = idPrefix + cfg.key;
     const div = document.createElement('div');
@@ -1328,19 +1639,21 @@ function buildStepperHTML(holderId, cfgs, idPrefix){
         openStep = (openStep===stepKey) ? null : stepKey;
         renderStepper();
         renderReportsStepper();
+        renderAttendanceStepper();
       };
     }
     holder.appendChild(div);
 
     if(openStep===stepKey && ready){
+      const cst = cfg.state || state;
       const opts = typeof cfg.options==='function' ? cfg.options() : cfg.options;
       const optHolder = div.querySelector(`#opts-${stepKey}`);
       optHolder.classList.add('open');
       opts.forEach(o=>{
-        // Check if this option has a submenu (for academicTerm)
+        // Check if this option has a submenu
         if(o.submenu){
           const groupBtn = document.createElement('button');
-          groupBtn.className='opt-btn term-group-btn' + (state[cfg.key]===o.id ? ' selected':'');
+          groupBtn.className='opt-btn term-group-btn' + (cst[cfg.key]===o.id ? ' selected':'');
           groupBtn.innerHTML = `${o.label} <span class="arrow">▸</span>`;
           groupBtn.onclick=(e)=>{
             e.stopPropagation();
@@ -1357,22 +1670,22 @@ function buildStepperHTML(holderId, cfgs, idPrefix){
           subgroup.setAttribute('data-parent', o.id);
           o.submenu.forEach(sub=>{
             const subBtn = document.createElement('button');
-            subBtn.className='opt-btn' + (state[cfg.key]===sub.id ? ' selected':'');
+            subBtn.className='opt-btn' + (cst[cfg.key]===sub.id ? ' selected':'');
             subBtn.textContent=sub.label;
             subBtn.onclick=(e)=>{
               e.stopPropagation();
-              selectValue(cfg.key,sub.id);
+              selectValue(cfg.key,sub.id,cst);
             };
             subgroup.appendChild(subBtn);
           });
           optHolder.appendChild(subgroup);
         } else {
           const b = document.createElement('button');
-          b.className='opt-btn' + (state[cfg.key]===o.id ? ' selected':'');
+          b.className='opt-btn' + (cst[cfg.key]===o.id ? ' selected':'');
           b.textContent=o.label;
           b.onclick=(e)=>{
             e.stopPropagation();
-            selectValue(cfg.key,o.id);
+            selectValue(cfg.key,o.id,cst);
           };
           optHolder.appendChild(b);
         }
@@ -1381,14 +1694,15 @@ function buildStepperHTML(holderId, cfgs, idPrefix){
   });
 }
 
-function selectValue(key, id){
-  state[key]=id;
-  // reset downstream selections
-  if(key==='section'){ state.stage=null; state.grade=null; state.term=null; state.academicTerm=null; state.subject=null; }
-  if(key==='stage'){ state.grade=null; state.term=null; state.academicTerm=null; state.subject=null; }
-  if(key==='grade'){ state.term=null; state.academicTerm=null; state.subject=null; }
-  if(key==='term'){ state.academicTerm=null; state.subject=null; }
-  if(key==='academicTerm'){ state.subject=null; }
+function selectValue(key, id, targetState){
+  const st = targetState || state;
+  st[key]=id;
+  // reset downstream selections (only resets keys that exist on the target state object)
+  const order = ['termPeriod','section','stage','grade','term','academicTerm','subject'];
+  const idx = order.indexOf(key);
+  if(idx>-1){
+    order.slice(idx+1).forEach(k=>{ if(k in st) st[k]=null; });
+  }
   openStep=null;
   renderStepper();
   renderReportsStepper();
@@ -1405,6 +1719,21 @@ document.addEventListener('click', (e)=>{
     openTermGroup = null;
     document.querySelectorAll('.term-group').forEach(el=> el.classList.remove('open'));
     document.querySelectorAll('.term-group-btn').forEach(el=> el.classList.remove('expanded'));
+  }
+  if(!e.target.closest('#dashboardDropdownWrap')){
+    const dm = document.getElementById('dashboardMenu');
+    if(dm) dm.classList.remove('open');
+  }
+  if(!e.target.closest('#examsDropdownWrap')){
+    const em = document.getElementById('examsMenu');
+    if(em) em.classList.remove('open');
+    document.querySelectorAll('#examsMenu .term-group').forEach(el=> el.classList.remove('open'));
+    document.querySelectorAll('#examsMenu .term-group-btn').forEach(el=> el.classList.remove('expanded'));
+    openExamsTermGroup = null;
+  }
+  if(!e.target.closest('#configDropdownWrap')){
+    const cm = document.getElementById('configMenu');
+    if(cm) cm.classList.remove('open');
   }
   if(!e.target.closest('#visitorsWidget')){
     const dd = document.getElementById('visitorsDropdown');
@@ -1431,20 +1760,604 @@ function toggleConfigMenu(e){
   document.getElementById('configMenu').classList.toggle('open');
 }
 
+function toggleDashboardMenu(e){
+  e.stopPropagation();
+  document.getElementById('dashboardMenu').classList.toggle('open');
+}
+
+let openDashTermGroup = null;
+function toggleDashTermGroup(e, term){
+  e.stopPropagation();
+  openDashTermGroup = (openDashTermGroup===term) ? null : term;
+  document.querySelectorAll('#dashboardMenu .term-group').forEach(el=> el.classList.remove('open'));
+  document.querySelectorAll('#dashboardMenu .term-group-btn').forEach(el=> el.classList.remove('expanded'));
+  if(openDashTermGroup){
+    document.getElementById('dashTermGroup_'+openDashTermGroup).classList.add('open');
+    document.getElementById('dashTermGroupBtn_'+openDashTermGroup).classList.add('expanded');
+  }
+}
+
+function toggleExamsMenu(e){
+  e.stopPropagation();
+  document.getElementById('examsMenu').classList.toggle('open');
+}
+
+let openExamsTermGroup = null;
+function toggleExamsTermGroup(e, term){
+  e.stopPropagation();
+  openExamsTermGroup = (openExamsTermGroup===term) ? null : term;
+  document.querySelectorAll('#examsMenu .term-group').forEach(el=> el.classList.remove('open'));
+  document.querySelectorAll('#examsMenu .term-group-btn').forEach(el=> el.classList.remove('expanded'));
+  if(openExamsTermGroup){
+    document.getElementById('examsTermGroup_'+openExamsTermGroup).classList.add('open');
+    document.getElementById('examsTermGroupBtn_'+openExamsTermGroup).classList.add('expanded');
+  }
+}
+
+const DASHBOARD_MODE_LABELS = { cycle1:'Cycle 1', cycle1vs2:'Cycle 1 Vs Cycle 2' };
+
+function openDashboard(term, mode){
+  state.dashboardTerm = term;
+  state.dashboardMode = mode || 'cycle1';
+  const menu = document.getElementById('dashboardMenu');
+  if(menu) menu.classList.remove('open');
+  document.querySelectorAll('#dashboardMenu .term-group').forEach(el=> el.classList.remove('open'));
+  document.querySelectorAll('#dashboardMenu .term-group-btn').forEach(el=> el.classList.remove('expanded'));
+  openDashTermGroup = null;
+  switchView('dashboard');
+}
+
+function openExamsAnalysis(term, mode){
+  state.examsTerm = term;
+  state.examsMode = mode || 'cycle1';
+  const menu = document.getElementById('examsMenu');
+  if(menu) menu.classList.remove('open');
+  document.querySelectorAll('#examsMenu .term-group').forEach(el=> el.classList.remove('open'));
+  document.querySelectorAll('#examsMenu .term-group-btn').forEach(el=> el.classList.remove('expanded'));
+  openExamsTermGroup = null;
+  switchView('examsAnalysis');
+}
+
+function renderDashboard(){
+  const label = TERM_LABELS[state.dashboardTerm] || 'Term 1';
+  const modeLabel = DASHBOARD_MODE_LABELS[state.dashboardMode] || 'Cycle 1';
+  const crumbs = document.getElementById('dashboardCrumbs');
+  if(crumbs) crumbs.innerHTML = `<span class="crumb subj">${label}</span><span class="crumb subj">${modeLabel}</span>`;
+  renderDashboardFilters();
+  renderDashboardCharts();
+}
+
+/* ---------- Cycle Dashboard: filters ---------- */
+function renderDashboardFilters(){
+  const wrap = document.getElementById('dashboardFilters');
+  if(!wrap) return;
+  const sectionOpts = Object.keys(SECTIONS).map(k=>`<option value="${k}" ${state.dashboardSection===k?'selected':''}>${SECTIONS[k].label}</option>`).join('');
+  const stageOpts = Object.keys(STAGES).map(k=>`<option value="${k}" ${state.dashboardStage===k?'selected':''}>${STAGES[k].label}</option>`).join('');
+  const gradeOpts = state.dashboardStage ? STAGES[state.dashboardStage].grades.map(g=>`<option value="${g.id}" ${state.dashboardGrade===g.id?'selected':''}>${g.label}</option>`).join('') : '';
+
+  let classOpts = '', studentOpts = '';
+  const classReady = state.dashboardSection && state.dashboardStage && state.dashboardGrade;
+  if(classReady){
+    const ck = `${state.dashboardSection}|${state.dashboardStage}|${state.dashboardGrade}`;
+    const roster = students[ck] || [];
+    const classes = getClassesInGrade({ section: state.dashboardSection, stage: state.dashboardStage, grade: state.dashboardGrade });
+    classOpts = classes.map(c=>`<option value="${String(c).replace(/"/g,'&quot;')}" ${state.dashboardClassroom===c?'selected':''}>${c}</option>`).join('');
+    const filtered = roster.filter(s=> !state.dashboardClassroom || (s.classroom||'').trim()===state.dashboardClassroom)
+      .slice().sort((a,b)=>a.name.localeCompare(b.name));
+    studentOpts = filtered.length
+      ? filtered.map(s=>`<option value="${s.id}" ${state.dashboardStudent===s.id?'selected':''}>${s.name}${s.classroom?` (${s.classroom})`:''}</option>`).join('')
+      : `<option value="" disabled>No students found for this class</option>`;
+  }
+
+  wrap.innerHTML = `
+    <div>
+      <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;">Section</label>
+      <select id="dbfSection" onchange="setDashboardFilter('section',this.value)">
+        <option value="">— Select —</option>${sectionOpts}
+      </select>
+    </div>
+    <div>
+      <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;">Stage</label>
+      <select id="dbfStage" onchange="setDashboardFilter('stage',this.value)">
+        <option value="">— Select —</option>${stageOpts}
+      </select>
+    </div>
+    <div>
+      <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;">Grade</label>
+      <select id="dbfGrade" onchange="setDashboardFilter('grade',this.value)" ${state.dashboardStage?'':'disabled'}>
+        <option value="">— Select —</option>${gradeOpts}
+      </select>
+    </div>
+    <div>
+      <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;">Class</label>
+      <select id="dbfClassroom" onchange="setDashboardFilter('classroom',this.value)" ${classReady?'':'disabled'}>
+        <option value="">All</option>${classOpts}
+      </select>
+    </div>
+    <div>
+      <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;">Student</label>
+      <select id="dbfStudent" onchange="setDashboardFilter('student',this.value)" ${classReady?'':'disabled'}>
+        <option value="">— Select a student —</option>${studentOpts}
+      </select>
+    </div>`;
+}
+
+function setDashboardFilter(kind, value){
+  if(kind==='section') state.dashboardSection = value || null;
+  if(kind==='stage'){ state.dashboardStage = value || null; state.dashboardGrade = null; state.dashboardClassroom=null; state.dashboardStudent=null; }
+  if(kind==='grade'){ state.dashboardGrade = value || null; state.dashboardClassroom=null; state.dashboardStudent=null; }
+  if(kind==='classroom'){ state.dashboardClassroom = value || null; state.dashboardStudent=null; }
+  if(kind==='student') state.dashboardStudent = value || null;
+  renderDashboardFilters();
+  renderDashboardCharts();
+}
+
+/* ---------- Cycle Dashboard: data ---------- */
+function computeCycleStats(section, stage, grade, term, studentId){
+  const junior = stage==='primary' && (grade==='g1' || grade==='g2');
+  const subjects = STAGES[stage].subjects;
+  const ck = `${section}|${stage}|${grade}`;
+  const roster = students[ck] || [];
+  const student = roster.find(s=>s.id===studentId);
+  if(junior || !roster.length || !student){
+    return { junior, empty: !roster.length, noStudent: !student, perSubject: [] };
+  }
+  const perSubject = subjects.map(subject=>{
+    const sk = `${ck}|${term}|${subject}`;
+    const subjScores = scores[sk] || {};
+    const classVals1 = [], classVals2 = [];
+    roster.forEach(s=>{
+      const sc = subjScores[s.id];
+      if(!sc) return;
+      const cv1 = parseFloat(sc.m1Cycle), cv2 = parseFloat(sc.m2Cycle);
+      if(!isNaN(cv1)) classVals1.push(cv1);
+      if(!isNaN(cv2)) classVals2.push(cv2);
+    });
+    const classAvg1 = classVals1.length ? classVals1.reduce((a,b)=>a+b,0)/classVals1.length : null;
+    const classAvg2 = classVals2.length ? classVals2.reduce((a,b)=>a+b,0)/classVals2.length : null;
+    const mySc = subjScores[studentId];
+    const v1 = mySc ? parseFloat(mySc.m1Cycle) : NaN;
+    const v2 = mySc ? parseFloat(mySc.m2Cycle) : NaN;
+    return {
+      subject,
+      v1: isNaN(v1)?null:v1, v2: isNaN(v2)?null:v2,
+      classAvg1, classAvg2,
+      hasV1: !isNaN(v1), hasV2: !isNaN(v2)
+    };
+  });
+  return { junior:false, empty:false, noStudent:false, student, perSubject };
+}
+
+const CYCLE_MAX = 5;
+const CYCLE_BANDS = [
+  { key:'excellent', label:'Excellent (4.5–5)', color:'#2F6F4E', test:v=>v>=4.5 },
+  { key:'verygood',  label:'Very Good (4–4.49)', color:'#2A5C99', test:v=>v>=4 && v<4.5 },
+  { key:'good',      label:'Good (3–3.99)',      color:'#C9A227', test:v=>v>=3 && v<4 },
+  { key:'accept',    label:'Acceptable (2–2.99)', color:'#9C7C15', test:v=>v>=2 && v<3 },
+  { key:'weak',      label:'Weak (below 2)',     color:'#B23A3A', test:v=>v<2 }
+];
+
+function renderDashboardCharts(){
+  const area = document.getElementById('dashboardChartsArea');
+  if(!area) return;
+  const { dashboardSection:section, dashboardStage:stage, dashboardGrade:grade, dashboardTerm:term, dashboardMode:mode, dashboardStudent:studentId } = state;
+  if(!section || !stage || !grade){
+    area.innerHTML = `<div class="empty-state"><div class="seal-lg">📈</div><h3>Choose a class</h3><p>Select the Section, Stage and Grade above to view the Cycle 1 analysis.</p></div>`;
+    return;
+  }
+  const preStats = computeCycleStats(section, stage, grade, term, studentId);
+  if(preStats.junior){
+    area.innerHTML = `<div class="empty-state"><div class="seal-lg">ℹ️</div><h3>Not applicable</h3><p>Cycle scores are not recorded for Grade 1 &amp; Grade 2 Primary.</p></div>`;
+    return;
+  }
+  if(preStats.empty){
+    area.innerHTML = `<div class="empty-state"><div class="seal-lg">ℹ️</div><h3>No students</h3><p>There are no students registered for this class yet.</p></div>`;
+    return;
+  }
+  if(!studentId){
+    area.innerHTML = `<div class="empty-state"><div class="seal-lg">🎓</div><h3>Choose a student</h3><p>Select the Classroom (optional) and Student above to view their Cycle analysis across all subjects.</p></div>`;
+    return;
+  }
+  const stats = preStats;
+  const withData = stats.perSubject.filter(p=> p.hasV1 || p.hasV2);
+  if(!withData.length){
+    area.innerHTML = `<div class="empty-state"><div class="seal-lg">ℹ️</div><h3>No Cycle marks yet</h3><p>No Cycle scores have been entered for <b>${escapeXml(stats.student.name)}</b> in ${TERM_LABELS[term]||'this term'}.</p></div>`;
+    return;
+  }
+
+  const nameBanner = `<div class="db-student-banner"><span class="seal-lg" style="width:38px;height:38px;font-size:16px;">🎓</span><div><div class="db-student-name">${escapeXml(stats.student.name)}</div><div class="db-student-meta">${STAGES[stage].grades.find(g=>g.id===grade).label} • ${SECTIONS[section].label}${stats.student.classroom?' • '+escapeXml(stats.student.classroom):''}</div></div></div>`;
+
+  if(mode==='cycle1vs2'){
+    area.innerHTML = nameBanner + renderCycleCompareView(stats.perSubject);
+  } else {
+    area.innerHTML = nameBanner + renderCycle1View(stats.perSubject);
+  }
+}
+
+function renderCycle1View(perSubject){
+  const withData = perSubject.filter(p=>p.hasV1);
+  const bars = withData.map(p=>({ label:p.subject, values:[p.v1, p.classAvg1] }));
+  const barSvg = svgGroupedBarChart(bars, CYCLE_MAX, ['Student','Class Average'], ['var(--blue)','var(--gold)']);
+
+  const bandCounts = CYCLE_BANDS.map(b=>({ ...b, count: withData.filter(p=>b.test(p.v1)).length }));
+  const pieSvg = svgPieChart(bandCounts.map(b=>({ label:b.label, value:b.count, color:b.color })));
+
+  const vals = withData.map(p=>p.v1);
+  const overallAvg = vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length) : 0;
+  const maxV = vals.length ? Math.max(...vals) : null;
+  const minV = vals.length ? Math.min(...vals) : null;
+  const bestSubjects = maxV===null ? [] : withData.filter(p=>p.v1===maxV).map(p=>p.subject);
+  const worstSubjects = minV===null ? [] : withData.filter(p=>p.v1===minV).map(p=>p.subject);
+
+  return `
+    <div class="db-summary-row">
+      <div class="db-stat-card"><div class="db-stat-num">${overallAvg.toFixed(2)}<small>/5</small></div><div class="db-stat-label">Student's Average</div></div>
+      <div class="db-stat-card"><div class="db-stat-num">${maxV!==null?maxV.toFixed(1):'—'}</div><div class="db-stat-label">Best Subject${bestSubjects.length?': '+bestSubjects.join(', '):''}</div></div>
+      <div class="db-stat-card"><div class="db-stat-num">${minV!==null?minV.toFixed(1):'—'}</div><div class="db-stat-label">Weakest Subject${worstSubjects.length?': '+worstSubjects.join(', '):''}</div></div>
+      <div class="db-stat-card"><div class="db-stat-num">${vals.length}</div><div class="db-stat-label">Subjects Recorded</div></div>
+    </div>
+    <div class="db-charts-grid">
+      <div class="db-chart-card">
+        <h4>Cycle 1 — Student vs Class Average (Max 5)</h4>
+        ${barSvg}
+      </div>
+      <div class="db-chart-card">
+        <h4>Performance Distribution Across Subjects</h4>
+        ${pieSvg}
+        ${legendHtml(bandCounts)}
+      </div>
+    </div>`;
+}
+
+function renderCycleCompareView(perSubject){
+  const withData = perSubject.filter(p=>p.hasV1 || p.hasV2);
+  const bars = withData.map(p=>({ label:p.subject, values:[p.v1, p.v2] }));
+  const barSvg = svgGroupedBarChart(bars, CYCLE_MAX, ['Cycle 1','Cycle 2'], ['var(--blue)','var(--gold)']);
+
+  let improved=0, same=0, declined=0;
+  withData.forEach(p=>{
+    if(p.hasV1 && p.hasV2){
+      if(p.v2>p.v1) improved++;
+      else if(p.v2<p.v1) declined++;
+      else same++;
+    }
+  });
+  const total = improved+same+declined;
+  const pieData = [
+    { label:'Improved', value:improved, color:'#2F6F4E' },
+    { label:'Same', value:same, color:'#C9A227' },
+    { label:'Declined', value:declined, color:'#B23A3A' }
+  ];
+  const pieSvg = svgPieChart(pieData);
+
+  const v1All = withData.filter(p=>p.hasV1).map(p=>p.v1);
+  const v2All = withData.filter(p=>p.hasV2).map(p=>p.v2);
+  const a1 = v1All.length? v1All.reduce((a,b)=>a+b,0)/v1All.length : 0;
+  const a2 = v2All.length? v2All.reduce((a,b)=>a+b,0)/v2All.length : 0;
+  const diff = a2 - a1;
+
+  return `
+    <div class="db-summary-row">
+      <div class="db-stat-card"><div class="db-stat-num">${a1.toFixed(2)}<small>/5</small></div><div class="db-stat-label">Cycle 1 Average</div></div>
+      <div class="db-stat-card"><div class="db-stat-num">${a2.toFixed(2)}<small>/5</small></div><div class="db-stat-label">Cycle 2 Average</div></div>
+      <div class="db-stat-card" style="color:${diff>=0?'var(--green)':'var(--red)'}"><div class="db-stat-num">${diff>=0?'+':''}${diff.toFixed(2)}</div><div class="db-stat-label">Change</div></div>
+      <div class="db-stat-card"><div class="db-stat-num">${total}</div><div class="db-stat-label">Subjects Compared</div></div>
+    </div>
+    <div class="db-charts-grid">
+      <div class="db-chart-card">
+        <h4>Cycle 1 vs Cycle 2 per Subject (Max 5)</h4>
+        ${barSvg}
+      </div>
+      <div class="db-chart-card">
+        <h4>Progress: Cycle 1 → Cycle 2</h4>
+        ${pieSvg}
+        ${legendHtml(pieData)}
+      </div>
+    </div>`;
+}
+
+function legendHtml(items){
+  return `<div class="db-legend">${items.map(it=>`
+    <div class="db-legend-item"><span class="db-legend-dot" style="background:${it.color}"></span>${it.label} — <b>${it.count!==undefined?it.count:it.value}</b></div>
+  `).join('')}</div>`;
+}
+
+/* ================== EXAMS ANALYSIS (Score Range) ================== */
+const EXAMS_MODE_LABELS = { cycle1:'Cycle 1', cycle2:'Cycle 2', finalexam:'First Term Exam Paper' };
+// Term 2's "Final Exam" column is labelled "End-of-Year Exam Paper" instead of "First Term Exam Paper".
+function getExamModeLabel(term, mode){
+  if(mode==='finalexam') return term==='term2' ? 'End-of-Year Exam Paper' : 'First Term Exam Paper';
+  return EXAMS_MODE_LABELS[mode] || mode;
+}
+
+// Which raw score field feeds each exam mode, its maximum grade (as shown in the mark-entry
+// tables), and which stages actually record that field. Cycle 1 / Cycle 2 only exist for the
+// Primary Stage (non-junior grades); First Term Exam Paper (the "Final Exam" column) only
+// exists for Prep & Secondary Stage subjects.
+const EXAM_FIELD_INFO = {
+  cycle1:    { field:'m1Cycle', max:5,  appliesToStage: st => st==='primary' },
+  cycle2:    { field:'m2Cycle', max:5,  appliesToStage: st => st==='primary' },
+  finalexam: { field:'final',   max:60, appliesToStage: st => st!=='primary' }
+};
+
+// Score-range bands used for the analysis table (percentage of each column's own maximum).
+const SCORE_BANDS = [
+  { label:'< 50%',  min:-Infinity, max:50,       bg:'#F8E9E9', fg:'#B23A3A' },
+  { label:'50–60%', min:50,        max:60,       bg:'#FBF0DC', fg:'#B5791B' },
+  { label:'60–70%', min:60,        max:70,       bg:'#E8EFF8', fg:'#2A5C99' },
+  { label:'70–80%', min:70,        max:80,       bg:'#E7F1EB', fg:'#2F6F4E' },
+  { label:'80–85%', min:80,        max:85,       bg:'#E4F3F3', fg:'#0E7C86' },
+  { label:'85–90%', min:85,        max:90,       bg:'#EFE9F7', fg:'#6E4FA8' },
+  { label:'90–95%', min:90,        max:95,       bg:'#FBF7D9', fg:'#9C8A12' },
+  { label:'≥ 95%',  min:95,        max:Infinity, bg:'#1B2A4A', fg:'#FFFFFF' }
+];
+function bandIndexForPct(pct){
+  for(let i=0;i<SCORE_BANDS.length;i++){
+    const b = SCORE_BANDS[i];
+    if(i===SCORE_BANDS.length-1){ if(pct>=b.min) return i; }
+    else if(pct>=b.min && pct<b.max) return i;
+  }
+  return 0;
+}
+
+function renderExamsAnalysis(){
+  const label = TERM_LABELS[state.examsTerm] || 'Term 1';
+  const modeLabel = getExamModeLabel(state.examsTerm, state.examsMode) || 'Cycle 1';
+  const crumbs = document.getElementById('examsCrumbs');
+  if(crumbs) crumbs.innerHTML = `<span class="crumb subj">${label}</span><span class="crumb subj">${modeLabel}</span>`;
+  renderExamsFilters();
+  renderExamsTable();
+}
+
+/* ---------- Exams Analysis: filters ---------- */
+function renderExamsFilters(){
+  const wrap = document.getElementById('examsFilters');
+  if(!wrap) return;
+  const sectionOpts = Object.keys(SECTIONS).map(k=>`<option value="${k}" ${state.examsSection===k?'selected':''}>${SECTIONS[k].label}</option>`).join('');
+  const stageOpts = Object.keys(STAGES).map(k=>`<option value="${k}" ${state.examsStage===k?'selected':''}>${STAGES[k].label}</option>`).join('');
+  const gradeOpts = state.examsStage ? STAGES[state.examsStage].grades.map(g=>`<option value="${g.id}" ${state.examsGrade===g.id?'selected':''}>${g.label}</option>`).join('') : '';
+
+  let classOpts = '';
+  const classReady = state.examsSection && state.examsStage && state.examsGrade;
+  if(classReady){
+    const classes = getClassesInGrade({ section: state.examsSection, stage: state.examsStage, grade: state.examsGrade });
+    classOpts = classes.map(c=>`<option value="${String(c).replace(/"/g,'&quot;')}" ${state.examsClassroom===c?'selected':''}>${c}</option>`).join('');
+  }
+
+  wrap.innerHTML = `
+    <div>
+      <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;">Section</label>
+      <select id="exfSection" onchange="setExamsFilter('section',this.value)">
+        <option value="">— Select —</option>${sectionOpts}
+      </select>
+    </div>
+    <div>
+      <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;">Stage</label>
+      <select id="exfStage" onchange="setExamsFilter('stage',this.value)">
+        <option value="">— Select —</option>${stageOpts}
+      </select>
+    </div>
+    <div>
+      <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;">Grade</label>
+      <select id="exfGrade" onchange="setExamsFilter('grade',this.value)" ${state.examsStage?'':'disabled'}>
+        <option value="">— Select —</option>${gradeOpts}
+      </select>
+    </div>
+    <div>
+      <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;">Class</label>
+      <select id="exfClassroom" onchange="setExamsFilter('classroom',this.value)" ${classReady?'':'disabled'}>
+        <option value="">All classes</option>${classOpts}
+      </select>
+    </div>`;
+}
+
+function setExamsFilter(kind, value){
+  if(kind==='section') state.examsSection = value || null;
+  if(kind==='stage'){ state.examsStage = value || null; state.examsGrade = null; state.examsClassroom = null; }
+  if(kind==='grade'){ state.examsGrade = value || null; state.examsClassroom = null; }
+  if(kind==='classroom') state.examsClassroom = value || null;
+  renderExamsFilters();
+  renderExamsTable();
+}
+
+/* ---------- Exams Analysis: data ---------- */
+function computeExamsAnalysis(section, stage, grade, classroom, term, mode){
+  const info = EXAM_FIELD_INFO[mode];
+  if(!info) return { invalid:true, reason:'Unknown exam type.' };
+  if(!info.appliesToStage(stage)){
+    return { invalid:true, reason: mode==='finalexam'
+      ? 'First Term Exam Paper scores are only recorded for Prep and Secondary Stage subjects.'
+      : 'Cycle scores are only recorded for Primary Stage subjects.' };
+  }
+  const junior = stage==='primary' && (grade==='g1' || grade==='g2');
+  if(junior){
+    return { invalid:true, reason:'Cycle scores are not recorded for Grade 1 & Grade 2 Primary.' };
+  }
+  const ck = `${section}|${stage}|${grade}`;
+  let roster = students[ck] || [];
+  if(classroom) roster = roster.filter(s=> (s.classroom||'').trim() === classroom);
+  if(!roster.length){
+    return { invalid:true, reason:'There are no students registered for this class yet.' };
+  }
+
+  const subjects = STAGES[stage].subjects;
+  const columns = [];
+  subjects.forEach(subject=>{
+    const sk = `${ck}|${term}|${subject}`;
+    const subjScores = scores[sk] || {};
+    const vals = [];
+    roster.forEach(s=>{
+      const sc = subjScores[s.id];
+      if(!sc) return;
+      const raw = sc[info.field];
+      if(raw===null || raw===undefined || raw==='') return;
+      const num = parseFloat(raw);
+      if(isNaN(num)) return;
+      vals.push(num);
+    });
+    // A subject with no recorded scores for this exam is left out of the analysis entirely.
+    if(!vals.length) return;
+    const bandCounts = SCORE_BANDS.map(()=>0);
+    vals.forEach(v=>{
+      const pct = (v/info.max)*100;
+      bandCounts[bandIndexForPct(pct)]++;
+    });
+    columns.push({ subject, total:vals.length, bandCounts });
+  });
+  return { invalid:false, columns, max:info.max };
+}
+
+function renderExamsTable(){
+  const area = document.getElementById('examsTableArea');
+  if(!area) return;
+  const { examsSection:section, examsStage:stage, examsGrade:grade, examsClassroom:classroom, examsTerm:term, examsMode:mode } = state;
+
+  if(!term || !mode){
+    area.innerHTML = `<div class="empty-state"><div class="seal-lg">🧮</div><h3>Choose an exam</h3><p>Use the "Exams Analysis" menu above to choose a Term, then Cycle 1, Cycle 2, or First Term / End-of-Year Exam Paper.</p></div>`;
+    return;
+  }
+  if(!section || !stage || !grade){
+    area.innerHTML = `<div class="empty-state"><div class="seal-lg">📊</div><h3>Choose a class</h3><p>Select the Section, Stage and Grade above to view the ${escapeHtml(getExamModeLabel(term, mode))} score-range analysis.</p></div>`;
+    return;
+  }
+
+  const result = computeExamsAnalysis(section, stage, grade, classroom, term, mode);
+  if(result.invalid){
+    area.innerHTML = `<div class="empty-state"><div class="seal-lg">ℹ️</div><h3>Not applicable</h3><p>${escapeHtml(result.reason)}</p></div>`;
+    return;
+  }
+  if(!result.columns.length){
+    area.innerHTML = `<div class="empty-state"><div class="seal-lg">ℹ️</div><h3>No scores recorded yet</h3><p>No subject has ${escapeHtml(getExamModeLabel(term, mode))} scores recorded for this class yet.</p></div>`;
+    return;
+  }
+
+  const subjHeaderCells = result.columns.map(c=>`<th colspan="2">${escapeHtml(c.subject)}</th>`).join('');
+  const subHeaderCells = result.columns.map(()=>`<th>Count</th><th>%</th>`).join('');
+  const bodyRows = SCORE_BANDS.map((band,i)=>{
+    const cells = result.columns.map(c=>{
+      const count = c.bandCounts[i];
+      const pct = c.total ? (count/c.total*100) : 0;
+      return `<td style="background:${band.bg};color:${band.fg};font-weight:700;">${count}</td><td style="background:${band.bg};color:${band.fg};">${pct.toFixed(1)}%</td>`;
+    }).join('');
+    return `<tr><td class="range-cell">${band.label}</td>${cells}</tr>`;
+  }).join('');
+  const totalCells = result.columns.map(c=>`<td>${c.total}</td><td>100.0%</td>`).join('');
+  const totalRow = `<tr class="total-row"><td class="range-cell">TOTAL</td>${totalCells}</tr>`;
+
+  area.innerHTML = `
+    <div class="table-card">
+      <div class="grade-table-scroll">
+        <table class="exam-analysis-table">
+          <thead>
+            <tr><th class="range-cell" rowspan="2">Score Range</th>${subjHeaderCells}</tr>
+            <tr>${subHeaderCells}</tr>
+          </thead>
+          <tbody>${bodyRows}${totalRow}</tbody>
+        </table>
+      </div>
+    </div>
+    <p class="foot-note">
+      Percentages are calculated against this column's own maximum grade (Max. ${result.max}) as shown in the mark-entry tables.
+      Only subjects with at least one recorded ${escapeHtml(getExamModeLabel(term, mode))} score for this class are included.
+    </p>`;
+}
+
+/* ---------- SVG chart builders (no external libraries) ---------- */
+function svgBarChart(items, maxVal, seriesStyle){
+  const w = 560, h = 300, padL=36, padB=54, padT=16, padR=16;
+  const chartW = w-padL-padR, chartH = h-padT-padB;
+  const n = items.length || 1;
+  const gap = 14;
+  const barW = Math.max(10, (chartW - gap*(n-1))/n * 0.6);
+  const slot = (chartW - gap*(n-1))/n;
+  const color = (seriesStyle && seriesStyle[0] && seriesStyle[0].color) || 'var(--blue)';
+  let bars = '', labels='';
+  items.forEach((it,i)=>{
+    const val = it.value===null || isNaN(it.value) ? 0 : it.value;
+    const bh = (val/maxVal) * chartH;
+    const x = padL + i*(slot+gap/n) + (slot-barW)/2;
+    const y = padT + chartH - bh;
+    bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" rx="4" fill="${color}"></rect>
+      <text x="${(x+barW/2).toFixed(1)}" y="${(y-6).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">${it.value===null?'—':val.toFixed(1)}</text>`;
+    labels += `<text x="${(x+barW/2).toFixed(1)}" y="${h-padB+16}" text-anchor="middle" font-size="10.5" fill="var(--ink-soft)" transform="rotate(-18 ${(x+barW/2).toFixed(1)} ${h-padB+16})">${escapeXml(it.label)}</text>`;
+  });
+  const gridLines = [0,1,2,3,4,5].map(g=>{
+    const y = padT + chartH - (g/maxVal)*chartH;
+    return `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${w-padR}" y2="${y.toFixed(1)}" stroke="var(--border)" stroke-width="1"></line>
+      <text x="${padL-8}" y="${(y+4).toFixed(1)}" text-anchor="end" font-size="10" fill="var(--ink-soft)">${g}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;">${gridLines}${bars}${labels}</svg>`;
+}
+
+function svgGroupedBarChart(items, maxVal, seriesNames, colors){
+  const w = 560, h = 300, padL=36, padB=54, padT=16, padR=16;
+  const chartW = w-padL-padR, chartH = h-padT-padB;
+  const n = items.length || 1;
+  const gap = 14;
+  const slot = (chartW - gap*(n-1))/n;
+  const barW = Math.max(6, slot*0.32);
+  let bars = '', labels = '';
+  items.forEach((it,i)=>{
+    const groupX = padL + i*(slot+gap/n);
+    it.values.forEach((val,si)=>{
+      const v = val===null || isNaN(val) ? 0 : val;
+      const bh = (v/maxVal) * chartH;
+      const x = groupX + (slot/2 - barW) + si*(barW+4);
+      const y = padT + chartH - bh;
+      bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" rx="3" fill="${colors[si]}"></rect>
+        <text x="${(x+barW/2).toFixed(1)}" y="${(y-5).toFixed(1)}" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--ink)">${val===null?'—':v.toFixed(1)}</text>`;
+    });
+    labels += `<text x="${(groupX+slot/2).toFixed(1)}" y="${h-padB+16}" text-anchor="middle" font-size="10.5" fill="var(--ink-soft)" transform="rotate(-18 ${(groupX+slot/2).toFixed(1)} ${h-padB+16})">${escapeXml(it.label)}</text>`;
+  });
+  const gridLines = [0,1,2,3,4,5].map(g=>{
+    const y = padT + chartH - (g/maxVal)*chartH;
+    return `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${w-padR}" y2="${y.toFixed(1)}" stroke="var(--border)" stroke-width="1"></line>
+      <text x="${padL-8}" y="${(y+4).toFixed(1)}" text-anchor="end" font-size="10" fill="var(--ink-soft)">${g}</text>`;
+  }).join('');
+  const legend = seriesNames.map((s,i)=>`<span style="display:inline-flex;align-items:center;gap:5px;margin-inline-end:14px;font-size:11.5px;color:var(--ink-soft);"><span style="width:10px;height:10px;border-radius:3px;background:${colors[i]};display:inline-block;"></span>${s}</span>`).join('');
+  return `<div style="margin-bottom:6px;">${legend}</div><svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;">${gridLines}${bars}${labels}</svg>`;
+}
+
+function svgPieChart(data){
+  const total = data.reduce((a,d)=>a+d.value,0);
+  const cx=110, cy=110, r=100;
+  if(!total){
+    return `<svg viewBox="0 0 220 220" style="width:100%;max-width:240px;display:block;margin:0 auto;"><circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--border)"></circle><text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="13" fill="var(--ink-soft)">No data</text></svg>`;
+  }
+  let angle = -90, paths='';
+  data.forEach(d=>{
+    if(d.value<=0) return;
+    const slice = (d.value/total)*360;
+    const start = angle, end = angle+slice;
+    const large = slice>180 ? 1 : 0;
+    const x1 = cx + r*Math.cos(start*Math.PI/180), y1 = cy + r*Math.sin(start*Math.PI/180);
+    const x2 = cx + r*Math.cos(end*Math.PI/180), y2 = cy + r*Math.sin(end*Math.PI/180);
+    paths += `<path d="M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${large} 1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="${d.color}" stroke="var(--paper)" stroke-width="2"></path>`;
+    angle = end;
+  });
+  return `<svg viewBox="0 0 220 220" style="width:100%;max-width:240px;display:block;margin:0 auto;">${paths}</svg>`;
+}
+
+function escapeXml(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 /* ================== WORKSPACE ================== */
 function renderWorkspace(){
-  const ready = state.section && state.stage && state.grade && state.term && state.academicTerm && state.subject;
+  const ready = state.termPeriod && state.section && state.stage && state.grade && state.term && state.academicTerm && state.subject;
   document.getElementById('workspace').classList.toggle('show', !!ready);
   document.getElementById('introState').classList.toggle('show', !ready);
   if(!ready) return;
 
+  const markEntryLabels = { month1:'First Month Mark Entry', month2:'Second Month Mark Entry', coursework:'Total Coursework Mark Entry' };
   const gradeLabel = STAGES[state.stage].grades.find(g=>g.id===state.grade).label;
   document.getElementById('crumbs').innerHTML = `
+    <span class="crumb">${TERM_LABELS[state.termPeriod]}</span>
     <span class="crumb">${SECTIONS[state.section].label}</span>
-    <span class="crumb">${STAGES[state.stage].label}</span>
+    <span class="crumb stage-${state.stage}">${STAGES[state.stage].label}</span>
     <span class="crumb">${gradeLabel}</span>
     <span class="crumb">${state.term}</span>
-    <span class="crumb">${state.academicTerm}</span>
+    <span class="crumb">${markEntryLabels[state.academicTerm]}</span>
     <span class="crumb subj">${state.subject}</span>
   `;
   toggleAddForm(false);
@@ -1457,7 +2370,8 @@ const REPORT_TITLES = {
   month2: 'Second Month Report Card',
   coursework: 'Total Coursework Report Card',
   reportcard: 'First Term Report Card',
-  endyear: 'End-of-Year Report Card'
+  endyear: 'End-of-Year Report Card',
+  markentry: 'Mark Entry Report'
 };
 const TERM_LABELS = { term1:'Term 1', term2:'Term 2' };
 
@@ -1475,7 +2389,7 @@ function renderReportWorkspace(){
   const termLabel = TERM_LABELS[state.reportTerm] || '';
   document.getElementById('reportsCrumbs').innerHTML = `
     <span class="crumb">${SECTIONS[state.section].label}</span>
-    <span class="crumb">${STAGES[state.stage].label}</span>
+    <span class="crumb stage-${state.stage}">${STAGES[state.stage].label}</span>
     <span class="crumb">${gradeLabel}</span>
     <span class="crumb">${state.term}</span>
     ${termLabel ? `<span class="crumb">${termLabel}</span>` : ''}
@@ -1499,6 +2413,11 @@ function renderReportTable(){
   const holder = document.getElementById('reportsTableHolder');
   const type = state.reportType;
 
+  if(type === 'markentry'){
+    renderMarkEntryReport();
+    return;
+  }
+
   if(type === 'month1'){
     renderMonth1Certificate();
     return;
@@ -1508,17 +2427,19 @@ function renderReportTable(){
   const primary = isPrimary();
 
   if(roster.length===0){
+    const msg = emptyRosterMessage();
     holder.innerHTML = `
       <div class="empty-state">
         <div class="seal-lg">?</div>
-        <h3>No students in this class yet</h3>
-        <p>Add students from the "Grade Book" tab first.</p>
+        <h3>${msg.title}</h3>
+        <p>${msg.body}</p>
       </div>`;
     return;
   }
 
   const subjects = STAGES[state.stage].subjects;
-  const maxPerSubject = (type==='coursework'||type==='reportcard'||type==='endyear') ? (primary?40:100) : (primary?15:null);
+  const junior = isJuniorPrimary();
+  const maxPerSubject = (type==='coursework'||type==='reportcard'||type==='endyear') ? (primary?(junior?100:40):100) : (primary?(junior?75:15):null);
   const notApplicable = !primary && (type==='month1'||type==='month2');
 
   const headerCols = subjects.map(sub=>
@@ -1576,6 +2497,178 @@ function renderReportTable(){
     </table>${note}`;
 }
 
+/* ================== MARK ENTRY REPORT ================== */
+// Roster filtered down to only the students a given subject actually applies to
+// (Second Language subjects, and Religion / Ch-Religion), independent of state.subject.
+function filterRosterForSubject(roster, subject){
+  if(isLanguageSubject(subject)){
+    const lang = /french/i.test(subject) ? 'French' : 'German';
+    return roster.filter(s=> s.lang2 === lang);
+  }
+  if(subject === 'Ch-Religion') return roster.filter(s=> s.religion === 'Christian');
+  if(subject === 'Religion') return roster.filter(s=> s.religion === 'Muslim');
+  return roster;
+}
+
+// Every gradable item recorded across a full Term (both Month 1 & Month 2 mark-entry
+// screens, plus Cycles / Activity / Skills, or Month1/Month2/Mid-Year/Final Exam outside
+// Primary Stage) — this is what the Mark Entry Report tracks completion for.
+function markEntryFields(stage, junior){
+  if(stage==='primary'){
+    if(junior){
+      return [
+        {key:'m1E1', label:'Month 1 — Q.1'}, {key:'m1E2', label:'Month 1 — Q.2'}, {key:'m1E3', label:'Month 1 — Q.3'}, {key:'m1E4', label:'Month 1 — Q.4'},
+        {key:'m1CW', label:'Month 1 — C.W.'}, {key:'m1Hw', label:'Month 1 — H.W.'}, {key:'m1Oral', label:'Month 1 — Oral'}, {key:'m1Beh', label:'Month 1 — Beh. & Attend.'},
+        {key:'m2E1', label:'Month 2 — Q.1'}, {key:'m2E2', label:'Month 2 — Q.2'}, {key:'m2E3', label:'Month 2 — Q.3'}, {key:'m2E4', label:'Month 2 — Q.4'},
+        {key:'m2CW', label:'Month 2 — C.W.'}, {key:'m2Hw', label:'Month 2 — H.W.'}, {key:'m2Oral', label:'Month 2 — Oral'}, {key:'m2Beh', label:'Month 2 — Beh. & Attend.'},
+        {key:'activity', label:'Activity'}, {key:'tasks', label:'Skills'}
+      ];
+    }
+    return [
+      {key:'m1E1', label:'Month 1 — Q.1'}, {key:'m1E2', label:'Month 1 — Q.2'}, {key:'m1E3', label:'Month 1 — Q.3'}, {key:'m1E4', label:'Month 1 — Q.4'},
+      {key:'m1Hw', label:'Month 1 — H.W.'}, {key:'m1Beh', label:'Month 1 — Beh. & Attend.'}, {key:'m1Cycle', label:'Cycle 1'},
+      {key:'m2E1', label:'Month 2 — Q.1'}, {key:'m2E2', label:'Month 2 — Q.2'}, {key:'m2E3', label:'Month 2 — Q.3'}, {key:'m2E4', label:'Month 2 — Q.4'},
+      {key:'m2Hw', label:'Month 2 — H.W.'}, {key:'m2Beh', label:'Month 2 — Beh. & Attend.'}, {key:'m2Cycle', label:'Cycle 2'},
+      {key:'activity', label:'Activity'}, {key:'tasks', label:'Performance Tasks'}
+    ];
+  }
+  // Prep & Secondary Stage
+  return [
+    {key:'m1', label:'Month 1'}, {key:'m2', label:'Month 2'}, {key:'mid', label:'Mid-Year'}, {key:'final', label:'Final Exam'}
+  ];
+}
+
+// Color-codes a completion percentage the same way across the report (green = done,
+// blue = good progress, amber = partial, red = largely missing).
+function markEntryColor(pct){
+  if(pct>=95) return { bg:'var(--green-bg)', fg:'var(--green)' };
+  if(pct>=75) return { bg:'var(--blue-bg)',  fg:'var(--blue)'  };
+  if(pct>=50) return { bg:'var(--amber-bg)', fg:'var(--amber)' };
+  return { bg:'var(--red-bg)', fg:'var(--red)' };
+}
+
+function renderMarkEntryReport(){
+  const holder = document.getElementById('reportsTableHolder');
+  const roster = getClassRoster();
+
+  if(roster.length===0){
+    const msg = emptyRosterMessage();
+    holder.innerHTML = `
+      <div class="empty-state">
+        <div class="seal-lg">?</div>
+        <h3>${msg.title}</h3>
+        <p>${msg.body}</p>
+      </div>`;
+    return;
+  }
+
+  const stage = state.stage;
+  const junior = isJuniorPrimary();
+  const fields = markEntryFields(stage, junior);
+  const subjects = STAGES[stage].subjects;
+  const term = state.reportTerm || 'term1';
+  const ck = classKey();
+
+  let grandEntered = 0, grandTotal = 0;
+  const subjectBlocks = [];
+
+  subjects.forEach(subject=>{
+    const filteredRoster = filterRosterForSubject(roster, subject);
+    // A subject that doesn't apply to any student in this class (e.g. French for an
+    // all-German class) is left out of the report entirely.
+    if(!filteredRoster.length) return;
+
+    const sk = `${ck}|${term}|${subject}`;
+    const subjScores = scores[sk] || {};
+    let subjEntered = 0, subjTotal = 0;
+
+    const fieldRows = fields.map(f=>{
+      let entered = 0;
+      filteredRoster.forEach(s=>{
+        const sc = subjScores[s.id];
+        const raw = sc ? sc[f.key] : null;
+        if(raw!==null && raw!==undefined && raw!==''){ entered++; }
+      });
+      const total = filteredRoster.length;
+      const empty = total - entered;
+      subjEntered += entered; subjTotal += total;
+      grandEntered += entered; grandTotal += total;
+      const pct = total ? Math.round((entered/total*100)*10)/10 : 0;
+      return { label:f.label, entered, total, empty, pct };
+    });
+
+    const subjPct = subjTotal ? Math.round((subjEntered/subjTotal*100)*10)/10 : 0;
+    subjectBlocks.push({ subject, fieldRows, subjEntered, subjTotal, subjEmpty: subjTotal-subjEntered, subjPct });
+  });
+
+  if(!subjectBlocks.length){
+    holder.innerHTML = `
+      <div class="empty-state">
+        <div class="seal-lg">ℹ️</div>
+        <h3>No applicable subjects</h3>
+        <p>None of this stage's subjects apply to the students currently in this class.</p>
+      </div>`;
+    return;
+  }
+
+  const overallPct = grandTotal ? Math.round((grandEntered/grandTotal*100)*10)/10 : 0;
+  const overallColor = markEntryColor(overallPct);
+  const overallEmpty = grandTotal - grandEntered;
+
+  let bodyRows = '';
+  subjectBlocks.forEach(block=>{
+    const rowspan = block.fieldRows.length + 1;
+    const subjColor = markEntryColor(block.subjPct);
+    block.fieldRows.forEach((fr, idx)=>{
+      const c = markEntryColor(fr.pct);
+      bodyRows += `<tr>`;
+      if(idx===0){
+        bodyRows += `<td class="me-subject-cell" rowspan="${rowspan}">${escapeHtml(block.subject)}<small>${block.subjPct}% complete</small></td>`;
+      }
+      bodyRows += `
+          <td class="me-item-cell">${escapeHtml(fr.label)}</td>
+          <td>${fr.entered}</td>
+          <td>${fr.total}</td>
+          <td style="background:${fr.empty>0?'var(--red-bg)':'transparent'};color:${fr.empty>0?'var(--red)':'var(--ink-soft)'};font-weight:${fr.empty>0?'800':'400'};">${fr.empty}</td>
+          <td style="background:${c.bg};color:${c.fg};font-weight:700;">${fr.pct}%</td>
+        </tr>`;
+    });
+    bodyRows += `
+        <tr class="me-subtotal-row">
+          <td class="me-item-cell">Subject Total</td>
+          <td>${block.subjEntered}</td>
+          <td>${block.subjTotal}</td>
+          <td>${block.subjEmpty}</td>
+          <td>${block.subjPct}%</td>
+        </tr>`;
+  });
+
+  holder.innerHTML = `
+    <div class="db-summary-row">
+      <div class="db-stat-card"><div class="db-stat-num">${grandEntered}<small>/${grandTotal}</small></div><div class="db-stat-label">Cells Entered</div></div>
+      <div class="db-stat-card" style="color:${overallColor.fg}"><div class="db-stat-num">${overallPct}%</div><div class="db-stat-label">Overall Completion</div></div>
+      <div class="db-stat-card" style="color:var(--red)"><div class="db-stat-num">${overallEmpty}</div><div class="db-stat-label">Empty Cells</div></div>
+      <div class="db-stat-card"><div class="db-stat-num">${subjectBlocks.length}</div><div class="db-stat-label">Subjects Tracked</div></div>
+    </div>
+    <table class="mark-entry-table">
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>Item</th>
+          <th>Entered</th>
+          <th>Total</th>
+          <th>Empty</th>
+          <th>% Complete</th>
+        </tr>
+      </thead>
+      <tbody>${bodyRows}</tbody>
+    </table>
+    <p class="foot-note">
+      Tracks how many students have a mark recorded for each item, across every Month 1 / Month 2 / Cycle item (Primary Stage) or Month 1 / Month 2 / Mid-Year / Final Exam column (Prep &amp; Secondary Stage) of the ${escapeHtml(TERM_LABELS[term]||term)} data for this class.
+      Subjects that don't apply to any student in this class (e.g. a Second Language nobody takes) are left out.
+    </p>`;
+}
+
 
 /* ================== FIRST MONTH REPORT — CERTIFICATE ================== */
 /* Grade 3 Primary ONLY. Design must match the approved certificate exactly. */
@@ -1600,11 +2693,12 @@ function renderMonth1Certificate(){
   const roster = getClassRoster();
 
   if(roster.length===0){
+    const msg = emptyRosterMessage();
     holder.innerHTML = `
       <div class="empty-state">
         <div class="seal-lg">?</div>
-        <h3>No students in this class yet</h3>
-        <p>Add students from the "Grade Book" tab first.</p>
+        <h3>${msg.title}</h3>
+        <p>${msg.body}</p>
       </div>`;
     return;
   }
@@ -1776,16 +2870,19 @@ function addStudentManual(){
   toggleAddForm(false);
   renderTable();
   saveState();
+  logActivity('add', `Added student "${name}" (${STAGES[state.stage].label}, ${state.term||'—'})`);
 }
 
 function deleteStudent(id){
   if(!confirm('Delete this student from the class list?')) return;
   const roster = getRoster();
   const idx = roster.findIndex(s=>s.id===id);
+  const removedName = idx>-1 ? roster[idx].name : 'Unknown';
   if(idx>-1) roster.splice(idx,1);
   deleteAttendanceForStudent(id);
   renderTable();
   saveState();
+  logActivity('delete', `Deleted student "${removedName}" from ${STAGES[state.stage].label}, ${state.term||'—'}`);
 }
 
 function showDeleteOptions(){
@@ -1837,6 +2934,7 @@ function deleteSelectedStudents(){
   saveState();
   closeOverlay();
   alert(`تم حذف ${idsToDelete.length} طالب(ة)`);
+  logActivity('delete', `Deleted ${idsToDelete.length} selected student(s) from ${STAGES[state.stage].label}, ${state.term||'—'}`);
 }
 
 function deleteAllStudents(){
@@ -1867,6 +2965,7 @@ function deleteAllStudents(){
   saveState();
   closeOverlay();
   alert('تم حذف جميع الطلاب من هذا الفصل');
+  logActivity('delete', `Deleted all ${idsToRemove.length} student(s) from ${STAGES[state.stage].label}, ${state.term||'—'}`);
 }
 
 function letterGrade(pct){
@@ -1875,6 +2974,14 @@ function letterGrade(pct){
   if(pct>=65) return {t:'Good', c:'good'};
   if(pct>=50) return {t:'Pass', c:'pass'};
   return {t:'Fail', c:'fail'};
+}
+
+// Color Code for Grade 1 & Grade 2 Primary Total Coursework (Term Total, Max. 100)
+function courseworkColor(pct){
+  if(pct>=85) return {t:'Blue', c:'color-blue'};
+  if(pct>=65) return {t:'Green', c:'color-green'};
+  if(pct>=50) return {t:'Yellow', c:'color-yellow'};
+  return {t:'Red', c:'color-red'};
 }
 
 function clamp(v,max){
@@ -1886,8 +2993,8 @@ function clamp(v,max){
 
 function emptyScoreObj(){
   if(isPrimary()) return {
-    m1E1:null, m1E2:null, m1E3:null, m1E4:null, m1Hw:null, m1Beh:null, m1Cycle:null,
-    m2E1:null, m2E2:null, m2E3:null, m2E4:null, m2Hw:null, m2Beh:null, m2Cycle:null,
+    m1E1:null, m1E2:null, m1E3:null, m1E4:null, m1Hw:null, m1Beh:null, m1Cycle:null, m1CW:null, m1Oral:null,
+    m2E1:null, m2E2:null, m2E3:null, m2E4:null, m2Hw:null, m2Beh:null, m2Cycle:null, m2CW:null, m2Oral:null,
     activity:null, tasks:null
   };
   return {m1:null,m2:null,mid:null,final:null};
@@ -1902,14 +3009,27 @@ function avgEntered(vals){
 }
 
 function computePrimaryTotals(sc){
-  const avg1 = avgEntered([sc.m1E1,sc.m1E2,sc.m1E3,sc.m1E4]);
-  const month1Total = avg1 + (parseFloat(sc.m1Hw)||0) + (parseFloat(sc.m1Beh)||0);
-  const avg2 = avgEntered([sc.m2E1,sc.m2E2,sc.m2E3,sc.m2E4]);
-  const month2Total = avg2 + (parseFloat(sc.m2Hw)||0) + (parseFloat(sc.m2Beh)||0);
+  const junior = isJuniorPrimary();
+  let avg1 = avgEntered([sc.m1E1,sc.m1E2,sc.m1E3,sc.m1E4]);
+  let avg2 = avgEntered([sc.m2E1,sc.m2E2,sc.m2E3,sc.m2E4]);
+  let month1Total, month2Total;
+
+  if(junior){
+    // Q. Av. is averaged out of 5 first (ignoring empty cells), then scaled x4 to become out of 20.
+    avg1 = avg1 * 4;
+    avg2 = avg2 * 4;
+    month1Total = avg1 + (parseFloat(sc.m1CW)||0) + (parseFloat(sc.m1Hw)||0) + (parseFloat(sc.m1Oral)||0) + (parseFloat(sc.m1Beh)||0);
+    month2Total = avg2 + (parseFloat(sc.m2CW)||0) + (parseFloat(sc.m2Hw)||0) + (parseFloat(sc.m2Oral)||0) + (parseFloat(sc.m2Beh)||0);
+  } else {
+    month1Total = avg1 + (parseFloat(sc.m1Hw)||0) + (parseFloat(sc.m1Beh)||0);
+    month2Total = avg2 + (parseFloat(sc.m2Hw)||0) + (parseFloat(sc.m2Beh)||0);
+  }
+
   const twoMonthsAvg = (month1Total + month2Total) / 2;
-  const totalCycles = (parseFloat(sc.m1Cycle)||0) + (parseFloat(sc.m2Cycle)||0);
+  const totalCycles = junior ? 0 : ((parseFloat(sc.m1Cycle)||0) + (parseFloat(sc.m2Cycle)||0));
   const totalCoursework = twoMonthsAvg + totalCycles + (parseFloat(sc.activity)||0) + (parseFloat(sc.tasks)||0);
-  return { avg1, month1Total, avg2, month2Total, twoMonthsAvg, totalCycles, totalCoursework, maxTotal:40 };
+  const maxTotal = junior ? 100 : 40; // junior Term Total: Two Months Av.(75) + Activity(20) + Skills(5) = 100
+  return { avg1, month1Total, avg2, month2Total, twoMonthsAvg, totalCycles, totalCoursework, maxTotal, junior };
 }
 
 function updateScore(studentId, field, value, max){
@@ -1918,6 +3038,8 @@ function updateScore(studentId, field, value, max){
   map[studentId][field] = (value===''||value===null||value===undefined) ? null : clamp(value, max);
   renderTable(true);
   saveState();
+  const stu = getRoster().find(s=>s.id===studentId);
+  logActivity('edit', `Set "${field}" = ${value===''?'—':value} for ${stu?stu.name:'a student'} — ${state.subject||''} (${state.term||'—'})`);
 }
 
 function scoreInputHtml(studentId, field, value, max){
@@ -1935,10 +3057,38 @@ function isReligionSubject(subject){ return subject==='Religion' || subject==='C
 
 // Roster scoped to the currently selected Class (state.term). Used for DISPLAY only —
 // mutations (add/delete/import) must keep using the full getRoster() array.
+function emptyRosterMessage(){
+  const isUnlinkedParent = currentUser && currentUser.role==='parent'
+    && currentUser.effective && Array.isArray(currentUser.effective.studentScope)
+    && currentUser.effective.studentScope.length===0;
+  if(isUnlinkedParent){
+    return { title:'No student linked to this account yet', body:'Please contact the school administrator to link your child\'s profile to this account.' };
+  }
+  const hasScopedStudent = currentUser && currentUser.role==='parent'
+    && currentUser.effective && Array.isArray(currentUser.effective.studentScope)
+    && currentUser.effective.studentScope.length>0;
+  if(hasScopedStudent){
+    return { title:'No matching student in this class', body:'Your linked child is not enrolled in the class you selected — please check the Section / Stage / Grade / Class selection above.' };
+  }
+  return { title:'No students in this class yet', body:'Add students from the "Grade Book" tab first.' };
+}
 function getClassRoster(){
   const roster = getRoster();
-  if(!state.term) return roster;
-  return roster.filter(s => (s.classroom||'') === state.term);
+  let filtered = state.term ? roster.filter(s => (s.classroom||'') === state.term) : roster;
+  // A Parent/Student account with linked students is restricted to exactly those students —
+  // this is what keeps a parent from seeing classmates' grades or report cards.
+  filtered = filtered.filter(s => scopeStudentAllowed(s.id));
+  return filtered;
+}
+
+// Roster for the Absence tab — scoped entirely to attState, independent of the Grade Book tab's selections
+function getAttRoster(){
+  if(!attState.section || !attState.stage || !attState.grade) return [];
+  const ck = `${attState.section}|${attState.stage}|${attState.grade}`;
+  const roster = students[ck] || [];
+  let filtered = attState.term ? roster.filter(s => (s.classroom||'') === attState.term) : roster;
+  filtered = filtered.filter(s => scopeStudentAllowed(s.id));
+  return filtered;
 }
 
 function subjectFilteredRoster(){
@@ -1984,17 +3134,18 @@ function renderAttendanceWorkspace(){
   const ws = document.getElementById('attendanceWorkspace');
   const intro = document.getElementById('attendanceIntroState');
   if(!ws || !intro) return;
-  const ready = !!(state.section && state.stage && state.grade && state.term);
+  const ready = !!(attState.termPeriod && attState.section && attState.stage && attState.grade && attState.term);
   ws.style.display = ready ? '' : 'none';
   intro.style.display = ready ? 'none' : '';
   if(!ready) return;
 
-  const gradeLabel = STAGES[state.stage].grades.find(g=>g.id===state.grade).label;
+  const gradeLabel = ATT_STAGES[attState.stage].grades.find(g=>g.id===attState.grade).label;
   document.getElementById('attendanceCrumbs').innerHTML = `
-    <span class="crumb">${SECTIONS[state.section].label}</span>
-    <span class="crumb">${STAGES[state.stage].label}</span>
+    <span class="crumb">${TERM_LABELS[attState.termPeriod]}</span>
+    <span class="crumb">${ATT_SECTIONS[attState.section].label}</span>
+    <span class="crumb stage-${attState.stage}">${ATT_STAGES[attState.stage].label}</span>
     <span class="crumb">${gradeLabel}</span>
-    <span class="crumb subj">${state.term}</span>
+    <span class="crumb subj">${attState.term}</span>
   `;
   const addBar = document.getElementById('attAddMonthBar');
   if(addBar) addBar.style.display = (currentUser && currentUser.effective && currentUser.effective.edit) ? '' : 'none';
@@ -2055,6 +3206,7 @@ function addAttendanceMonth(){
   saveState();
   renderAttendanceMonthTabs();
   renderAttendanceTable();
+  logActivity('add', `Created attendance table "${month.label}" (${ATT_STAGES[attState.stage].label}, ${attState.term||'—'})`);
 }
 
 function deleteAttendanceMonth(id){
@@ -2062,11 +3214,13 @@ function deleteAttendanceMonth(id){
   if(!confirm('Delete this monthly attendance table? All absence records in it will be permanently removed.')) return;
   const ck = attClassKey();
   if(!attendance[ck]) return;
+  const removed = attendance[ck].months.find(m=>m.id===id);
   attendance[ck].months = attendance[ck].months.filter(m=>m.id!==id);
   if(state.attMonth===id) state.attMonth = null;
   saveState();
   renderAttendanceMonthTabs();
   renderAttendanceTable();
+  logActivity('delete', `Deleted attendance table "${removed?removed.label:id}" (${ATT_STAGES[attState.stage].label}, ${attState.term||'—'})`);
 }
 
 function selectAttendanceMonth(id){
@@ -2092,7 +3246,7 @@ function renderAttendanceTable(){
     return;
   }
 
-  const roster = getClassRoster();
+  const roster = getAttRoster();
   if(roster.length===0){
     holder.innerHTML = `
       <div class="empty-state">
@@ -2160,6 +3314,8 @@ function toggleAttendance(monthId, studentId, dateStr, checked){
   const cell = document.getElementById('attTotal-'+studentId);
   if(cell) cell.textContent = total;
   saveState();
+  const stu = getAttRoster().find(s=>s.id===studentId);
+  logActivity('edit', `Marked ${stu?stu.name:'a student'} as ${checked?'absent':'present'} on ${dateStr} (${month.label})`);
 }
 
 // Removes any attendance records for a student that's being deleted, across every class/month.
@@ -2183,10 +3339,17 @@ function renderTable(preserveFocus){
     const saveLine = `Grades are saved automatically as you type — you can still use "Full Backup" to save a copy to your device, or "Restore Backup" to load one later.`;
     if(isPrimary()){
       const mode = academicSubMode();
+      const junior = isJuniorPrimary();
       let modeLine;
-      if(mode==='month2') modeLine = `This screen is for <b>Month 2</b> marks only: Q.1–Q.4, Q. Av. (5), H.W. (5) and Behaviour &amp; Attendance (5) make up Total 2 (Max. 15), plus Cycle 2 (Max. 5).`;
-      else if(mode==='coursework') modeLine = `This screen shows the <b>Total Coursework</b> summary (Max. 40): Two Months Average (15) + Total Cycles (10) + Activity (5) + Performance Tasks (10). Two Months Average and Total Cycles are calculated automatically from the Month 1 and Month 2 mark-entry screens.`;
-      else modeLine = `This screen is for <b>Month 1</b> marks only: Q.1–Q.4, Q. Av. (5), H.W. (5) and Behaviour &amp; Attendance (5) make up Total 1 (Max. 15), plus Cycle 1 (Max. 5).`;
+      if(junior){
+        if(mode==='month2') modeLine = `This screen is for <b>Month 2</b> marks only: Q.1–Q.4 (5 each) are averaged (ignoring empty cells) then ×4 to give Q. Av. (20). Q. Av. + C.W. (20) + H.W. (20) + Oral (10) + Behaviour &amp; Attendance (5) make up Total 2 (Max. 75).`;
+        else if(mode==='coursework') modeLine = `This screen shows the <b>Term Av.</b> summary (Max. 100): Two Months Av. (75, the average of Total 1 and Total 2) + Activity (20) + Skills (5) = Term Total. Grade follows the same percentage bands as other stages; Color follows: 85%+ Blue, 65%+ Green, 50%+ Yellow, below 50% Red.`;
+        else modeLine = `This screen is for <b>Month 1</b> marks only: Q.1–Q.4 (5 each) are averaged (ignoring empty cells) then ×4 to give Q. Av. (20). Q. Av. + C.W. (20) + H.W. (20) + Oral (10) + Behaviour &amp; Attendance (5) make up Total 1 (Max. 75).`;
+      } else {
+        if(mode==='month2') modeLine = `This screen is for <b>Month 2</b> marks only: Q.1–Q.4, Q. Av. (5), H.W. (5) and Behaviour &amp; Attendance (5) make up Total 2 (Max. 15), plus Cycle 2 (Max. 5).`;
+        else if(mode==='coursework') modeLine = `This screen shows the <b>Total Coursework</b> summary (Max. 40): Two Months Average (15) + Total Cycles (10) + Activity (5) + Performance Tasks (10). Two Months Average and Total Cycles are calculated automatically from the Month 1 and Month 2 mark-entry screens.`;
+        else modeLine = `This screen is for <b>Month 1</b> marks only: Q.1–Q.4, Q. Av. (5), H.W. (5) and Behaviour &amp; Attendance (5) make up Total 1 (Max. 15), plus Cycle 1 (Max. 5).`;
+      }
       footNote.innerHTML = `${modeLine}<br>${langLine}${religionLine}${saveLine}`;
     } else {
       footNote.innerHTML = `Subject maximum grade is 100: Month 1 (10) + Month 2 (10) + Mid-Year (20) + Final Exam (60).<br>${langLine}${religionLine}${saveLine}`;
@@ -2284,7 +3447,58 @@ function renderPrimaryTable(roster, scoreMap, holder){
 }
 
 /* ---- First Month Mark Entry: Q.1–Q.4, Q. Av., H.W., Beh. & Attend., Total 1, Cycle 1 ---- */
+/* Grade 1 & Grade 2 Primary use an extended version: Q. Av., C.W., H.W., Oral (out of 20/20/20/10) + Beh. & Attend. (5) = Total 1 (Max. 75), plus Cycle 1. */
 function renderPrimaryMonth1Table(roster, scoreMap, holder){
+  const junior = isJuniorPrimary();
+
+  if(junior){
+    let rows = roster.map((s, i)=>{
+      const sc = scoreMap[s.id] || emptyScoreObj();
+      const t = computePrimaryTotals(sc);
+      return `
+        <tr>
+          ${primaryIdCellsHtml(s, i)}
+          <td>${scoreInputHtml(s.id,'m1E1',sc.m1E1,5)}</td>
+          <td>${scoreInputHtml(s.id,'m1E2',sc.m1E2,5)}</td>
+          <td>${scoreInputHtml(s.id,'m1E3',sc.m1E3,5)}</td>
+          <td>${scoreInputHtml(s.id,'m1E4',sc.m1E4,5)}</td>
+          <td class="pct-cell">${Math.round(t.avg1*10)/10}</td>
+          <td>${scoreInputHtml(s.id,'m1CW',sc.m1CW,20)}</td>
+          <td>${scoreInputHtml(s.id,'m1Hw',sc.m1Hw,20)}</td>
+          <td>${scoreInputHtml(s.id,'m1Oral',sc.m1Oral,10)}</td>
+          <td>${scoreInputHtml(s.id,'m1Beh',sc.m1Beh,5)}</td>
+          <td class="total-cell">${Math.round(t.month1Total*10)/10}</td>
+          <td><button class="del-btn" onclick="deleteStudent('${s.id}')" title="Delete">✕</button></td>
+        </tr>`;
+    }).join('');
+
+    holder.innerHTML = `
+      <table>
+        <thead>
+          <tr>${PRIMARY_ID_HEADERS}
+            <th colspan="10">1st Month</th>
+            <th></th>
+          </tr>
+          <tr>
+            <th></th><th></th><th></th><th></th><th></th>
+            <th>Q. 1<br><small>(Max. 5)</small></th>
+            <th>Q. 2<br><small>(Max. 5)</small></th>
+            <th>Q. 3<br><small>(Max. 5)</small></th>
+            <th>Q. 4<br><small>(Max. 5)</small></th>
+            <th>Q. Av.<br><small>(Max. 20)</small></th>
+            <th>C.W.<br><small>(Max. 20)</small></th>
+            <th>H.W.<br><small>(Max. 20)</small></th>
+            <th>Oral<br><small>(Max. 10)</small></th>
+            <th>Beh. &amp;<br>Attend.<br><small>(Max. 5)</small></th>
+            <th>Total 1<br><small>(Max. 75)</small></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+    return;
+  }
+
   let rows = roster.map((s, i)=>{
     const sc = scoreMap[s.id] || emptyScoreObj();
     const t = computePrimaryTotals(sc);
@@ -2330,7 +3544,58 @@ function renderPrimaryMonth1Table(roster, scoreMap, holder){
 }
 
 /* ---- Second Month Mark Entry: Q.1–Q.4, Q. Av., H.W., Beh. & Attend., Total 2, Cycle 2 ---- */
+/* Grade 1 & Grade 2 Primary use an extended version: Q. Av., C.W., H.W., Oral (out of 20/20/20/10) + Beh. & Attend. (5) = Total 2 (Max. 75), plus Cycle 2. */
 function renderPrimaryMonth2Table(roster, scoreMap, holder){
+  const junior = isJuniorPrimary();
+
+  if(junior){
+    let rows = roster.map((s, i)=>{
+      const sc = scoreMap[s.id] || emptyScoreObj();
+      const t = computePrimaryTotals(sc);
+      return `
+        <tr>
+          ${primaryIdCellsHtml(s, i)}
+          <td>${scoreInputHtml(s.id,'m2E1',sc.m2E1,5)}</td>
+          <td>${scoreInputHtml(s.id,'m2E2',sc.m2E2,5)}</td>
+          <td>${scoreInputHtml(s.id,'m2E3',sc.m2E3,5)}</td>
+          <td>${scoreInputHtml(s.id,'m2E4',sc.m2E4,5)}</td>
+          <td class="pct-cell">${Math.round(t.avg2*10)/10}</td>
+          <td>${scoreInputHtml(s.id,'m2CW',sc.m2CW,20)}</td>
+          <td>${scoreInputHtml(s.id,'m2Hw',sc.m2Hw,20)}</td>
+          <td>${scoreInputHtml(s.id,'m2Oral',sc.m2Oral,10)}</td>
+          <td>${scoreInputHtml(s.id,'m2Beh',sc.m2Beh,5)}</td>
+          <td class="total-cell">${Math.round(t.month2Total*10)/10}</td>
+          <td><button class="del-btn" onclick="deleteStudent('${s.id}')" title="Delete">✕</button></td>
+        </tr>`;
+    }).join('');
+
+    holder.innerHTML = `
+      <table>
+        <thead>
+          <tr>${PRIMARY_ID_HEADERS}
+            <th colspan="10">2nd Month</th>
+            <th></th>
+          </tr>
+          <tr>
+            <th></th><th></th><th></th><th></th><th></th>
+            <th>Q. 1<br><small>(Max. 5)</small></th>
+            <th>Q. 2<br><small>(Max. 5)</small></th>
+            <th>Q. 3<br><small>(Max. 5)</small></th>
+            <th>Q. 4<br><small>(Max. 5)</small></th>
+            <th>Q. Av.<br><small>(Max. 20)</small></th>
+            <th>C.W.<br><small>(Max. 20)</small></th>
+            <th>H.W.<br><small>(Max. 20)</small></th>
+            <th>Oral<br><small>(Max. 10)</small></th>
+            <th>Beh. &amp;<br>Attend.<br><small>(Max. 5)</small></th>
+            <th>Total 2<br><small>(Max. 75)</small></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+    return;
+  }
+
   let rows = roster.map((s, i)=>{
     const sc = scoreMap[s.id] || emptyScoreObj();
     const t = computePrimaryTotals(sc);
@@ -2375,8 +3640,57 @@ function renderPrimaryMonth2Table(roster, scoreMap, holder){
     </table>`;
 }
 
-/* ---- Total Coursework Mark Entry: Two Months Av., Total Cycles, Activity, Per. Tasks, Total Coursework, Percentage, Grade ---- */
+/* ---- Total Coursework Mark Entry ---- */
+/* Standard grades: Two Months Av., Total Cycles, Activity, Per. Tasks, Total Coursework, Percentage, Grade. */
+/* Grade 1 & Grade 2 Primary use a "Term Av." structure instead: Two Months Av. (avg of Total 1 & Total 2, Max.75) + Activity (Max.20) + Skills (Max.5) = Term Total (Max.100), plus Grade and Color. */
 function renderPrimaryCourseworkTable(roster, scoreMap, holder){
+  const junior = isJuniorPrimary();
+
+  if(junior){
+    let rows = roster.map((s, i)=>{
+      const sc = scoreMap[s.id] || emptyScoreObj();
+      const t = computePrimaryTotals(sc);
+      const pct = Math.round((t.totalCoursework / t.maxTotal * 100) * 10) / 10;
+      const g = letterGrade(pct);
+      const col = courseworkColor(pct);
+      return `
+        <tr>
+          ${primaryIdCellsHtml(s, i)}
+          <td class="pct-cell">${Math.round(t.twoMonthsAvg*10)/10}</td>
+          <td>${scoreInputHtml(s.id,'activity',sc.activity,20)}</td>
+          <td>${scoreInputHtml(s.id,'tasks',sc.tasks,5)}</td>
+          <td class="total-cell">${Math.round(t.totalCoursework*10)/10}</td>
+          <td><span class="badge ${g.c}">${g.t}</span></td>
+          <td><span class="badge ${col.c}">${col.t}</span></td>
+          <td><button class="del-btn" onclick="deleteStudent('${s.id}')" title="Delete">✕</button></td>
+        </tr>`;
+    }).join('');
+
+    holder.innerHTML = `
+      <table>
+        <thead>
+          <tr>${PRIMARY_ID_HEADERS}
+            <th colspan="6">Term Av.</th>
+            <th></th>
+          </tr>
+          <tr>
+            <th></th><th></th><th></th><th></th><th></th>
+            <th>Two Months<br>Av.<br><small>(Max. 75)</small></th>
+            <th>Activity<br><small>(Max. 20)</small></th>
+            <th>Skills<br><small>(Max. 5)</small></th>
+            <th>Term Total<br><small>(Max. 100)</small></th>
+            <th>Grade</th>
+            <th>Color</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+    return;
+  }
+
+  const twoMonthsMax = 15;
+  const courseworkMax = 40;
   let rows = roster.map((s, i)=>{
     const sc = scoreMap[s.id] || emptyScoreObj();
     const t = computePrimaryTotals(sc);
@@ -2400,11 +3714,11 @@ function renderPrimaryCourseworkTable(roster, scoreMap, holder){
     <table>
       <thead>
         <tr>${PRIMARY_ID_HEADERS}
-          <th>Two Months<br>Av.<br><small>(max. 15)</small></th>
+          <th>Two Months<br>Av.<br><small>(max. ${twoMonthsMax})</small></th>
           <th>Total<br>Cycles<br><small>(Max. 10)</small></th>
           <th>Activity<br><small>(Max. 5)</small></th>
           <th>Per. Tasks<br><small>(Max. 10)</small></th>
-          <th>Total<br>Coursework<br><small>(Max. 40)</small></th>
+          <th>Total<br>Coursework<br><small>(Max. ${courseworkMax})</small></th>
           <th>Percentage</th>
           <th>Grade</th>
           <th></th>
@@ -2442,15 +3756,29 @@ function importExcel(file){
         roster.push({id, displayId, name, classroom, religion, lang2});
 
         if(isPrimary()){
+          const junior = isJuniorPrimary();
           const sc = emptyScoreObj();
           const map = {
             m1E1:['Month 1 Q. 1','Month 1 Q1'], m1E2:['Month 1 Q. 2','Month 1 Q2'], m1E3:['Month 1 Q. 3','Month 1 Q3'], m1E4:['Month 1 Q. 4','Month 1 Q4'],
-            m1Hw:['Month 1 H.W.','Month 1 Homework'], m1Beh:['Month 1 Beh. & Attend.','Month 1 Attendance & Behavior'], m1Cycle:['Cycle 1'],
+            m1Hw:['Month 1 H.W.','Month 1 Homework'], m1Beh:['Month 1 Beh. & Attend.','Month 1 Attendance & Behavior'],
             m2E1:['Month 2 Q. 1','Month 2 Q1'], m2E2:['Month 2 Q. 2','Month 2 Q2'], m2E3:['Month 2 Q. 3','Month 2 Q3'], m2E4:['Month 2 Q. 4','Month 2 Q4'],
-            m2Hw:['Month 2 H.W.','Month 2 Homework'], m2Beh:['Month 2 Beh. & Attend.','Month 2 Attendance & Behavior'], m2Cycle:['Cycle 2'],
-            activity:['Activity'], tasks:['Per. Tasks','Performance Tasks']
+            m2Hw:['Month 2 H.W.','Month 2 Homework'], m2Beh:['Month 2 Beh. & Attend.','Month 2 Attendance & Behavior'],
+            activity:['Activity']
           };
-          const maxes = {m1E1:5,m1E2:5,m1E3:5,m1E4:5,m1Hw:5,m1Beh:5,m1Cycle:5,m2E1:5,m2E2:5,m2E3:5,m2E4:5,m2Hw:5,m2Beh:5,m2Cycle:5,activity:5,tasks:10};
+          if(junior){
+            map.m1CW = ['Month 1 C.W.','Month 1 Coursework'];
+            map.m1Oral = ['Month 1 Oral'];
+            map.m2CW = ['Month 2 C.W.','Month 2 Coursework'];
+            map.m2Oral = ['Month 2 Oral'];
+            map.tasks = ['Skills'];
+          } else {
+            map.m1Cycle = ['Cycle 1'];
+            map.m2Cycle = ['Cycle 2'];
+            map.tasks = ['Per. Tasks','Performance Tasks'];
+          }
+          const maxes = junior
+            ? {m1E1:5,m1E2:5,m1E3:5,m1E4:5,m1CW:20,m1Hw:20,m1Oral:10,m1Beh:5,m2E1:5,m2E2:5,m2E3:5,m2E4:5,m2CW:20,m2Hw:20,m2Oral:10,m2Beh:5,activity:20,tasks:5}
+            : {m1E1:5,m1E2:5,m1E3:5,m1E4:5,m1Hw:5,m1Beh:5,m1Cycle:5,m2E1:5,m2E2:5,m2E3:5,m2E4:5,m2Hw:5,m2Beh:5,m2Cycle:5,activity:5,tasks:10};
           let any=false;
           Object.keys(map).forEach(field=>{
             const col = map[field].find(c=> row[c]!==undefined && row[c]!=='');
@@ -2475,6 +3803,7 @@ function importExcel(file){
       saveState();
       document.getElementById('importTitle').textContent = 'Import Successful';
       document.getElementById('importMsg').textContent = `${added} student(s) added${skipped? ` (${skipped} row(s) without a name were skipped)`:''} to the current class list.`;
+      logActivity('import', `Imported ${added} student(s) from Excel into ${STAGES[state.stage].label}, ${state.term||'—'}${skipped?` (${skipped} skipped)`:''}`);
       document.getElementById('importResultOverlay').classList.add('show');
     }catch(err){
       alert('Could not read the file. Make sure it is a valid Excel file and that the first column contains "Student Name".');
@@ -2506,6 +3835,23 @@ function exportExcel(){
       const t = computePrimaryTotals(sc);
       const pct = Math.round((t.totalCoursework / t.maxTotal * 100) * 10) / 10;
       const g = letterGrade(pct);
+      if(t.junior){
+        const col = courseworkColor(pct);
+        return {
+          ...base,
+          "Month 1 Q. 1": sc.m1E1??'', "Month 1 Q. 2": sc.m1E2??'',
+          "Month 1 Q. 3": sc.m1E3??'', "Month 1 Q. 4": sc.m1E4??'', "Month 1 Q. Av.": Math.round(t.avg1*10)/10,
+          "Month 1 C.W.": sc.m1CW??'', "Month 1 H.W.": sc.m1Hw??'', "Month 1 Oral": sc.m1Oral??'',
+          "Month 1 Beh. & Attend.": sc.m1Beh??'', "Month 1 Total": Math.round(t.month1Total*10)/10,
+          "Month 2 Q. 1": sc.m2E1??'', "Month 2 Q. 2": sc.m2E2??'',
+          "Month 2 Q. 3": sc.m2E3??'', "Month 2 Q. 4": sc.m2E4??'', "Month 2 Q. Av.": Math.round(t.avg2*10)/10,
+          "Month 2 C.W.": sc.m2CW??'', "Month 2 H.W.": sc.m2Hw??'', "Month 2 Oral": sc.m2Oral??'',
+          "Month 2 Beh. & Attend.": sc.m2Beh??'', "Month 2 Total": Math.round(t.month2Total*10)/10,
+          "Two Months Av.": Math.round(t.twoMonthsAvg*10)/10,
+          "Activity": sc.activity??'', "Skills": sc.tasks??'',
+          "Term Total": Math.round(t.totalCoursework*10)/10, "Grade": g.t, "Color": col.t
+        };
+      }
       return {
         ...base,
         "Month 1 Q. 1": sc.m1E1??'', "Month 1 Q. 2": sc.m1E2??'',
@@ -2615,6 +3961,7 @@ function restoreBackup(file){
       renderAttendanceWorkspace();
       saveState();
       alert('Data restored successfully.');
+      logActivity('edit', `Restored a full backup file (dated ${payload.savedAt || 'unknown'})`);
     }catch(err){
       alert('Invalid backup file.');
     }
@@ -2773,6 +4120,7 @@ function deleteStudentFromDb(ck, studentId){
   if(!confirm('Permanently delete this student from the database? Their grades in all subjects will be deleted.')) return;
   const roster = students[ck]||[];
   const idx = roster.findIndex(s=>s.id===studentId);
+  const removedName = idx>-1 ? roster[idx].name : 'Unknown';
   if(idx>-1) roster.splice(idx,1);
   // remove scores in any subject under this class
   Object.keys(scores).forEach(sk=>{
@@ -2783,6 +4131,7 @@ function deleteStudentFromDb(ck, studentId){
   renderDatabase();
   if(currentView==='grades') renderTable();
   saveState();
+  logActivity('delete', `Permanently deleted student "${removedName}" from the Student Database`);
 }
 
 // Classroom values already used by students who share the same section/stage/grade (classKey)
@@ -2844,7 +4193,7 @@ function confirmDeleteAllDb(){
   studentIdCounter = 1;
   renderDatabase();
   if(currentView==='grades'){ state.term=null; state.subject=null; renderStepper(); renderWorkspace(); }
-  if(currentView==='attendance'){ state.term=null; state.attMonth=null; renderAttendanceStepper(); renderAttendanceWorkspace(); }
+  if(currentView==='attendance'){ attState.term=null; state.attMonth=null; renderAttendanceStepper(); renderAttendanceWorkspace(); }
   saveState();
   alert('All data has been deleted.');
 }
@@ -2985,6 +4334,107 @@ const REMEMBER_LS_KEY = 'gradesSystemRememberedUser_v1';
 let users = [];
 let currentUser = null;
 
+/* ================== ACTIVITY & LOGIN LOG ==================
+   Records who signed in/out and who changed what, with a timestamp.
+   Stored locally and piggybacks on the existing Firebase sync payload,
+   so the Admin can review activity from any device. */
+const ACTIVITY_LOG_LS_KEY = 'gradesSystemActivityLog_v1';
+const ACTIVITY_LOG_MAX = 500;
+let activityLog = [];
+
+function loadActivityLog(){
+  try{
+    const raw = localStorage.getItem(ACTIVITY_LOG_LS_KEY);
+    activityLog = raw ? (JSON.parse(raw) || []) : [];
+  }catch(err){ activityLog = []; }
+}
+function saveActivityLogLocalOnly(){
+  try{ localStorage.setItem(ACTIVITY_LOG_LS_KEY, JSON.stringify(activityLog)); }
+  catch(err){ console.warn('Could not save activity log', err); }
+}
+// type: 'login' | 'logout' | 'add' | 'edit' | 'delete' | 'import'
+function logActivity(type, message){
+  const entry = {
+    id: uid(),
+    username: currentUser ? currentUser.username : 'system',
+    displayName: currentUser ? (currentUser.displayName || currentUser.username) : 'System',
+    role: currentUser ? currentUser.role : '',
+    type, message,
+    ts: Date.now()
+  };
+  activityLog.unshift(entry);
+  if(activityLog.length > ACTIVITY_LOG_MAX) activityLog.length = ACTIVITY_LOG_MAX;
+  saveActivityLogLocalOnly();
+  scheduleGithubPush();
+  const overlay = document.getElementById('activityLogOverlay');
+  if(overlay && overlay.classList.contains('show')) renderActivityLogTable();
+}
+function activityLogFormatTs(ts){
+  const d = new Date(ts);
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mi = String(d.getMinutes()).padStart(2,'0');
+  return `${dd}/${mm}/${d.getFullYear()} ${hh}:${mi}`;
+}
+const LOG_TYPE_LABELS = { login:'Login', logout:'Logout', add:'Added', edit:'Edited', delete:'Deleted', import:'Imported' };
+function visibleActivityLog(){
+  // Head of Department: only see their own entries plus Teacher/Parent accounts within their own section.
+  if(currentUser && currentUser.role==='hod'){
+    const sectionUsernames = new Set(
+      users.filter(u=> (u.role==='teacher'||u.role==='parent') && u.section===currentUser.section).map(u=>u.username)
+    );
+    sectionUsernames.add(currentUser.username);
+    return activityLog.filter(e=> sectionUsernames.has(e.username));
+  }
+  return activityLog;
+}
+function openActivityLogModal(){
+  if(!currentUser || !currentUser.effective || !currentUser.effective.settings){ alert('You do not have permission to view the activity log.'); return; }
+  const userSelect = document.getElementById('logFilterUser');
+  const usernames = [...new Set(visibleActivityLog().map(e=>e.username))].sort((a,b)=>a.localeCompare(b));
+  userSelect.innerHTML = '<option value="">All users</option>' + usernames.map(u=>{
+    const entry = activityLog.find(e=>e.username===u);
+    const label = entry ? (entry.displayName||u) : u;
+    return `<option value="${u}">${escapeHtml(label)}</option>`;
+  }).join('');
+  document.getElementById('logFilterType').value = '';
+  document.getElementById('clearActivityLogBtn').style.display = (currentUser.role==='admin') ? '' : 'none';
+  renderActivityLogTable();
+  document.getElementById('activityLogOverlay').classList.add('show');
+}
+function closeActivityLogModal(){
+  document.getElementById('activityLogOverlay').classList.remove('show');
+}
+function renderActivityLogTable(){
+  const body = document.getElementById('activityLogTableBody');
+  if(!body) return;
+  const userFilter = document.getElementById('logFilterUser').value;
+  const typeFilter = document.getElementById('logFilterType').value;
+  let list = visibleActivityLog();
+  if(userFilter) list = list.filter(e=>e.username===userFilter);
+  if(typeFilter) list = list.filter(e=>e.type===typeFilter);
+  if(list.length===0){
+    body.innerHTML = `<tr><td colspan="4"><div class="log-empty">No activity recorded yet.</div></td></tr>`;
+    return;
+  }
+  body.innerHTML = list.map(e=>`
+    <tr>
+      <td class="log-ts">${activityLogFormatTs(e.ts)}</td>
+      <td><div class="log-user">${escapeHtml(e.displayName||e.username)}</div><div class="log-role">${escapeHtml(ROLE_LABELS[e.role]||e.role||'')}</div></td>
+      <td><span class="log-type-pill log-type-${e.type}">${LOG_TYPE_LABELS[e.type]||e.type}</span></td>
+      <td>${escapeHtml(e.message||'')}</td>
+    </tr>`).join('');
+}
+function clearActivityLog(){
+  if(!currentUser || currentUser.role!=='admin'){ alert('Only the Admin can clear the activity log.'); return; }
+  if(!confirm('Delete the entire activity log for everyone? This cannot be undone.')) return;
+  activityLog = [];
+  saveActivityLogLocalOnly();
+  scheduleGithubPush();
+  renderActivityLogTable();
+}
+
 const ROLE_LABELS = { admin:'Admin', teacher:'Teacher', hod:'Head of Department', parent:'Parent / Student' };
 
 function showWelcomeModal(user){
@@ -3046,20 +4496,28 @@ function findUser(username){
 function getEffectivePermissions(user){
   const role = user.role || 'parent';
   if(role==='admin'){
-    return { database:true, grades:true, attendance:true, reports:true, settings:true, edit:true,
+    return { database:true, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, settings:true, edit:true,
       sectionScope:null, subjectScope:null, classroomScope:null };
   }
   if(role==='hod'){
-    return { database:true, grades:true, attendance:true, reports:true, settings:'partial', edit:true,
+    return { database:true, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, settings:'partial', edit:true,
       sectionScope:user.section||null, subjectScope:null, classroomScope:null };
   }
   if(role==='teacher'){
-    return { database:false, grades:true, attendance:true, reports:true, settings:false, edit:true,
+    return { database:false, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, settings:false, edit:true,
       sectionScope:user.section||null, subjectScope:user.subjects||[], classroomScope:user.classrooms||[] };
   }
   // parent
-  return { database:false, grades:true, attendance:true, reports:true, settings:false, edit:false,
-    sectionScope:user.section||null, subjectScope:user.subjects||[], classroomScope:user.classrooms||[] };
+  const hasStudentLink = Array.isArray(user.studentIds);
+  return { database:false, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, settings:false, edit:false,
+    // Once a specific student link exists, section/subject/classroom no longer restrict anything —
+    // the exact student-ID scope below is what keeps a parent from seeing classmates' data.
+    // Legacy accounts (saved before this feature existed, so `studentIds` is still undefined)
+    // keep behaving exactly as before, so nobody's access silently changes underneath them.
+    sectionScope: hasStudentLink ? null : (user.section||null),
+    subjectScope: hasStudentLink ? null : (user.subjects||[]),
+    classroomScope: hasStudentLink ? null : (user.classrooms||[]),
+    studentScope: hasStudentLink ? user.studentIds : null };
 }
 
 function scopeSectionAllowed(id){
@@ -3076,6 +4534,11 @@ function scopeClassroomAllowed(name){
   if(!currentUser || !currentUser.effective) return true;
   const sc = currentUser.effective.classroomScope;
   return !sc || sc.includes(name);
+}
+function scopeStudentAllowed(id){
+  if(!currentUser || !currentUser.effective) return true;
+  const sc = currentUser.effective.studentScope;
+  return !sc || sc.includes(id);
 }
 
 function handleLogin(e){
@@ -3125,9 +4588,11 @@ function loginAs(user, remember, showWelcome){
   }
   if(showWelcome) showWelcomeModal(user);
   startPresenceTracking();
+  logActivity('login', 'Signed in');
 }
 
 function logoutUser(){
+  logActivity('logout', 'Signed out');
   stopPresenceTracking();
   currentUser = null;
   try{
@@ -3164,6 +4629,8 @@ function firstAllowedTab(){
   if(currentUser.effective.grades) return 'grades';
   if(currentUser.effective.attendance) return 'attendance';
   if(currentUser.effective.reports) return 'reports';
+  if(currentUser.effective.dashboard) return 'dashboard';
+  if(currentUser.effective.examsAnalysis) return 'examsAnalysis';
   return null;
 }
 
@@ -3176,6 +4643,8 @@ function applyPermissionsUI(){
   document.getElementById('navTabGrades').style.display = eff.grades ? '' : 'none';
   document.getElementById('navTabAttendance').style.display = eff.attendance ? '' : 'none';
   document.getElementById('reportsDropdownWrap').style.display = eff.reports ? '' : 'none';
+  document.getElementById('dashboardDropdownWrap').style.display = eff.dashboard ? '' : 'none';
+  document.getElementById('examsDropdownWrap').style.display = eff.examsAnalysis ? '' : 'none';
   document.getElementById('navTabManageUsers').style.display = eff.settings ? '' : 'none';
   document.getElementById('backupRestoreGroup').style.display = eff.settings===true ? '' : 'none';
   const toolbar = document.getElementById('gradesToolbar');
@@ -3211,6 +4680,62 @@ function openUsersModal(){
 function closeUsersModal(){
   document.getElementById('usersOverlay').classList.remove('show');
 }
+// Flattens the `students` store into one list, tagging each student with
+// where they belong, so the "Linked Student(s)" picker can search across
+// every section/stage/grade/class at once.
+function allStudentsFlat(){
+  const list = [];
+  Object.entries(students).forEach(([ck, roster])=>{
+    const [section, stage, grade] = ck.split('|');
+    (roster||[]).forEach(s=> list.push(Object.assign({}, s, { section, stage, grade })));
+  });
+  return list;
+}
+
+let ufSelectedStudentIds = [];
+
+function renderUfStudentPicker(){
+  const wrap = document.getElementById('ufStudentsWrap');
+  const note = document.getElementById('ufStudentsSelectedNote');
+  if(!wrap) return;
+  const q = (document.getElementById('ufStudentSearch').value||'').trim().toLowerCase();
+  let list = allStudentsFlat();
+  if(q) list = list.filter(s=> s.name.toLowerCase().includes(q) || (s.displayId||'').toLowerCase().includes(q));
+  list.sort((a,b)=> a.name.localeCompare(b.name));
+  const shown = list.slice(0,80);
+  wrap.innerHTML = shown.map(s=>{
+    const sectionLabel = SECTIONS[s.section] ? SECTIONS[s.section].label : s.section;
+    const gradeObj = STAGES[s.stage] ? STAGES[s.stage].grades.find(g=>g.id===s.grade) : null;
+    const gradeLabel = gradeObj ? gradeObj.label : s.grade;
+    const where = [sectionLabel, gradeLabel, s.classroom].filter(Boolean).join(' / ');
+    const label = `${s.name}${s.displayId?` (${s.displayId})`:''} — ${where}`;
+    const checked = ufSelectedStudentIds.includes(s.id) ? 'checked' : '';
+    return `<label class="perm-check"><input type="checkbox" value="${s.id}" onchange="toggleUfStudent('${s.id}', this.checked)" ${checked}> ${escapeHtml(label)}</label>`;
+  }).join('') || `<p class="foot-note">No matching students found.</p>`;
+  if(list.length > shown.length){
+    wrap.innerHTML += `<p class="foot-note">…and ${list.length - shown.length} more — refine your search to find them.</p>`;
+  }
+  if(note){
+    note.textContent = ufSelectedStudentIds.length
+      ? `${ufSelectedStudentIds.length} student(s) linked to this account.`
+      : 'No students linked yet — this account will not see any report cards until at least one student is checked.';
+  }
+}
+
+function toggleUfStudent(id, checked){
+  if(checked){
+    if(!ufSelectedStudentIds.includes(id)) ufSelectedStudentIds.push(id);
+  } else {
+    ufSelectedStudentIds = ufSelectedStudentIds.filter(x=> x!==id);
+  }
+  const note = document.getElementById('ufStudentsSelectedNote');
+  if(note){
+    note.textContent = ufSelectedStudentIds.length
+      ? `${ufSelectedStudentIds.length} student(s) linked to this account.`
+      : 'No students linked yet — this account will not see any report cards until at least one student is checked.';
+  }
+}
+
 function buildSubjectCheckboxes(selected){
   selected = selected || [];
   const wrap = document.getElementById('ufSubjectsWrap');
@@ -3222,10 +4747,13 @@ function buildSubjectCheckboxes(selected){
 }
 function onRoleFormChange(){
   const role = document.getElementById('ufRole').value;
-  const needsSection = role==='teacher' || role==='hod' || role==='parent';
-  const needsScope = role==='teacher' || role==='parent';
+  const needsSection = role==='teacher' || role==='hod';
+  const needsScope = role==='teacher';
+  const needsStudents = role==='parent';
   document.getElementById('ufSectionField').style.display = needsSection ? '' : 'none';
   document.getElementById('ufScopeField').style.display = needsScope ? '' : 'none';
+  document.getElementById('ufStudentsField').style.display = needsStudents ? '' : 'none';
+  if(needsStudents) renderUfStudentPicker();
 }
 function resetUserForm(){
   document.getElementById('editingUsername').value = '';
@@ -3237,6 +4765,8 @@ function resetUserForm(){
   document.getElementById('ufSection').value = (currentUser && currentUser.role==='hod') ? currentUser.section : 'en';
   document.getElementById('ufClassrooms').value = '';
   buildSubjectCheckboxes();
+  ufSelectedStudentIds = [];
+  document.getElementById('ufStudentSearch').value = '';
   onRoleFormChange();
   document.getElementById('ufSubmitBtn').textContent = '＋ Add User';
   document.getElementById('ufCancelBtn').style.display = 'none';
@@ -3256,6 +4786,8 @@ function editUser(username){
   document.getElementById('ufSection').value = user.section || 'en';
   document.getElementById('ufClassrooms').value = (user.classrooms||[]).join(', ');
   buildSubjectCheckboxes(user.subjects||[]);
+  ufSelectedStudentIds = (user.studentIds||[]).slice();
+  document.getElementById('ufStudentSearch').value = '';
   onRoleFormChange();
   document.getElementById('ufSubmitBtn').textContent = '💾 Save Changes';
   document.getElementById('ufCancelBtn').style.display = '';
@@ -3275,8 +4807,9 @@ function saveUserFromForm(){
   if(currentUser.role==='hod' && (role==='admin' || role==='hod')){ alert('You can only create Teacher or Parent/Student accounts.'); return; }
 
   const userObj = { username, displayName, password, role };
-  if(role==='teacher' || role==='hod' || role==='parent') userObj.section = section;
-  if(role==='teacher' || role==='parent'){ userObj.subjects = subjects; userObj.classrooms = classrooms; }
+  if(role==='teacher' || role==='hod') userObj.section = section;
+  if(role==='teacher'){ userObj.subjects = subjects; userObj.classrooms = classrooms; }
+  if(role==='parent'){ userObj.studentIds = ufSelectedStudentIds.slice(); }
 
   if(editing){
     const user = findUser(editing);
@@ -3286,14 +4819,20 @@ function saveUserFromForm(){
       currentUser = user;
       currentUser.effective = getEffectivePermissions(user);
     }
+    saveUsers();
+    renderUsersTable();
+    resetUserForm();
+    if(currentUser){ currentUser.effective = getEffectivePermissions(currentUser); applyPermissionsUI(); }
+    logActivity('edit', `Updated user account "${username}" (${ROLE_LABELS[role]||role})`);
   } else {
     if(findUser(username)){ alert('This username already exists.'); return; }
     users.push(userObj);
+    saveUsers();
+    renderUsersTable();
+    resetUserForm();
+    if(currentUser){ currentUser.effective = getEffectivePermissions(currentUser); applyPermissionsUI(); }
+    logActivity('add', `Created user account "${username}" (${ROLE_LABELS[role]||role})`);
   }
-  saveUsers();
-  renderUsersTable();
-  resetUserForm();
-  if(currentUser){ currentUser.effective = getEffectivePermissions(currentUser); applyPermissionsUI(); }
 }
 function deleteUserRow(username){
   if(username === 'admin'){ alert('The default administrator account cannot be deleted.'); return; }
@@ -3306,6 +4845,7 @@ function deleteUserRow(username){
   users = users.filter(u=> u.username !== username);
   saveUsers();
   renderUsersTable();
+  logActivity('delete', `Deleted user account "${username}"`);
 }
 function renderUsersTable(){
   const body = document.getElementById('usersTableBody');
@@ -3315,9 +4855,11 @@ function renderUsersTable(){
   }
   body.innerHTML = list.map(u=>{
     const sectionLabel = u.section ? SECTIONS[u.section].label : '—';
-    const scopeInfo = (u.role==='teacher' || u.role==='parent')
-      ? `${(u.subjects||[]).length} subject(s), ${(u.classrooms||[]).length} class(es)`
-      : (u.role==='hod' ? 'Entire department' : 'Full system access');
+    const scopeInfo = u.role==='parent'
+      ? `${Array.isArray(u.studentIds) ? u.studentIds.length : 0} linked student(s)`
+      : (u.role==='teacher'
+        ? `${(u.subjects||[]).length} subject(s), ${(u.classrooms||[]).length} class(es)`
+        : (u.role==='hod' ? 'Entire department' : 'Full system access'));
     return `
       <tr>
         <td><b>${u.username}</b></td>
@@ -3367,6 +4909,100 @@ function downloadUserTemplate(){
   XLSX.utils.book_append_sheet(wb, wsData, "Users");
   XLSX.utils.book_append_sheet(wb, wsGuide, "Allowed Values");
   XLSX.writeFile(wb, "Users_Import_Template.xlsx");
+}
+
+/* ---------- Bulk-link Parent/Student accounts to specific students ---------- */
+function downloadParentLinkTemplate(){
+  const sample = [
+    { "Username":"sara.parent", "Student ID(s)":"STU-0012" },
+    { "Username":"ahmed.parent", "Student ID(s)":"STU-0034; STU-0035" },
+    { "Username":"", "Student ID(s)":"" }
+  ];
+  const wsData = XLSX.utils.json_to_sheet(sample);
+  const guide = [
+    { "Field":"Username", "Notes":"Must match an EXISTING Parent/Student account username exactly (create the account first via 'Add Users from Excel' or the form above)." },
+    { "Field":"Student ID(s)", "Notes":"The student's 'STU-####' ID — visible in the Student Database Excel export (column 'ID') or in the Grade Book. Separate multiple IDs (for parents with more than one child) with a semicolon, e.g. STU-0034; STU-0035." },
+    { "Field":"Note", "Notes":"Re-uploading a username that was already linked REPLACES its previous student list — it does not add to it." }
+  ];
+  const wsGuide = XLSX.utils.json_to_sheet(guide);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, wsData, "Parent Links");
+  XLSX.utils.book_append_sheet(wb, wsGuide, "Instructions");
+  XLSX.writeFile(wb, "Parent_Student_Linking_Template.xlsx");
+}
+
+function importParentLinksExcel(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+      const flat = allStudentsFlat();
+      const byDisplayId = new Map();
+      flat.forEach(s=>{
+        if(!s.displayId) return;
+        const key = s.displayId.toString().trim().toLowerCase();
+        if(!byDisplayId.has(key)) byDisplayId.set(key, []);
+        byDisplayId.get(key).push(s);
+      });
+
+      let linked = 0;
+      const problems = [];
+      // Merge multiple rows for the same username into one final ID list, rather than
+      // letting a later row silently wipe out IDs collected from an earlier row.
+      const pending = new Map();
+
+      rows.forEach(row=>{
+        const username = (row['Username']||'').toString().trim();
+        const idsRaw = (row['Student ID(s)']||row['Student ID']||row['StudentIDs']||'').toString().trim();
+        if(!username && !idsRaw) return; // skip blank helper rows
+        if(!username){ problems.push(`(missing username): row skipped`); return; }
+
+        const user = findUser(username);
+        if(!user){ problems.push(`${username}: no such user account`); return; }
+        if(user.role !== 'parent'){ problems.push(`${username}: is not a Parent/Student account (role: ${ROLE_LABELS[user.role]||user.role})`); return; }
+
+        const tokens = idsRaw.split(/[;,]/).map(t=>t.trim()).filter(Boolean);
+        if(!tokens.length){ problems.push(`${username}: no Student ID(s) given`); return; }
+
+        const resolvedIds = pending.has(username) ? pending.get(username) : [];
+        tokens.forEach(tok=>{
+          const matches = byDisplayId.get(tok.toLowerCase());
+          if(!matches || matches.length===0){ problems.push(`${username}: student ID "${tok}" not found`); return; }
+          if(matches.length>1){ problems.push(`${username}: student ID "${tok}" matches more than one student — please fix the duplicate ID in Student Database first`); return; }
+          if(!resolvedIds.includes(matches[0].id)) resolvedIds.push(matches[0].id);
+        });
+        pending.set(username, resolvedIds);
+      });
+
+      pending.forEach((ids, username)=>{
+        const user = findUser(username);
+        if(!user) return;
+        user.studentIds = ids;
+        linked++;
+      });
+
+      if(linked>0){ saveUsers(); renderUsersTable(); }
+
+      document.getElementById('importTitle').textContent = 'Parent Linking Result';
+      let msg = `${linked} account(s) linked/updated successfully.`;
+      if(problems.length){
+        msg += `<br><br><b>${problems.length} issue(s):</b><br>` +
+          problems.slice(0,10).map(p=>`• ${p}`).join('<br>') +
+          (problems.length>10 ? `<br>... and ${problems.length-10} more` : '');
+      }
+      document.getElementById('importMsg').innerHTML = msg;
+      document.getElementById('importResultOverlay').classList.add('show');
+      logActivity('edit', `Bulk-linked ${linked} parent account(s) to students via Excel`);
+    }catch(err){
+      alert('Could not read the file. Make sure the file format and column names match the template.');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  document.getElementById('parentLinkExcelInput').value='';
 }
 
 function importUsersExcel(file){
@@ -3497,6 +5133,13 @@ function applyRemotePayload(payload){
   studentIdCounter = payload.studentIdCounter || 1;
   attendance = payload.attendance || {};
   if(Array.isArray(payload.users) && payload.users.length){ users = payload.users; saveUsersLocalOnly(); }
+  if(Array.isArray(payload.activityLog) && payload.activityLog.length){
+    const map = {};
+    activityLog.forEach(e=> map[e.id]=e);
+    payload.activityLog.forEach(e=> map[e.id]=e);
+    activityLog = Object.values(map).sort((a,b)=> b.ts-a.ts).slice(0, ACTIVITY_LOG_MAX);
+    saveActivityLogLocalOnly();
+  }
   if(payload.presenceBucket && !presenceBucket){
     presenceBucket = payload.presenceBucket;
     try{ localStorage.setItem(PRESENCE_BUCKET_LS_KEY, presenceBucket); }catch(err){}
@@ -3549,7 +5192,7 @@ async function pushToGithub(){
   if(!githubReady()) return false;
   setSyncStatus('syncing');
   try{
-    const payload = { students, scores, studentIdCounter, attendance, users, presenceBucket: presenceBucket || null, savedAt: new Date().toISOString() };
+    const payload = { students, scores, studentIdCounter, attendance, users, activityLog, presenceBucket: presenceBucket || null, savedAt: new Date().toISOString() };
     fbLastPushedAt = Date.now();
     await FB_DOC_REF.set(payload, { merge:false });
     setSyncStatus('synced');
@@ -3713,8 +5356,28 @@ function stopPresenceTracking(){
   if(listEl) listEl.innerHTML = '<span class="visitor-chip-empty">Sign in to see who\'s online</span>';
 }
 
+/* ================== DARK MODE ================== */
+const DARK_MODE_LS_KEY = 'gradeBookDarkMode';
+function updateDarkToggleIcon(){
+  const btn = document.getElementById('darkToggleBtn');
+  if(btn) btn.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+}
+function toggleDarkMode(){
+  document.body.classList.toggle('dark-mode');
+  try{ localStorage.setItem(DARK_MODE_LS_KEY, document.body.classList.contains('dark-mode') ? '1' : '0'); }catch(err){}
+  updateDarkToggleIcon();
+}
+function initDarkMode(){
+  let saved = null;
+  try{ saved = localStorage.getItem(DARK_MODE_LS_KEY); }catch(err){}
+  if(saved==='1') document.body.classList.add('dark-mode');
+  updateDarkToggleIcon();
+}
+initDarkMode();
+
 /* ================== INIT ================== */
 loadState();
+loadActivityLog();
 loadGithubConfig();
 renderStepper();
 renderAttendanceStepper();
