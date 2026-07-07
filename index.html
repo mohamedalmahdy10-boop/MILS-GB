@@ -14,6 +14,7 @@
 :root{
   --bg:#F7F6F2;
   --paper:#FFFFFF;
+  --paper-2:#FBF8F0;
   --ink:#1B2A4A;
   --ink-2:#28395F;
   --ink-soft:#5B6472;
@@ -43,6 +44,7 @@
 body.dark-mode{
   --bg:#12172A;
   --paper:#1B2340;
+  --paper-2:#212A4C;
   --ink:#EDEFF5;
   --ink-2:#C7CEDD;
   --ink-soft:#9AA3B8;
@@ -81,9 +83,16 @@ body{
 /* ---------- Header ---------- */
 .masthead{
   display:flex;align-items:center;justify-content:space-between;
-  gap:20px;padding:26px 32px;background:var(--paper);
-  border-radius:var(--radius);box-shadow:var(--shadow);
+  gap:20px;padding:26px 32px;
+  background:linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
+  border-radius:var(--radius);
+  border:1px solid rgba(201,162,39,0.3);
   border-top:5px solid var(--gold);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.8) inset,
+    0 -2px 0 rgba(27,42,74,0.04) inset,
+    0 16px 34px rgba(27,42,74,0.14),
+    0 4px 10px rgba(156,124,21,0.10);
   margin-bottom:22px;flex-wrap:wrap;
 }
 .masthead .seal{
@@ -94,9 +103,9 @@ body{
   box-shadow:inset 0 0 0 3px rgba(255,255,255,0.35), 0 4px 10px rgba(156,124,21,0.35);
   flex-shrink:0;
 }
-.logo-pair{display:flex;align-items:center;gap:14px;flex-shrink:0;}
+.logo-pair{display:flex;align-items:center;gap:20px;flex-shrink:0;}
 .school-logo{height:56px;width:auto;object-fit:contain;border-radius:6px;background:#fff;}
-.logo-divider{width:1px;height:44px;background:var(--border);}
+.logo-divider{width:2px;height:52px;background:linear-gradient(180deg, transparent, var(--border) 20%, var(--border) 80%, transparent);}
 
 /* ---------- Date/Time/Weather Widget (inline, part of the header) ---------- */
 .dtw-widget{
@@ -190,15 +199,20 @@ body{
 
 /* ---------- Quick Stats Widget (students / avg grade / pending reports) ---------- */
 .quick-stats{
-  display:flex;align-items:center;
-  background:var(--bg);border:1px solid var(--border);border-radius:12px;
-  padding:5px 2px;flex-shrink:0;
+  display:flex;align-items:stretch;gap:8px;flex-shrink:0;
 }
-.qs-item{display:flex;flex-direction:column;align-items:center;padding:2px 14px;min-width:58px;cursor:default;}
-.qs-num{font-family:'Aref Ruqaa',serif;font-size:17px;font-weight:700;color:var(--ink);line-height:1.1;}
+.qs-item{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:8px 16px;min-width:64px;cursor:default;
+  background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  box-shadow:0 1px 0 rgba(255,255,255,0.6) inset, 0 2px 6px rgba(27,42,74,0.06);
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.qs-item:hover{transform:translateY(-2px);box-shadow:0 1px 0 rgba(255,255,255,0.6) inset, 0 6px 14px rgba(27,42,74,0.12);}
+.qs-num{font-family:'Aref Ruqaa',serif;font-size:18px;font-weight:700;color:var(--ink);line-height:1.1;}
+.qs-pending{background:var(--gold-light);border-color:rgba(201,162,39,0.4);}
 .qs-pending .qs-num{color:var(--gold-deep);}
-.qs-label{font-size:9.5px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-top:2px;white-space:nowrap;}
-.qs-sep{width:1px;align-self:stretch;background:var(--border);margin:5px 0;}
+.qs-label{font-size:9.5px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-top:3px;white-space:nowrap;}
 @media (max-width:980px){ .quick-stats{display:none;} }
 
 /* ---------- Notification Bell ---------- */
@@ -210,6 +224,15 @@ body{
   transition:transform .15s ease, box-shadow .15s ease;
 }
 .notif-bell-btn:hover{transform:translateY(-2px);box-shadow:0 8px 16px rgba(0,0,0,0.14);}
+.notif-bell-btn.has-unread{
+  background:var(--ink);color:#fff;border-color:var(--ink);
+  animation:notifBellPulse 2.2s infinite;
+}
+@keyframes notifBellPulse{
+  0%{box-shadow:0 0 0 0 rgba(27,42,74,0.35);}
+  70%{box-shadow:0 0 0 8px rgba(27,42,74,0);}
+  100%{box-shadow:0 0 0 0 rgba(27,42,74,0);}
+}
 .notif-badge{
   position:absolute;top:-3px;right:-3px;background:var(--red);color:#fff;
   font-size:10px;font-weight:800;min-width:16px;height:16px;border-radius:8px;
@@ -1295,9 +1318,7 @@ td:has(> .score-input){background:var(--bg);}
       <span id="githubSyncStatus" style="font-size:12px;font-weight:800;display:none;align-items:center;">☁ Not synced yet</span>
       <div class="quick-stats" id="quickStatsWidget" title="Live system overview">
         <div class="qs-item"><span class="qs-num" id="qsStudents">—</span><span class="qs-label">Students</span></div>
-        <div class="qs-sep"></div>
         <div class="qs-item"><span class="qs-num" id="qsAvg">—</span><span class="qs-label">Avg. grade</span></div>
-        <div class="qs-sep"></div>
         <div class="qs-item qs-pending"><span class="qs-num" id="qsPending">—</span><span class="qs-label">Pending</span></div>
       </div>
       <div class="notif-bell-wrap" id="notifBellWrap" style="display:none;">
@@ -5543,16 +5564,19 @@ const NOTIF_TYPE_ICONS = { add:'➕', edit:'✏️', delete:'🗑️', import:'�
 
 function updateNotifBadge(){
   const badge = document.getElementById('notifBadge');
+  const bellBtn = document.getElementById('notifBellBtn');
   if(!badge) return;
-  if(!currentUser || currentUser.role!=='admin'){ badge.style.display = 'none'; return; }
+  if(!currentUser || currentUser.role!=='admin'){ badge.style.display = 'none'; if(bellBtn) bellBtn.classList.remove('has-unread'); return; }
   const lastSeen = getNotifLastSeen();
   const list = visibleActivityLog().filter(e=> NOTIF_VISIBLE_TYPES.includes(e.type));
   const unread = list.filter(e=> e.ts > lastSeen).length;
   if(unread > 0){
     badge.style.display = 'flex';
     badge.textContent = unread > 99 ? '99+' : unread;
+    if(bellBtn) bellBtn.classList.add('has-unread');
   } else {
     badge.style.display = 'none';
+    if(bellBtn) bellBtn.classList.remove('has-unread');
   }
 }
 
