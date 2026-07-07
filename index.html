@@ -652,6 +652,15 @@ tbody tr:hover{background:var(--row-hover);}
   padding:6px 2px;font-family:'Tajawal';font-weight:700;font-size:13px;color:var(--ink);
   background:var(--paper);transition:border-color .15s, background .15s;
 }
+/* Hide spinner arrows from number input */
+.score-input::-webkit-outer-spin-button,
+.score-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.score-input[type=number] {
+  -moz-appearance: textfield;
+}
 .score-input:focus{outline:none;border-color:var(--gold);}
 .score-input.input-error{border-color:var(--red) !important;background:var(--red-bg) !important;}
 /* Column-group tints: quiz columns share one tint, homework/behavior share another,
@@ -5297,6 +5306,12 @@ function downloadTemplate(){
 function nextTeacherDisplayId(){ return 'TCH-' + String(teacherIdCounter++).padStart(4,'0'); }
 
 function toggleAddTeacherForm(force){
+  // Teachers Database access restricted to Admin users only
+  if(!currentUser || currentUser.role !== 'admin'){ 
+    alert('⛔ Teachers Database is only available to Administrators.');
+    return; 
+  }
+  
   const form = document.getElementById('addTeacherForm');
   const willShow = force!==undefined ? force : !form.classList.contains('show');
   form.classList.toggle('show', willShow);
@@ -5317,6 +5332,12 @@ function populateTeacherClassesDropdown(){
 }
 
 function addTeacherManual(){
+  // Teachers Database access restricted to Admin users only
+  if(!currentUser || currentUser.role !== 'admin'){
+    alert('⛔ Teachers Database is only available to Administrators.');
+    return;
+  }
+  
   const name = document.getElementById('newTeacherName').value.trim();
   if(!name){ alert('Please enter the teacher\'s name.'); return; }
   const section = document.getElementById('newTeacherSection').value;
@@ -5333,6 +5354,12 @@ function addTeacherManual(){
 }
 
 function deleteTeacherFromDb(id){
+  // Teachers Database access restricted to Admin users only
+  if(!currentUser || currentUser.role !== 'admin'){
+    alert('⛔ Teachers Database is only available to Administrators.');
+    return;
+  }
+  
   if(!confirm('Permanently delete this teacher from the database?')) return;
   const idx = teachers.findIndex(t=>t.id===id);
   const removedName = idx>-1 ? teachers[idx].name : 'Unknown';
@@ -5343,6 +5370,12 @@ function deleteTeacherFromDb(id){
 }
 
 function updateTeacherField(id, field, value){
+  // Teachers Database access restricted to Admin users only
+  if(!currentUser || currentUser.role !== 'admin'){
+    alert('⛔ Teachers Database is only available to Administrators.');
+    return;
+  }
+  
   const t = teachers.find(t=>t.id===id);
   if(!t) return;
   t[field] = value;
@@ -5355,6 +5388,12 @@ function toggleSelectAllTeachers(){
 }
 
 function deleteSelectedTeachers(){
+  // Teachers Database access restricted to Admin users only
+  if(!currentUser || currentUser.role !== 'admin'){
+    alert('⛔ Teachers Database is only available to Administrators.');
+    return;
+  }
+  
   const checked = Array.from(document.querySelectorAll('.teacherCheckbox:checked'));
   if(checked.length===0){ alert('Please select one or more teachers to delete.'); return; }
   if(!confirm(`Permanently delete ${checked.length} selected teacher(s)? This cannot be undone.`)) return;
@@ -5366,6 +5405,13 @@ function deleteSelectedTeachers(){
 }
 
 function renderTeachersDatabase(){
+  // Teachers Database access restricted to Admin users only
+  if(!currentUser || currentUser.role !== 'admin'){
+    const holder = document.getElementById('teachersTableHolder');
+    if(holder) holder.innerHTML = '<p style="color: var(--red); padding: 20px; text-align: center;">⛔ Access Denied - Teachers Database is only available to Administrators.</p>';
+    return;
+  }
+  
   const search = (document.getElementById('teacherSearch').value||'').trim().toLowerCase();
   const fSection = document.getElementById('teacherFilterSection').value;
 
@@ -6268,7 +6314,7 @@ function tryAutoLogin(){
 
 function canAccessTab(tab){
   if(!currentUser || !currentUser.effective) return false;
-  if(tab==='teachers') return !!currentUser.effective.database;
+  if(tab==='teachers') return currentUser.role === 'admin'; // Teachers Database only for Admin
   return !!currentUser.effective[tab];
 }
 
@@ -6290,6 +6336,8 @@ function applyPermissionsUI(){
   document.getElementById('userBadgeRole').textContent = ROLE_LABELS[currentUser.role] || 'User';
   // Student Database is only for Admin
   document.getElementById('navTabDatabase').style.display = (eff.database && currentUser.role==='admin') ? '' : 'none';
+  // Teachers Database is only for Admin
+  document.getElementById('navTabTeachers').style.display = (eff.settings && currentUser.role==='admin') ? '' : 'none';
   document.getElementById('navTabGrades').style.display = eff.grades ? '' : 'none';
   document.getElementById('navTabAttendance').style.display = eff.attendance ? '' : 'none';
   document.getElementById('reportsDropdownWrap').style.display = eff.reports ? '' : 'none';
@@ -6535,23 +6583,52 @@ function saveUserFromForm(){
     const user = findUser(editing);
     if(!user) return;
     Object.assign(user, userObj);
+    
+    // Auto-update teacher in Teachers Database if role is teacher
+    if(role === 'teacher'){
+      const teacher = teachers.find(t => t.name === editing || t.name === displayName);
+      if(teacher){
+        teacher.name = displayName || username;
+        teacher.section = section;
+        teacher.subject = subjects.length > 0 ? subjects[0] : '';
+        teacher.classes = classrooms.join(', ');
+      }
+    }
+    
     if(currentUser && currentUser.username === user.username){
       currentUser = user;
       currentUser.effective = getEffectivePermissions(user);
     }
     saveUsers();
+    saveState(); // Save teachers as well
     renderUsersTable();
+    renderTeachersDatabase();
     resetUserForm();
     if(currentUser){ currentUser.effective = getEffectivePermissions(currentUser); applyPermissionsUI(); }
-    logActivity('edit', `Updated user account "${username}" (${ROLE_LABELS[role]||role})`);
+    logActivity('edit', `Updated user account "${username}" (${ROLE_LABELS[role]||role})${role==='teacher' ? ' + updated Teachers Database' : ''}`);
   } else {
     if(findUser(username)){ alert('This username already exists.'); return; }
     users.push(userObj);
+    
+    // Auto-import teacher to Teachers Database
+    if(role === 'teacher'){
+      const teacherEntry = {
+        id: uid(),
+        displayId: nextTeacherDisplayId(),
+        name: displayName || username,
+        section: section,
+        subject: subjects.length > 0 ? subjects[0] : '',
+        classes: classrooms.join(', ')
+      };
+      teachers.push(teacherEntry);
+    }
+    
     saveUsers();
+    saveState(); // Save teachers as well
     renderUsersTable();
     resetUserForm();
     if(currentUser){ currentUser.effective = getEffectivePermissions(currentUser); applyPermissionsUI(); }
-    logActivity('add', `Created user account "${username}" (${ROLE_LABELS[role]||role})`);
+    logActivity('add', `Created user account "${username}" (${ROLE_LABELS[role]||role})${role==='teacher' ? ' + added to Teachers Database' : ''}`);
   }
 }
 function deleteUserRow(username){
@@ -6562,10 +6639,19 @@ function deleteUserRow(username){
     alert('You can only delete Teacher and Parent/Student accounts within your own section.'); return;
   }
   if(!confirm(`Delete user "${username}"?`)) return;
+  
+  // Delete from Teachers Database if user was a teacher
+  if(user && user.role === 'teacher'){
+    const displayName = user.displayName || username;
+    teachers = teachers.filter(t => t.name !== displayName && t.name !== username);
+  }
+  
   users = users.filter(u=> u.username !== username);
   saveUsers();
+  saveState(); // Save teachers as well
   renderUsersTable();
-  logActivity('delete', `Deleted user account "${username}"`);
+  renderTeachersDatabase();
+  logActivity('delete', `Deleted user account "${username}"${user && user.role === 'teacher' ? ' + removed from Teachers Database' : ''}`);
 }
 function renderUsersTable(){
   const body = document.getElementById('usersTableBody');
