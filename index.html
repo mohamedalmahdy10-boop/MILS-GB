@@ -306,8 +306,8 @@ body{
 }
 .nav-tab{
   border:none;background:transparent;color:var(--ink-soft);font-family:'Tajawal';
-  font-weight:800;font-size:14px;padding:10px 22px;border-radius:9px;cursor:pointer;transition:.15s;
-  position:relative;
+  font-weight:800;font-size:13px;padding:8px 16px;border-radius:9px;cursor:pointer;transition:.15s;
+  position:relative;white-space:nowrap;
 }
 .nav-tab.active{background:var(--ink);color:#fff;}
 .nav-tab:not(.active):hover{background:var(--bg);color:var(--ink);}
@@ -321,6 +321,7 @@ body{
 .nav-tab[data-view="reports"].active::after{background:var(--teal);}
 .nav-tab[data-view="dashboard"].active::after{background:var(--blue);}
 .nav-tab[data-view="config"].active::after{background:var(--purple);}
+.nav-tab[data-view="teachers"].active::after{background:var(--teal);}
 .nav-tab:not(.active)::after{background:transparent;}
 .nav-dropdown{position:relative;}
 .nav-dropdown-menu{
@@ -513,6 +514,16 @@ body.dark-mode .exam-analysis-table th, body.dark-mode .exam-analysis-table td{ 
   transition:opacity .18s ease, transform .18s ease, visibility .18s;
 }
 .step-options.open{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto;}
+.uf-classdd-wrap{ position:relative; margin-top:5px; }
+.uf-classdd-btn{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--bg);border:1.5px solid var(--border);border-radius:8px;
+  padding:9px 12px;font-family:'Tajawal';font-size:14px;font-weight:600;color:var(--ink);
+  cursor:pointer;text-align:left;transition:.15s;
+}
+.uf-classdd-btn:hover{ border-color:var(--gold); }
+.uf-classdd-panel{ left:0;right:0;min-width:0;width:100%;max-height:230px;overflow:auto; }
+.uf-classdd-panel .perm-check{ display:block;padding:6px 4px; }
 .opt-btn{
   display:block;width:100%;text-align:left;background:none;border:none;
   padding:9px 10px;border-radius:7px;font-family:'Tajawal';font-size:14px;font-weight:600;
@@ -568,17 +579,22 @@ input[type=file]{display:none;}
 
 /* ---------- Add student form ---------- */
 .add-form{
-  display:none;background:var(--paper);border-radius:12px;padding:18px 20px;
-  box-shadow:var(--shadow);margin-bottom:18px;gap:12px;flex-wrap:wrap;align-items:flex-end;
+  display:none;background:var(--paper);border-radius:12px;padding:14px 18px;
+  box-shadow:var(--shadow);margin-bottom:18px;gap:10px;flex-wrap:wrap;align-items:flex-end;
 }
 .add-form.show{display:flex;}
 .field{display:flex;flex-direction:column;gap:5px;}
 .field label{font-size:12px;color:var(--ink-soft);font-weight:700;}
 .field input{
-  border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';
-  font-size:14px;min-width:170px;
+  border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-family:'Tajawal';
+  font-size:13.5px;min-width:170px;
 }
 .field input:focus{outline:none;border-color:var(--gold);}
+.field select{
+  border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-family:'Tajawal';
+  font-size:13.5px;min-width:150px;background:#fff;color:var(--ink);
+}
+.field select:focus{outline:none;border-color:var(--gold);}
 
 /* ---------- Table ---------- */
 .month-pill{
@@ -1086,7 +1102,7 @@ td:has(> .score-input){background:var(--bg);}
       </div>
       <div class="field">
         <label>Password</label>
-        <input type="text" id="ufPassword" placeholder="Password">
+        <input type="password" id="ufPassword" placeholder="Password" autocomplete="new-password">
       </div>
       <div class="field">
         <label>Role</label>
@@ -1106,12 +1122,30 @@ td:has(> .score-input){background:var(--bg);}
         </select>
       </div>
 
+      <div class="field uf-students-panel" id="ufStagesField" style="min-width:100%;flex-basis:100%;display:none;">
+        <p class="uf-section-title">Assigned Stage(s)</p>
+        <p class="foot-note" style="margin:0 0 10px;">This account will only see the stage(s) checked below (leave all unchecked = no stages yet, so nothing will show).</p>
+        <div class="perm-grid" id="ufStagesWrap">
+          <label class="perm-check"><input type="checkbox" class="uf-stage-cb" value="primary"> Primary Stage</label>
+          <label class="perm-check"><input type="checkbox" class="uf-stage-cb" value="prep"> Prep Stage</label>
+          <label class="perm-check"><input type="checkbox" class="uf-stage-cb" value="secondary"> Secondary Stage</label>
+        </div>
+      </div>
+
       <div class="field" id="ufScopeField" style="min-width:100%;flex-basis:100%;">
-        <p class="uf-section-title">Teacher access scope</p>
-        <label>Assigned Subjects (leave all unchecked = no subjects yet)</label>
+        <p class="uf-section-title" id="ufScopeTitle">Teacher access scope</p>
+        <label id="ufSubjectsLabel">Assigned Subjects (leave all unchecked = no subjects yet)</label>
         <div class="perm-grid" id="ufSubjectsWrap"></div>
-        <label style="margin-top:10px;display:block;">Assigned Classes <span style="color:#B8B2A0;font-weight:500;">(comma-separated, e.g. 3/A, 4/B — must match the "Class" values used in Grade Book)</span></label>
-        <input type="text" id="ufClassrooms" placeholder="e.g. 3/A, 4/B" style="width:100%;margin-top:5px;">
+        <div id="ufClassroomsField">
+          <label style="margin-top:10px;display:block;">Assigned Classes <span style="color:#B8B2A0;font-weight:500;">(pick from the classes already entered in Student Database)</span></label>
+          <div class="uf-classdd-wrap" id="ufClassroomsDD">
+            <button type="button" class="uf-classdd-btn" onclick="toggleUfClassroomsDD(event)">
+              <span id="ufClassroomsBtnText">Select classes…</span>
+              <span class="bc-caret">▾</span>
+            </button>
+            <div class="step-options uf-classdd-panel" id="ufClassroomsPanel"></div>
+          </div>
+        </div>
       </div>
 
       <div class="field uf-students-panel" id="ufStudentsField" style="min-width:100%;flex-basis:100%;display:none;">
@@ -1367,6 +1401,7 @@ td:has(> .score-input){background:var(--bg);}
 
   <div class="main-nav" id="mainNav">
     <button class="nav-tab active" data-view="database" id="navTabDatabase" onclick="switchView('database')">🗂 Student Database</button>
+    <button class="nav-tab" data-view="teachers" id="navTabTeachers" onclick="switchView('teachers')">🧑‍🏫 Teachers Database</button>
     <button class="nav-tab" data-view="grades" id="navTabGrades" onclick="switchView('grades')">📘 Grade Book</button>
     <button class="nav-tab" data-view="attendance" id="navTabAttendance" onclick="switchView('attendance')">📅 Absence</button>
     <div class="nav-dropdown" id="reportsDropdownWrap">
@@ -1678,6 +1713,85 @@ td:has(> .score-input){background:var(--bg);}
     </p>
   </div>
 
+  <div id="teachersView" style="display:none;">
+    <div class="classbar" style="margin-bottom:14px;">
+      <div class="classbar-crumbs"><span class="crumb">Teachers Database</span></div>
+      <div class="classbar-count" id="teachersCount">0 teachers</div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn btn-gold" onclick="toggleAddTeacherForm()">＋ Add Teacher</button>
+      <button class="btn btn-ink" onclick="document.getElementById('teachersExcelInput').click()">⇪ Bulk Import from Excel</button>
+      <input type="file" id="teachersExcelInput" accept=".xlsx,.xls,.csv" onchange="importTeachersExcel(this.files[0])">
+      <button class="btn btn-outline" onclick="downloadTeachersTemplate()">⬇ Download Blank Template</button>
+      <button class="btn btn-outline" onclick="exportTeachersDatabase()">⇩ Export Full Database</button>
+      <button class="btn btn-outline" onclick="deleteSelectedTeachers()">🗑 Delete Selected</button>
+    </div>
+
+    <div class="add-form" id="addTeacherForm">
+      <div class="field">
+        <label>Teacher Name</label>
+        <input type="text" id="newTeacherName" placeholder="e.g. Mona Ahmed Saleh">
+      </div>
+      <div class="field">
+        <label>Section</label>
+        <select id="newTeacherSection">
+          <option value="English">English</option>
+          <option value="French">French</option>
+          <option value="Both">Both</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Subject</label>
+        <input type="text" id="newTeacherSubject" list="teacherSubjectList" placeholder="e.g. Mathematics">
+        <datalist id="teacherSubjectList"></datalist>
+      </div>
+      <div class="field">
+        <label>Classes</label>
+        <select id="newTeacherClasses" onfocus="populateTeacherClassesDropdown()">
+          <option value="">Select a class...</option>
+        </select>
+      </div>
+      <button class="btn btn-gold" onclick="addTeacherManual()">Save Teacher</button>
+      <button class="btn btn-outline" onclick="toggleAddTeacherForm(false)">Cancel</button>
+    </div>
+
+    <div class="db-filters">
+      <div class="field">
+        <label>Search by name or ID</label>
+        <input type="text" id="teacherSearch" placeholder="Type to search..." oninput="renderTeachersDatabase()">
+      </div>
+      <div class="field">
+        <label>Section</label>
+        <select id="teacherFilterSection" onchange="renderTeachersDatabase()">
+          <option value="">All</option>
+          <option value="English">English</option>
+          <option value="French">French</option>
+          <option value="Both">Both</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Subject</label>
+        <select id="teacherFilterSubject" onchange="renderTeachersDatabase()">
+          <option value="">All</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Classes</label>
+        <select id="teacherFilterClass" onchange="renderTeachersDatabase()">
+          <option value="">All</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div id="teachersTableHolder"></div>
+    </div>
+    <p class="foot-note">
+      Add teachers one by one with the "Add Teacher" button, or bulk-import them all at once from an Excel/CSV sheet using "Bulk Import from Excel" (download the blank template first to see the required columns: ID, Teachers Name, Section, Subject, Classes).
+    </p>
+  </div>
+
 </div>
 
 <div class="overlay" id="importResultOverlay">
@@ -1773,6 +1887,9 @@ let scores = {};
 let studentIdCounter = 1;
 // attendance[classKey|classroom] = { months: [ {id, label, start, end, dates:[...], records:{studentId:{dateStr:true}}} ] }
 let attendance = {};
+// teachers = [{id, displayId, name, section, subject, classes}]
+let teachers = [];
+let teacherIdCounter = 1;
 
 // Base64 logos for the First Month Report certificate (same images as the masthead)
 const MILS_LOGO_B64 = "/9j/4AAQSkZJRgABAQEAeAB4AAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAByAHkDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9U6KKKACiiigAor5U/ac/bC139mv4ueE9L1Tw3Y3XgXV13TanHLI12gVgshCjCjbuU45yM9K4Hw1+2Bq3xM/bm0XwvoXiRT8MpI5IrVYIVCX8q27MxLsMkeYMDHpivUp5biKlP2qXu8rlf06evkK5900V8q/8FINb17wn+z2df8O+ItU8P6hZ6lBGW024MQmSQlWV8dQOCPQ17X8E4/t3wR8IeZqN7fG60eB3vrm4Z7hy8YJYydc5Jwe3Fc0sPy4eNe+jbVvQDv6K+Kv+Ce+sa74k8Q/Fy91vxZres2Oj602mWFvqV80sUcQZzuIbq/Cjca+iv2jPive/BP4N+IvGWnaT/bV5psKvHakkJlmC73xzsXO447CrrYSVLEfV4u70/H/hwPS6K+RP2W/2qvHvxiuPDrahYeHPEGm6oZV1CTw/K8d3oThSUF1C5OUbGA68ZNfXdZYjDzw0/Z1NxhRRRXMAUUUUAFFFFABRRXz74g+OGp6l4l8X+HrFRLeaRbJr2hNo84Ua1bQNi5tTI6Mu5XUo2wdGHI5NbUqMqrfL0Au/tCfBbVPi1458AzQaXpOoaBp7XkOsrqkh+e2niEbLGoBO8feVuxUV5lrn7Efhv4e6L4D1w+P77w7pPw2jnvvtkVlGZJMzNO7u5J4A4wAe/rXU658TviD44vLq98EtNc6c2m6Z4j0FbK3Ty72J5Nt1ZXEj5Ak2nIwVxj2qWP4I+L774qa14g1OeysfDN9HqGm3FrcahJM81lcojI5DAgSRyBvlJ2gHC4FexTqVqMIwlUUUun/D9fea/wCGEdd8aPB/w8/aR8Dw+GNe8Q3A0qSODWvJ0m6EcskOf3ch+ViUyw6DrUkK6b8GdP8AAHwq0uPV7rTtajudOs9TkvVNxZpFC0hJZhkkLwuBxgVxf9meFfBuofDyHxH4u0a1u/COni1fxDFe29rHe26qE+yTQtIXIO1JM9Ay8da1vFXxg+Cvijxt4S8RzfFvw9b3PhuW4lt4I9UtzHK0sRjbfk54U8YI5rBQlZU43lDV7O17O36AcB4M/Zj+Dtrb6ro/hT4leIoLHVZ3vNV0yPWVaO++zv8AvhIDGG4Iw+CCM81618Q/Ci/tCfDnw5qvgPxRDp32Wdb/AE+4lt/tFndpsaNoLiIkb4mViCDzXnfhP4d/Dm6u7C48N/FTSb021prUMbLcW8jtLqLbnlJVxyh6DHIrWh/Z5vbeHwukviOSXw3onhldIDaPdG3a2uEkDteIMMCzooB/iGOM5rapPmmpSqO67r18tbqwHK/swfsT6z8F/jRrfxC1vWNHia7gkgt9F8NwSxWkYkILZEhJwNuQvOMmvr2vjjRf2lfEOn654l1m/wBbaHQ7K0v9ZtdL1SydbjUbUFY7MW+E27N+dzB9x3jIGK960f4ynTNJ0+Xx5pf/AAiF3dIhVjL59u37hZZG3qP3aoSVJkC8qcZrDGQxNaaqVdXa2nkB6bRUUd1DK4RJUdyofarAnaehx6VLXkjCiiigAriviv451TwP4Qu9U0DQJPFmpWs0KyaXazKk3luwDMAerbei9yRXa14T8R/2Z9F1rxPL4h0c6xpWu6pKsV3qej6m9vcRj/nockq6AAAowPbGDXRQVNzXtHp/W+qA5n4gfErxb8S28Iav8J9amuLO8m3RQQ2xCQXEOWlttSB5jRxmPoCjDPPFc94suPhH+ymunan401+4m1CyuLjUtE8KwTefNp0tyM3EcRXDNEzE48w7frXHftcftgaT+zzJq/gv4aQWR8ealILjXNYhiXZbTMiqXKjhpyAOOi9TzXwF4Z0W8+JGsX/iDxHf3WpzSykzXFxKXlnkPJ3MecV70oU8Jg3jMU3Ciu3xSvt/kvK+ybPTyzLcTnGLhgsIrzl32SW7fkj6R+JX/BTrxhqVu2lfDnw/p3gbRY8pDI0SzXAX2UARp68A18x+MvjZ8QPiFO8viPxnrWrFxho5rx1jI9PLUhf0rvLz4d6Fd2xiWzFu2MLJESGHv7/jXJ+CPhPN4h8ZXmmXkrR2FiA88sfBdT90D0J/oavLOJMklQq1ox9n7NXfMtWttHd31aVu7R7HEvC+N4XoxxOMkpU3peN9H2d0t+h5x5a5ztGfpS4HpX1m/wAG/B72X2b+xo1XGPMV28z67s5ryux/Z+vdY+Llh4TtLllsLxTc/bGGTFAv38+rDoPUkVeXcdZTmHteZunyRcnzJaxWras3ql037XPzzA46nmFZUKKfM9k+p4+Y1bqoP4V1nhH4reNPANxFN4c8WaxozRcotreyKg/4BnafxFfeGk/st/DTStKWybw5HfHbte5upGaZz67s8H6Yr5k/aA/ZrPgHxVow8NtJLo+tz/ZoY5m3NbTddhbuuMkE88GvNyLxEybiPHf2bSjKMpX5edK0rdNG7O2tn+eh9jj8lxGXYd4qq1yx1dui7+h23wp/4KOeN/Bd6o8V6Ho/jS0ePyJrh7ZLa+aLOSpkUYfJ5wwxX1h4a8bfBX9tjUra4tNYudG8T7bWK80G+cI9xbQzCYwKp+VlY8FozkjqMV8seG/gF4S0PTY4buwXVrrb+9uLkk7j3wOgFea/Gf4PweBbeHxR4YkmsEt5V8yOORg0DE/K6NnI596/QsVkNOS9rS9yXl/lt9x+RYDjfLMfjFg4KS5nZNpWb++6v0uvuP0W0u88S/C34i3eq6j4euNc8Y+KpLqe8aGY/Y9M0izOIY4FAzI5VlO1cEs5z0FfRnh3xFb+IvD9hqyxy2Ud1bx3Bt7xfLlh3qGCyKfusM4IPevgP9jP9u4eL9S0vwH8VpobjUd6po3iS4A3NL0WOY9nPQP3PB9a9o8Lfsta03ii70fVLp9P8IQyC61PU7a7dtR8WXDv5n+kPnMUKEAeWpycdcGvgcXhXTm4Yj3WuvRry/BW+/qz9DPqmikVQihRwAMClrwRhXjf7W3xvHwB+COt+JICv9sSAWOmI3Q3MmQrY9FAZ/8AgOO9eyV+ev8AwVy1i4j0b4b6WrlbWa5vLiRc8MypGF/Lc3516WW0I4nF06Utm/y1E9j85dQ1C61a+ub69uJLu8uZGmmnlbc8jscsxPckmvTPhLrMB0+fTXcJcLIZEU/xqeuPoa8sr03wN8Ol+zi+1VHWSQfuYQxUoP7xI719Pxe8F/ZcqeLny3a5bau67LS/nqtD77gSOYf2xCrgKalZPmvolF93Z2fbR69LXPR2YIpZiFUDJZuAKx/hj4+06T4gazaPKkcd6saW8rHAdo8jGffPH0qNvB9pMrJc3N7dwkY8qa4Yr/8AX/GofBfwHik1x73U3M2jod1vDkh5T/tEdAP1r8YwUckhhMVHGV5XlCytHzT011d0tHZWvr1X2nixXxc8mhDEwUKLlraV5cyT5Vay032v52PdMH0rifC/xk0Xw7+0BpcVxcRLp32STTp7zI2RSSMGGT6AqoJ7ZNWv+FdWJ/dtqGrPadPsjXz+Xj09cfjWP4b/AGRk8VeOIrxZza+EA3mTx5Pm7gf9UhPUH+92rwsqjw9SjiP7TxElF05Je7bdW01d5dltfqfzHwxTf9p03h7yqLVK2nnf5H2ajCRFdCHRhkMpyCPUGvmv9qX4vaR4f8SeD9GSVLm5sdQF/fCMhjBHtKAH/aIYnHt716gnwN0W0UQadrHiLSNPAwNPstVkWED0AOSB9CK8S+OH7Jumza1p+peG7tdNt7hwl9a3EjSNgDmVCxJJPcE9TmvI8PMNlH+smHl7acp6uC5Le9bTmfM7aXel1dayS3/bOK60oZNiHiko0uW03zfZejtp8u/ZXPQbK8g1K1iurWZLi3mUPHLGcqwPfNeXftGeLLPSfA0+kNIj6hqDKqQg5ZUByWI7DjH1roLH4R6RpNnDbaZfatpcaKFYWd6yCQ/3mByMn2xXGfFT4B2+raSb7QfObWLdSXW4maRrsehZj9707V/dFTncGkj+EckjlFHNaNSrXlyKV1eNtVtzO7sr22v52PmVWKsGUlWByGU4IPqK/ZL9gT4/XHxw+CsUGr3H2jxJ4dddPvZGPzTJtzFKfdlBB90J71+N80UlvK8UqNHKjFWRxgqR1BFfcP8AwSb1m4t/i94y0tWb7JcaKtw6dvMSZFU/k7D8a+JzzDxrYOU3vHVfqf1RF9j9R6KKK/LzUK+Kf+Cp/wAN7jxP8GNF8U2sTSv4avyZ9o+7BOAjOfYMsY/4FX2tWX4n8N6d4x8O6loer2y3mmahbvbXMD9HjYEEfrXZg8Q8LXhWXR/8OJn4Z/DnwMjRxavfqHDfNbwnkf7x/wAK9KJxkk8V3vxe+Ampfs/60mjTeZdaG246bqRHyzRZyFY9A6jgj8elfN/j/wCIBvDJpmmSYgHyzTqfv/7I9v518tWw+YcVZvOF9Itq/SMb6ff97Z/UmBzDJ+E+HqOJpWfOk7J+9OdtdfJ6P+VaeT9k8E29t4nWW9RvMsoJTEGHSRhjOPYZrvgAMADAHAArzb9nv/knaf8AX3L/AOy1t6z48sP7QudHsLuOTUYR++Cn7nsPU/yr4PNsvqU8yxGFoJyjSbV+yTtd9j+VMzxuc+ImfwwcpK93GK2hBdX693q3ol0R6N4H0MeLtbuLUbltbRVa4mXGMk8IP9qvb7W1hsbeO3t41ihjG1UXoBXjn7NpJtNeycnzYz/46a6vx18XtE8J6xD4eW+hbxHcx74rUn7i+rehPYd8V+cY/D4nGY2WFw8XLlV7K70tdyfl3fQ/Xv7By3gaFb3m+VLmm93onZLor7L729ze8QeMrPQLyG0eOSe5lVm2xAFY8Djec8Z7V57qWpT6tdvcXDbnboOyj0FYtncS3d9LNNI0ssmWZmOSTS3fibQ9H1nS9P1fVYNNfUJfKhMp6n39B2yeMmv6s8Lsmy3KMlqZ1Uj+995Slq2ox1tFLX1S1dkfxzx1xJm3F+aU8pw6/d3XJBdW+sns2u7so6+bJNc1JPD+hXesXUcn9nWhX7RMi5ESswXcfYEjOKsW9xFdQRzwyLLDIoZJEOVYHoQa1v2i9Pg0z9n3xZb26BI1tV+p/eJya+Qfgv8AGiXwXNHpGryNLocjYSQ8tak9x/s+or7ng/jCPFdLEYqNPkpxqOMe9lGLvLpdt7LbbXc14i8MK2TYKk6FT2mIUeaa6PV6Q66efxeWiPRvjl8G4fElrceIdIRYdVhQvcRDhbhQMk/7wH5171/wSa+G88MPjTx5cRMkNwI9ItHI++FIklx9D5Y/Ol8HeAr74uXP9jaOweK9gIe9X5o4YmGPMJ/Hgd6+3/hV4B0D4R+C9J8E6AY0t9KtlHl7h5r5J3SuOuWbcc+v0rq4nxdOlT+rwfvS38l/wT1/D/FYzEYGdPE3cINKLf4q/W34bHY0UUV+YH6oFeffGjXvF+keGYLXwXp8Mur6lcLZjVLx1FtpatnNzKp5YKOijqxGeK9Bpk0KXETxSoskbgqyOMhgeoI7irhJRkpNXA8p/wCFO+D7n4R2fgDxRqknifTr4NELzVLzdcXM7ZZnifOVbO4gL0HHSvzr/aJ/4JyeNvhfcXWq+Ckm8Z+GAS4jhXN9bL6NGP8AWAf3l/ECvvn40/ADV/HlxYroHiGTR9MC21i+mxoiR2Nusm6aa1wvyTNH+7zxgdKzNc+PWu+EfiTNotto63XhmDUdO8N2ENyrpe395KN00kJPDRxR4LMeDtPNe9gcVXw8nPDyUnLWSf8AW+v9IJNySi3oj8odN+Jt14L8Anw5ZRS2msvcSmeSVCrQKcDAB53HB+lcBa31xY3iXUMzJcK24SZ5z7+tftX8RPAPwL+O3iK80HxJpmlX/iGK5ks2nWNre589Iw7qsoA3siMpPJAyK8D8Zf8ABKHwfq2+58H+M9S0lGGY4LxEu4/++xg4r1cDi8twzqudJwlVblJtX5r/AKdErW/E56NJYabqUdJN3v1v6+XQ+UfAv7TyeBPh/rItLXf4pvJEjhVl/cxYU5lPr7L6+1eCalrV/q+rzare3k1xqU0vnSXTsd5fOc5r7M1r/glH8SLHcdO8UeH9THYMJYT+oNcy3/BMP42CQgReHiufvf2mf/iKeUYHIMnnWrYNpSqu8m97dIq+0V2+89zM82xmb1FUxkuZpJetla7831OG8G/tGRab4Zuf7Yge51m3j2QbR8tyexY9iO/rXjPibxNqHi/WJ9S1Scz3Mx/4Cg7Ko7AV9daf/wAEs/iQYfO1jxR4a0OHIDPJJJIBngcgAV6p8P8A/glX4WkhjvvEfxDuNZt0Zllj0dEiiJU4YeYSxBBBBr0MLisryqi6GGlaDk5WV2rve3+XQ+Qw+U4XC4meLpw9+el+y7Lsv67HyXpH7RN5qnwY8QeAfELTX1xLarFpd4AXkOHU+U/c8A4Ptiuv/Z7/AGAviF8aJrbUNXtpPBvhZsM19qERE8yf9Mojyc/3mwPrX2v8O/DPwJ/Z28T+ItMl8HQ6DqehS2ajWNR/0+W4huOIrnfg+Uu/5S2Bg13nj/8AaA13RvH2o+H9A0aK9u9HvNPE+mXGRPqlnc4V7i1YcHymPI5HynOOK8ChOll7rRyqj7NVZc7b2u1FNpbK+l+l3eyPoq1eriOT2rvyqy9Crb+BIvgD4O03wx8IbqxudV0IC/1Dw3eSpJe6zb9HG8ncj9SpA25wOhp/g3wSPid46034naH408Q/2HdyLdnS3uRDHbSptSS2eHZlgcMCGb5SDgc5rS8Hfs73mj+O7XW9b1tNYTRtSu7/AES8CMl9HFcg+Zazv0kiUsSv0HpXtsMMdvGEiRY0HIVAAOea8qriLfDLmk936/0vTVao5oxUVaKsPooorzCgooooAKoanotpqkltcTWtvLe2bNJaXE0QdreQqV3LnocEjjqDV+ine2wHz/8ADP4C+KPBnjq91fVNS03W3urS6mfVby3V7uLUJmG5oCFBSEoFBRixG0AHFUvAvwp8dfC21EyKuqR6L4PfTrOy02+K/b9QaZ5XkJkUBWPyBSQQMtX0bRXY8XUlfms7gfKFn49+J/gH4feNL3xJc3mnzW+p6XBo7ajbfaJp4pFi+0JGQD5khJkHQ4IyFAOK1LP4o+P9a8L+FTo+t2upx32palZ6vr8FgSNKkRW+ywyRGMEENtDkqORjjdX0bq+h6fr1slvqNnDewpIsqLMgbY6/ddfRh2I5FO0vSLLRbdoLG1itYmdpGWJcbnY5Zj6sTySeTWjxNNq7pq/4bW/4PqB5v8VPB9/42+G2g2d5d6pFrNvd2d0dS0CIJLBcIDmcRSAhkBJzGQeD7Vxlv8MviZqnhu3tr/VdN1OTS/Ej3iLeW32BNa09oijrcJCpCSbndgdvJVSRX0PRWEcRKEeVJAeSa5+ztofizVLS81PNrbf8I9J4cvNJsT+4uLVmDIhdhu/dlRtbg5ya9L0vQ7PSbSyt4Yt/2OFbeKacmSUIAAAXbLHp3PNaFFZSqzmkpPRAFFFFZAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAf/2Q==";
@@ -1822,8 +1939,10 @@ function switchView(view){
   document.getElementById('attendanceView').style.display = view==='attendance' ? '' : 'none';
   document.getElementById('dashboardView').style.display = view==='dashboard' ? '' : 'none';
   document.getElementById('examsAnalysisView').style.display = view==='examsAnalysis' ? '' : 'none';
+  document.getElementById('teachersView').style.display = view==='teachers' ? '' : 'none';
   document.querySelectorAll('.nav-tab').forEach(b=> b.classList.toggle('active', b.dataset.view===view));
   if(view==='database') renderDatabase();
+  if(view==='teachers') renderTeachersDatabase();
   if(view==='reports'){ renderReportsStepper(); renderReportWorkspace(); }
   if(view==='attendance'){ renderAttendanceStepper(); renderAttendanceWorkspace(); }
   if(view==='dashboard'){ renderDashboard(); }
@@ -1874,7 +1993,7 @@ function makeStepConfig(st, sectionsData, stagesData){
     { key:'section', title:'Section', state: st, getLabel:()=> st.section ? sectionsData[st.section].label : null,
       options: Object.entries(sectionsData).filter(([id])=>scopeSectionAllowed(id)).map(([id,v])=>({id,label:v.label})), requires:['termPeriod'] },
     { key:'stage', title:'Stage', state: st, getLabel:()=> st.stage ? stagesData[st.stage].label : null,
-      options: Object.entries(stagesData).map(([id,v])=>({id,label:v.label})), requires:['termPeriod','section'] },
+      options: Object.entries(stagesData).filter(([id])=>scopeStageAllowed(id)).map(([id,v])=>({id,label:v.label})), requires:['termPeriod','section'] },
     { key:'grade', title:'Grade', state: st, getLabel:()=>{
         if(!st.grade) return null;
         const g = stagesData[st.stage].grades.find(g=>g.id===st.grade);
@@ -2080,6 +2199,10 @@ document.addEventListener('click', (e)=>{
   if(!e.target.closest('#visitorsWidget')){
     const dd = document.getElementById('visitorsDropdown');
     if(dd) dd.classList.remove('open');
+  }
+  if(!e.target.closest('#ufClassroomsDD')){
+    const cp = document.getElementById('ufClassroomsPanel');
+    if(cp) cp.classList.remove('open');
   }
 });
 
@@ -4715,7 +4838,7 @@ function saveState(){
 }
 function saveStateLocalOnly(){
   try{
-    localStorage.setItem(LS_KEY, JSON.stringify({ students, scores, studentIdCounter, attendance, savedAt: new Date().toISOString() }));
+    localStorage.setItem(LS_KEY, JSON.stringify({ students, scores, studentIdCounter, attendance, teachers, teacherIdCounter, savedAt: new Date().toISOString() }));
     flashSaveIndicator();
     updateQuickStatsWidget();
   }catch(err){ console.warn('Auto-save failed', err); }
@@ -4730,6 +4853,8 @@ function loadState(){
     scores = payload.scores || {};
     studentIdCounter = payload.studentIdCounter || 1;
     attendance = payload.attendance || {};
+    teachers = payload.teachers || [];
+    teacherIdCounter = payload.teacherIdCounter || 1;
   }catch(err){ console.warn('Auto-load failed', err); }
 }
 
@@ -4762,7 +4887,7 @@ function flashInlineSaved(el){
 }
 
 function downloadBackup(){
-  const payload = { students, scores, studentIdCounter, attendance, savedAt: new Date().toISOString() };
+  const payload = { students, scores, studentIdCounter, attendance, teachers, teacherIdCounter, savedAt: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -4781,8 +4906,11 @@ function restoreBackup(file){
       scores = payload.scores || {};
       studentIdCounter = payload.studentIdCounter || studentIdCounter;
       attendance = payload.attendance || {};
+      teachers = payload.teachers || [];
+      teacherIdCounter = payload.teacherIdCounter || teacherIdCounter;
       renderTable();
       renderDatabase();
+      renderTeachersDatabase();
       renderAttendanceWorkspace();
       saveState();
       alert('Data restored successfully.');
@@ -4957,6 +5085,18 @@ function deleteStudentFromDb(ck, studentId){
   if(currentView==='grades') renderTable();
   saveState();
   logActivity('delete', `Permanently deleted student "${removedName}" from the Student Database`);
+}
+
+// Every distinct classroom value stored anywhere in the Student Database (all sections/stages/grades)
+function getAllStoredClasses(){
+  const set = new Set();
+  Object.values(students).forEach(roster=>{
+    (roster||[]).forEach(s=>{
+      const c = (s.classroom||'').trim();
+      if(c) set.add(c);
+    });
+  });
+  return [...set].sort((a,b)=> a.localeCompare(b, undefined, {numeric:true}));
 }
 
 // Classroom values already used by students who share the same section/stage/grade (classKey)
@@ -5150,6 +5290,253 @@ function downloadTemplate(){
   XLSX.utils.book_append_sheet(wb, wsData, "Student Data");
   XLSX.utils.book_append_sheet(wb, wsGuide, "Allowed Values");
   XLSX.writeFile(wb, "Student_Import_Template.xlsx");
+}
+
+/* ================== TEACHERS DATABASE VIEW ================== */
+function nextTeacherDisplayId(){ return 'TCH-' + String(teacherIdCounter++).padStart(4,'0'); }
+
+function toggleAddTeacherForm(force){
+  const form = document.getElementById('addTeacherForm');
+  const willShow = force!==undefined ? force : !form.classList.contains('show');
+  form.classList.toggle('show', willShow);
+  if(willShow){
+    document.getElementById('teacherSubjectList').innerHTML = ALL_SUBJECTS.map(s=>`<option value="${s}"></option>`).join('');
+    document.getElementById('newTeacherName').value = '';
+    document.getElementById('newTeacherSection').value = 'English';
+    document.getElementById('newTeacherSubject').value = '';
+    document.getElementById('newTeacherClasses').value = '';
+  }
+}
+
+function populateTeacherClassesDropdown(){
+  const classSelect = document.getElementById('newTeacherClasses');
+  if(!classSelect) return;
+  const uniqueClasses = getAllStoredClasses();
+  classSelect.innerHTML = '<option value="">Select a class...</option>' + uniqueClasses.map(c=>`<option value="${c.replace(/"/g,'&quot;')}">${c}</option>`).join('');
+}
+
+function addTeacherManual(){
+  const name = document.getElementById('newTeacherName').value.trim();
+  if(!name){ alert('Please enter the teacher\'s name.'); return; }
+  const section = document.getElementById('newTeacherSection').value;
+  const subject = document.getElementById('newTeacherSubject').value.trim();
+  const classes = document.getElementById('newTeacherClasses').value.trim();
+  teachers.push({ id: uid(), displayId: nextTeacherDisplayId(), name, section, subject, classes });
+  toggleAddTeacherForm(false);
+  renderTeachersDatabase();
+  saveState();
+  logActivity('add', `Added teacher "${name}" to the Teachers Database`);
+}
+
+function deleteTeacherFromDb(id){
+  if(!confirm('Permanently delete this teacher from the database?')) return;
+  const idx = teachers.findIndex(t=>t.id===id);
+  const removedName = idx>-1 ? teachers[idx].name : 'Unknown';
+  if(idx>-1) teachers.splice(idx,1);
+  renderTeachersDatabase();
+  saveState();
+  logActivity('delete', `Permanently deleted teacher "${removedName}" from the Teachers Database`);
+}
+
+function updateTeacherField(id, field, value){
+  const t = teachers.find(t=>t.id===id);
+  if(!t) return;
+  t[field] = value;
+  saveState();
+}
+
+function toggleSelectAllTeachers(){
+  const all = document.getElementById('teacherSelectAllCheckbox');
+  document.querySelectorAll('.teacherCheckbox').forEach(cb=> cb.checked = all.checked);
+}
+
+function deleteSelectedTeachers(){
+  const checked = Array.from(document.querySelectorAll('.teacherCheckbox:checked'));
+  if(checked.length===0){ alert('Please select one or more teachers to delete.'); return; }
+  if(!confirm(`Permanently delete ${checked.length} selected teacher(s)? This cannot be undone.`)) return;
+  const ids = checked.map(cb=>cb.value);
+  teachers = teachers.filter(t=> !ids.includes(t.id));
+  renderTeachersDatabase();
+  saveState();
+  logActivity('delete', `Permanently deleted ${ids.length} teacher(s) from the Teachers Database`);
+}
+
+function renderTeachersDatabase(){
+  const search = (document.getElementById('teacherSearch').value||'').trim().toLowerCase();
+  const fSection = document.getElementById('teacherFilterSection').value;
+
+  const subjectSelect = document.getElementById('teacherFilterSubject');
+  const prevSubject = subjectSelect.value;
+  const teacherSubjects = teachers.map(t=>(t.subject||'').trim()).filter(Boolean);
+  const uniqueSubjects = [...new Set([...ALL_SUBJECTS, ...teacherSubjects])].sort((a,b)=>a.localeCompare(b));
+  subjectSelect.innerHTML = '<option value="">All</option>' + uniqueSubjects.map(s=>`<option value="${s}">${s}</option>`).join('');
+  if(uniqueSubjects.includes(prevSubject)) subjectSelect.value = prevSubject;
+  const fSubject = subjectSelect.value;
+
+  const classSelect = document.getElementById('teacherFilterClass');
+  const prevClass = classSelect.value;
+  const uniqueClasses = getAllStoredClasses();
+  classSelect.innerHTML = '<option value="">All</option>' + uniqueClasses.map(c=>`<option value="${c.replace(/"/g,'&quot;')}">${c}</option>`).join('');
+  if(uniqueClasses.includes(prevClass)) classSelect.value = prevClass;
+  const fClass = classSelect.value;
+
+  let list = teachers.filter(t=>{
+    if(fSection && t.section!==fSection) return false;
+    if(fSubject && (t.subject||'')!==fSubject) return false;
+    if(fClass){
+      const teacherClasses = (t.classes||'').split(',').map(c=>c.trim()).filter(Boolean);
+      if(!teacherClasses.includes(fClass)) return false;
+    }
+    if(search){
+      const hay = `${t.name} ${t.displayId}`.toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('teachersCount').textContent = `${list.length} teachers`;
+  const holder = document.getElementById('teachersTableHolder');
+
+  if(list.length===0){
+    holder.innerHTML = `
+      <div class="empty-state">
+        <div class="seal-lg">?</div>
+        <h3>No matching teachers</h3>
+        <p>Add teachers using the "Add Teacher" button, or import them from an Excel sheet.</p>
+      </div>`;
+    return;
+  }
+
+  const rows = list.map(t=>`
+    <tr>
+      <td><input type="checkbox" class="teacherCheckbox" value="${t.id}"></td>
+      <td><span class="seat-badge">${t.displayId||'—'}</span></td>
+      <td class="name-col">
+        <input type="text" class="db-edit-select" value="${(t.name||'').replace(/"/g,'&quot;')}" onchange="flashInlineSaved(this);updateTeacherField('${t.id}','name',this.value)">
+      </td>
+      <td>
+        <select class="db-edit-select" onchange="flashInlineSaved(this);updateTeacherField('${t.id}','section',this.value)">
+          <option value="English" ${t.section==='English'?'selected':''}>English</option>
+          <option value="French" ${t.section==='French'?'selected':''}>French</option>
+          <option value="Both" ${t.section==='Both'?'selected':''}>Both</option>
+        </select>
+      </td>
+      <td>
+        <input type="text" class="db-edit-select" value="${(t.subject||'').replace(/"/g,'&quot;')}" onchange="flashInlineSaved(this);updateTeacherField('${t.id}','subject',this.value)">
+      </td>
+      <td>
+        <input type="text" class="db-edit-select" value="${(t.classes||'').replace(/"/g,'&quot;')}" placeholder="e.g. 3/A, 3/B" onchange="flashInlineSaved(this);updateTeacherField('${t.id}','classes',this.value)">
+      </td>
+      <td><button class="del-btn" onclick="deleteTeacherFromDb('${t.id}')" title="Delete">✕</button></td>
+    </tr>`).join('');
+
+  holder.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th style="width:30px;"><input type="checkbox" id="teacherSelectAllCheckbox" onclick="toggleSelectAllTeachers()"></th>
+          <th>ID</th>
+          <th class="name-col">Teachers Name</th>
+          <th>Section</th>
+          <th>Subject</th>
+          <th>Classes</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function exportTeachersDatabase(){
+  if(teachers.length===0){ alert('There are no teachers to export yet.'); return; }
+  const rows = teachers.map((t,i)=>({
+    "ID": t.displayId||'',
+    "#": i+1,
+    "Teachers Name": t.name,
+    "Section": t.section,
+    "Subject": t.subject||'',
+    "Classes": t.classes||''
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Teachers Database");
+  XLSX.writeFile(wb, "Teachers_Database.xlsx");
+}
+
+function findTeacherSection(label){
+  label = (label||'').toString().trim();
+  if(/^both$/i.test(label) || /كلا|both/i.test(label)) return 'Both';
+  if(/english|انجليز|إنجليز/i.test(label)) return 'English';
+  if(/french|فرنس/i.test(label)) return 'French';
+  return null;
+}
+
+function importTeachersExcel(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+      let added = 0;
+      const problems = [];
+
+      rows.forEach((row, idx)=>{
+        const name = (row['Teachers Name']||row['Name']||row['Teacher Name']||'').toString().trim();
+        const providedId = (row['ID']||row['id']||'').toString().trim();
+        const sectionLabel = (row['Section']||'').toString().trim();
+        const subject = (row['Subject']||'').toString().trim();
+        const classes = (row['Classes']||row['Class']||'').toString().trim();
+
+        if(!name){ problems.push(`Row ${idx+2}: missing teacher name`); return; }
+        const section = findTeacherSection(sectionLabel);
+        if(!section){ problems.push(`${name}: unrecognized "Section" value ("${sectionLabel}") — must be English, French or Both`); return; }
+
+        teachers.push({ id: uid(), displayId: providedId || nextTeacherDisplayId(), name, section, subject, classes });
+        added++;
+      });
+
+      renderTeachersDatabase();
+      saveState();
+      document.getElementById('importTitle').textContent = 'Bulk Import Result';
+      let msg = `${added} teacher(s) added successfully.`;
+      if(problems.length){
+        msg += `<br><br><b>${problems.length} row(s) could not be added:</b><br>` +
+          problems.slice(0,8).map(p=>`• ${p}`).join('<br>') +
+          (problems.length>8 ? `<br>... and ${problems.length-8} more` : '');
+      }
+      document.getElementById('importMsg').innerHTML = msg;
+      document.getElementById('importResultOverlay').classList.add('show');
+    }catch(err){
+      alert('Could not read the file. Make sure the file format and column names match the template.');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  document.getElementById('teachersExcelInput').value='';
+}
+
+function downloadTeachersTemplate(){
+  const sample = [
+    { "ID":"", "Teachers Name":"Mona Ahmed Saleh", "Section":"English", "Subject":"Mathematics", "Classes":"3/A, 3/B, 4/A" },
+    { "ID":"", "Teachers Name":"", "Section":"", "Subject":"", "Classes":"" }
+  ];
+  const wsData = XLSX.utils.json_to_sheet(sample);
+
+  const guide = [
+    { "Field":"ID (optional)", "Allowed Values":"Leave blank to auto-generate, or enter an existing teacher code" },
+    { "Field":"Teachers Name", "Allowed Values":"Full name of the teacher" },
+    { "Field":"Section", "Allowed Values":"English / French / Both" },
+    { "Field":"Subject", "Allowed Values": ALL_SUBJECTS.join(' | ') },
+    { "Field":"Classes", "Allowed Values":"Comma-separated list of classes the teacher takes, e.g. 3/A, 3/B, 4/A" }
+  ];
+  const wsGuide = XLSX.utils.json_to_sheet(guide);
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, wsData, "Teacher Data");
+  XLSX.utils.book_append_sheet(wb, wsGuide, "Allowed Values");
+  XLSX.writeFile(wb, "Teachers_Import_Template.xlsx");
 }
 
 /* ================== AUTH & USER PERMISSIONS ================== */
@@ -5747,14 +6134,14 @@ function getEffectivePermissions(user){
       sectionScope:user.section||null, stageScope:user.stages||[], classroomScope:null };
   }
   if(role==='hod'){
-    // HODs: Can view grade book after identifying their subject, grade and section
-    return { database:false, grades:true, attendance:false, reports:false, dashboard:false, examsAnalysis:false, settings:false, edit:false,
-      sectionScope:user.section||null, stageScope:null, classroomScope:null };
+    // Head of Department: Can view OR edit their subject's grade book within their stage (and their section).
+    return { database:false, grades:true, attendance:false, reports:true, dashboard:false, examsAnalysis:false, settings:false, edit:true,
+      sectionScope:user.section||null, stageScope:user.stages||[], classroomScope:null, subjectScope:user.subjects||[] };
   }
   if(role==='teacher'){
-    // Teacher: Can view or edit grade form for their subjects and classes
+    // Teacher: Can view or edit the grade form for their own subjects and classes only
     return { database:false, grades:true, attendance:false, reports:false, dashboard:false, examsAnalysis:false, settings:false, edit:true,
-      sectionScope:user.section||null, stageScope:null, classroomScope:user.classrooms||[] };
+      sectionScope:user.section||null, stageScope:null, classroomScope:user.classrooms||[], subjectScope:user.subjects||[] };
   }
   // Parent/Student: Can View ONLY Reports and Dashboard
   const hasStudentLink = Array.isArray(user.studentIds);
@@ -5773,6 +6160,12 @@ function scopeSectionAllowed(id){
   if(!currentUser || !currentUser.effective) return true;
   const sc = currentUser.effective.sectionScope;
   return !sc || sc===id;
+}
+function scopeStageAllowed(id){
+  if(!currentUser || !currentUser.effective) return true;
+  const sc = currentUser.effective.stageScope;
+  // stageScope === null -> unrestricted. An array (even empty) -> restricted to exactly those stages.
+  return !sc || sc.includes(id);
 }
 function scopeSubjectAllowed(name){
   if(!currentUser || !currentUser.effective) return true;
@@ -5871,6 +6264,7 @@ function tryAutoLogin(){
 
 function canAccessTab(tab){
   if(!currentUser || !currentUser.effective) return false;
+  if(tab==='teachers') return !!currentUser.effective.database;
   return !!currentUser.effective[tab];
 }
 
@@ -6000,15 +6394,77 @@ function buildSubjectCheckboxes(selected){
     return `<label class="perm-check"><input type="checkbox" class="uf-subject-cb" id="${id}" value="${s}" ${checked}> ${subjectWithIcon(s)}</label>`;
   }).join('');
 }
+// Returns every unique, non-empty Class/Classroom value already entered anywhere in the
+// Student Database (across all sections/stages/grades), sorted alphabetically. Used to
+// populate the "Assigned Classes" dropdown in Manage Users so admins pick existing classes
+// instead of typing them (avoids typos/mismatches with the Grade Book "Class" values).
+function getAllClassroomsInDb(){
+  const set = new Set();
+  Object.values(students).forEach(roster=>{
+    (roster||[]).forEach(s=>{
+      const c = (s.classroom||'').trim();
+      if(c) set.add(c);
+    });
+  });
+  return [...set].sort();
+}
+
+let ufSelectedClassrooms = [];
+
+function buildClassroomOptions(selected){
+  ufSelectedClassrooms = (selected||[]).slice();
+  const panel = document.getElementById('ufClassroomsPanel');
+  const all = getAllClassroomsInDb();
+  if(!all.length){
+    panel.innerHTML = `<p class="foot-note" style="margin:6px;">No classes found yet — add students with a Class value in the Grade Book tab first.</p>`;
+  } else {
+    panel.innerHTML = all.map(c=>{
+      const checked = ufSelectedClassrooms.includes(c) ? 'checked' : '';
+      return `<label class="perm-check"><input type="checkbox" class="uf-classroom-cb" value="${escapeXml(c)}" ${checked} onchange="toggleUfClassroom('${c.replace(/'/g,"\\'")}', this.checked)"> ${escapeXml(c)}</label>`;
+    }).join('');
+  }
+  updateUfClassroomsBtnText();
+}
+
+function toggleUfClassroom(c, checked){
+  if(checked){ if(!ufSelectedClassrooms.includes(c)) ufSelectedClassrooms.push(c); }
+  else { ufSelectedClassrooms = ufSelectedClassrooms.filter(x=> x!==c); }
+  updateUfClassroomsBtnText();
+}
+
+function updateUfClassroomsBtnText(){
+  const el = document.getElementById('ufClassroomsBtnText');
+  if(!el) return;
+  el.textContent = ufSelectedClassrooms.length ? ufSelectedClassrooms.join(', ') : 'Select classes…';
+}
+
+function toggleUfClassroomsDD(e){
+  if(e) e.stopPropagation();
+  document.getElementById('ufClassroomsPanel').classList.toggle('open');
+}
+
 function onRoleFormChange(){
   const role = document.getElementById('ufRole').value;
   const needsSection = role==='teacher' || role==='hod' || role==='hos';
-  const needsScope = role==='teacher';
+  const needsStages = role==='hos' || role==='hod';
+  const needsScope = role==='teacher' || role==='hod';
+  const needsClassrooms = role==='teacher'; // HOD is scoped by subject+stage, not by classroom
   const needsStudents = role==='parent';
   document.getElementById('ufSectionField').style.display = needsSection ? '' : 'none';
+  document.getElementById('ufStagesField').style.display = needsStages ? '' : 'none';
   document.getElementById('ufScopeField').style.display = needsScope ? '' : 'none';
+  document.getElementById('ufClassroomsField').style.display = needsClassrooms ? '' : 'none';
+  document.getElementById('ufScopeTitle').textContent = role==='hod' ? 'Head of Department access scope' : 'Teacher access scope';
+  document.getElementById('ufSubjectsLabel').textContent = role==='hod' ? 'Subject (leave unchecked = no subject yet)' : 'Assigned Subjects (leave all unchecked = no subjects yet)';
   document.getElementById('ufStudentsField').style.display = needsStudents ? '' : 'none';
   if(needsStudents) renderUfStudentPicker();
+}
+function getUfSelectedStages(){
+  return Array.from(document.querySelectorAll('.uf-stage-cb:checked')).map(cb=>cb.value);
+}
+function setUfSelectedStages(stages){
+  stages = stages || [];
+  document.querySelectorAll('.uf-stage-cb').forEach(cb=>{ cb.checked = stages.includes(cb.value); });
 }
 function resetUserForm(){
   document.getElementById('editingUsername').value = '';
@@ -6018,8 +6474,9 @@ function resetUserForm(){
   document.getElementById('ufPassword').value = '';
   document.getElementById('ufRole').value = (currentUser && currentUser.role==='hod') ? 'teacher' : 'admin';
   document.getElementById('ufSection').value = (currentUser && currentUser.role==='hod') ? currentUser.section : 'en';
-  document.getElementById('ufClassrooms').value = '';
+  buildClassroomOptions([]);
   buildSubjectCheckboxes();
+  setUfSelectedStages([]);
   ufSelectedStudentIds = [];
   document.getElementById('ufStudentSearch').value = '';
   onRoleFormChange();
@@ -6039,8 +6496,9 @@ function editUser(username){
   document.getElementById('ufPassword').value = user.password || '';
   document.getElementById('ufRole').value = user.role;
   document.getElementById('ufSection').value = user.section || 'en';
-  document.getElementById('ufClassrooms').value = (user.classrooms||[]).join(', ');
+  buildClassroomOptions(user.classrooms||[]);
   buildSubjectCheckboxes(user.subjects||[]);
+  setUfSelectedStages(user.stages||[]);
   ufSelectedStudentIds = (user.studentIds||[]).slice();
   document.getElementById('ufStudentSearch').value = '';
   onRoleFormChange();
@@ -6055,7 +6513,8 @@ function saveUserFromForm(){
   const role = document.getElementById('ufRole').value;
   const section = document.getElementById('ufSection').value;
   const subjects = Array.from(document.querySelectorAll('.uf-subject-cb:checked')).map(cb=>cb.value);
-  const classrooms = document.getElementById('ufClassrooms').value.split(',').map(c=>c.trim()).filter(Boolean);
+  const classrooms = ufSelectedClassrooms.slice();
+  const stages = getUfSelectedStages();
 
   if(!username){ alert('Please enter a username.'); return; }
   if(!password){ alert('Please enter a password.'); return; }
@@ -6063,7 +6522,8 @@ function saveUserFromForm(){
 
   const userObj = { username, displayName, password, role };
   if(role==='teacher' || role==='hod' || role==='hos') userObj.section = section;
-  if(role==='hos'){ userObj.stages = []; } // Will be populated later if needed
+  if(role==='hos'){ userObj.stages = stages; }
+  if(role==='hod'){ userObj.stages = stages; userObj.subjects = subjects; }
   if(role==='teacher'){ userObj.subjects = subjects; userObj.classrooms = classrooms; }
   if(role==='parent'){ userObj.studentIds = ufSelectedStudentIds.slice(); }
 
@@ -6412,6 +6872,8 @@ function applyRemotePayload(payload){
   scores = payload.scores || {};
   studentIdCounter = payload.studentIdCounter || 1;
   attendance = payload.attendance || {};
+  teachers = payload.teachers || [];
+  teacherIdCounter = payload.teacherIdCounter || 1;
   if(Array.isArray(payload.users) && payload.users.length){ users = payload.users; saveUsersLocalOnly(); }
   if(Array.isArray(payload.activityLog) && payload.activityLog.length){
     const map = {};
@@ -6426,6 +6888,7 @@ function applyRemotePayload(payload){
   }
   saveStateLocalOnly();
   renderDatabase();
+  if(typeof renderTeachersDatabase==='function') renderTeachersDatabase();
   if(typeof renderTable==='function') renderTable();
   if(typeof renderAttendanceWorkspace==='function') renderAttendanceWorkspace();
   fbApplyingRemote = false;
@@ -6472,7 +6935,7 @@ async function pushToGithub(){
   if(!githubReady()) return false;
   setSyncStatus('syncing');
   try{
-    const payload = { students, scores, studentIdCounter, attendance, users, activityLog, presenceBucket: presenceBucket || null, savedAt: new Date().toISOString() };
+    const payload = { students, scores, studentIdCounter, attendance, teachers, teacherIdCounter, users, activityLog, presenceBucket: presenceBucket || null, savedAt: new Date().toISOString() };
     fbLastPushedAt = Date.now();
     await FB_DOC_REF.set(payload, { merge:false });
     setSyncStatus('synced');
@@ -6705,6 +7168,7 @@ renderAttendanceStepper();
 renderWorkspace();
 renderAttendanceWorkspace();
 renderDatabase();
+renderTeachersDatabase();
 /* ================== DATE / TIME / WEATHER WIDGET ================== */
 function dtwUpdateClock(){
   const now = new Date();
