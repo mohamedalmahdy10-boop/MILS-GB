@@ -149,14 +149,13 @@ body{
   cursor:pointer;transition:.15s;white-space:nowrap;
 }
 .ghost-btn:hover{background:var(--ink);color:#fff;}
-.dark-toggle-btn{
+.dark-toggle-btn,.notif-bell-btn{
   border:1.5px solid var(--border);background:var(--bg);color:var(--ink);
-  width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;
+  width:40px;height:40px;border-radius:50%;font-size:17px;cursor:pointer;position:relative;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  transition:transform .15s ease, box-shadow .15s ease, background .15s;
+  transition:border-color .15s ease, background .15s, color .15s;
 }
-.dark-toggle-btn:hover{transform:translateY(-2px);box-shadow:0 8px 16px rgba(0,0,0,0.14);}
-.dark-toggle-btn:active{transform:translateY(1px);}
+.dark-toggle-btn:hover,.notif-bell-btn:hover{border-color:var(--gold);}
 .dark-toggle-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
 
 /* ---------- Active Visitors Widget ---------- */
@@ -217,13 +216,6 @@ body{
 
 /* ---------- Notification Bell ---------- */
 .notif-bell-wrap{position:relative;flex-shrink:0;}
-.notif-bell-btn{
-  border:1.5px solid var(--border);background:var(--bg);color:var(--ink);
-  width:40px;height:40px;border-radius:50%;font-size:17px;cursor:pointer;position:relative;
-  display:flex;align-items:center;justify-content:center;
-  transition:transform .15s ease, box-shadow .15s ease;
-}
-.notif-bell-btn:hover{transform:translateY(-2px);box-shadow:0 8px 16px rgba(0,0,0,0.14);}
 .notif-bell-btn.has-unread{
   background:var(--ink);color:#fff;border-color:var(--ink);
   animation:notifBellPulse 2.2s infinite;
@@ -300,20 +292,21 @@ body{
 
 /* ---------- Main Nav ---------- */
 .main-nav{
-  display:flex;gap:6px;margin-bottom:20px;background:var(--paper);
-  border-radius:12px;padding:6px;box-shadow:var(--shadow);width:fit-content;
+  display:flex;gap:3px;margin-bottom:20px;background:var(--paper);
+  border-radius:12px;padding:5px;box-shadow:var(--shadow);width:100%;
+  justify-content:flex-end;flex-wrap:nowrap;
   position:sticky;top:12px;z-index:120;
 }
 .nav-tab{
   border:none;background:transparent;color:var(--ink-soft);font-family:'Tajawal';
-  font-weight:800;font-size:13px;padding:8px 16px;border-radius:9px;cursor:pointer;transition:.15s;
+  font-weight:800;font-size:13px;padding:8px 10px;border-radius:9px;cursor:pointer;transition:.15s;
   position:relative;white-space:nowrap;
 }
 .nav-tab.active{background:var(--ink);color:#fff;}
 .nav-tab:not(.active):hover{background:var(--bg);color:var(--ink);}
 /* Distinct accent color per main tab, shown as an underline chip beneath the tab */
 .nav-tab::after{
-  content:'';position:absolute;left:14px;right:14px;bottom:3px;height:3px;border-radius:3px;
+  content:'';position:absolute;left:9px;right:9px;bottom:3px;height:3px;border-radius:3px;
   background:transparent;transition:.15s;
 }
 .nav-tab[data-view="grades"].active::after{background:var(--gold);}
@@ -322,16 +315,17 @@ body{
 .nav-tab[data-view="dashboard"].active::after{background:var(--blue);}
 .nav-tab[data-view="config"].active::after{background:var(--purple);}
 .nav-tab[data-view="teachers"].active::after{background:var(--teal);}
+.nav-tab[data-view="perfAlerts"].active::after{background:var(--red);}
 .nav-tab:not(.active)::after{background:transparent;}
 .nav-dropdown{position:relative;}
 .nav-dropdown-menu{
   display:block;position:absolute;top:100%;left:0;margin-top:8px;min-width:230px;
   background:var(--paper);border:1px solid var(--border);border-radius:10px;
   box-shadow:0 12px 30px rgba(0,0,0,0.14);padding:8px;z-index:200;
-  opacity:0;visibility:hidden;transform:translateY(-8px);pointer-events:none;
-  transition:opacity .18s ease, transform .18s ease, visibility .18s;
+  opacity:0;visibility:hidden;transform:translateY(-6px);pointer-events:none;
+  transition:opacity .28s ease, transform .28s ease, visibility .28s;
 }
-.nav-dropdown-menu.open{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto;}
+.nav-dropdown-menu.open{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto;transition:opacity .16s ease, transform .16s ease, visibility .16s;}
 .term-group-btn{ font-weight:800; display:flex; align-items:center; justify-content:space-between; }
 .term-group-btn .arrow{ transition:transform .15s; font-size:12px; }
 .term-group-btn.expanded .arrow{ transform:rotate(90deg); }
@@ -341,6 +335,8 @@ body{
 }
 .term-group.open{ display:flex; }
 .term-group .opt-btn{ font-size:13px; font-weight:500; padding:7px 10px; }
+.perf-dup-row td{ background:var(--red-bg) !important; }
+.perf-count-cell{ text-align:center;font-weight:800; }
 
 /* ---------- Configuration Modal ---------- */
 .config-modal-overlay{
@@ -519,9 +515,9 @@ body.dark-mode .exam-analysis-table th, body.dark-mode .exam-analysis-table td{ 
   width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
   background:var(--bg);border:1.5px solid var(--border);border-radius:8px;
   padding:9px 12px;font-family:'Tajawal';font-size:14px;font-weight:600;color:var(--ink);
-  cursor:pointer;text-align:left;transition:.15s;
+  cursor:pointer;text-align:left;transition:border-color .15s;
 }
-.uf-classdd-btn:hover{ border-color:var(--gold); }
+.uf-classdd-btn:hover{border-color:var(--gold);}
 .uf-classdd-panel{ left:0;right:0;min-width:0;width:100%;max-height:230px;overflow:auto; }
 .uf-classdd-panel .perm-check{ display:block;padding:6px 4px; }
 .opt-btn{
@@ -530,6 +526,8 @@ body.dark-mode .exam-analysis-table th, body.dark-mode .exam-analysis-table td{ 
   color:var(--ink);cursor:pointer;
 }
 .opt-btn:hover{background:var(--gold-light);}
+.opt-btn-danger{color:var(--red);font-weight:800;}
+.opt-btn-danger:hover{background:var(--red-bg);}
 .opt-btn.selected{background:var(--ink);color:#fff;}
 @media (max-width: 720px){
   .breadcrumb-row{ gap:6px; }
@@ -564,15 +562,15 @@ body.dark-mode .exam-analysis-table th, body.dark-mode .exam-analysis-table td{ 
 .btn{
   border:none;border-radius:9px;padding:10px 18px;font-family:'Tajawal';font-weight:700;
   font-size:13.5px;cursor:pointer;display:flex;align-items:center;gap:7px;
-  transition:transform .12s ease, box-shadow .12s ease, background .15s, color .15s;
+  transition:box-shadow .15s ease, background .15s, color .15s, border-color .15s;
   box-shadow:0 2px 6px rgba(0,0,0,0.06);
 }
-.btn:hover{transform:translateY(-2px);box-shadow:0 8px 16px rgba(0,0,0,0.14);}
-.btn:active{transform:translateY(1px);box-shadow:0 2px 4px rgba(0,0,0,0.12);}
+.btn:hover{box-shadow:0 4px 10px rgba(0,0,0,0.10);}
+.btn:active{box-shadow:0 2px 4px rgba(0,0,0,0.12);}
 .btn-gold{background:var(--gold);color:var(--ink);}
 .btn-gold:hover{background:var(--gold-deep);color:#fff;}
-.btn-ink{background:var(--ink);color:#fff;}
-.btn-ink:hover{background:var(--ink-2);}
+.btn-ink,.login-card .btn-login{background:var(--ink);color:#fff;}
+.btn-ink:hover,.login-card .btn-login:hover{background:var(--ink-2);}
 .btn-outline{background:var(--paper);color:var(--ink);border:1.5px solid var(--border);}
 .btn-outline:hover{border-color:var(--ink);}
 input[type=file]{display:none;}
@@ -953,9 +951,8 @@ td:has(> .score-input){background:var(--bg);}
 .login-card .field input:focus{outline:none;border-color:var(--gold);}
 .login-card .btn-login{
   width:100%;border:none;border-radius:9px;padding:12px;font-family:'Tajawal';font-weight:800;
-  font-size:14px;cursor:pointer;background:var(--ink);color:#fff;margin-top:6px;transition:.15s;
+  font-size:14px;cursor:pointer;margin-top:6px;transition:background .15s;
 }
-.login-card .btn-login:hover{background:var(--ink-2);}
 .login-error{
   background:var(--red-bg);color:var(--red);border-radius:8px;padding:9px 12px;
   font-size:13px;font-weight:700;margin-bottom:14px;display:none;
@@ -1466,6 +1463,37 @@ td:has(> .score-input){background:var(--bg);}
         </div>
       </div>
     </div>
+    <div class="nav-dropdown" id="perfDropdownWrap">
+      <button class="nav-tab" data-view="perfAlerts" id="navTabPerfAlerts" onclick="togglePerfMenu(event)">🎯 Top &amp; At-Risk ▾</button>
+      <div class="nav-dropdown-menu" id="perfMenu">
+        <button class="opt-btn term-group-btn" id="perfTermGroupBtn_term1" onclick="togglePerfTermGroup(event,'term1')">Term 1 <span class="arrow">▸</span></button>
+        <div class="term-group" id="perfTermGroup_term1">
+          <button class="opt-btn term-group-btn" id="perfCycleGroupBtn_term1_cycle1" onclick="togglePerfCycleGroup(event,'term1','cycle1')">Cycle 1 <span class="arrow">▸</span></button>
+          <div class="term-group" id="perfCycleGroup_term1_cycle1">
+            <button class="opt-btn" onclick="openPerfAlert('term1','cycle1','top')">🌟 Top Performance Students</button>
+            <button class="opt-btn" onclick="openPerfAlert('term1','cycle1','risk')">⚠ At Risk Students</button>
+          </div>
+          <button class="opt-btn term-group-btn" id="perfCycleGroupBtn_term1_cycle2" onclick="togglePerfCycleGroup(event,'term1','cycle2')">Cycle 2 <span class="arrow">▸</span></button>
+          <div class="term-group" id="perfCycleGroup_term1_cycle2">
+            <button class="opt-btn" onclick="openPerfAlert('term1','cycle2','top')">🌟 Top Performance Students</button>
+            <button class="opt-btn" onclick="openPerfAlert('term1','cycle2','risk')">⚠ At Risk Students</button>
+          </div>
+        </div>
+        <button class="opt-btn term-group-btn" id="perfTermGroupBtn_term2" onclick="togglePerfTermGroup(event,'term2')">Term 2 <span class="arrow">▸</span></button>
+        <div class="term-group" id="perfTermGroup_term2">
+          <button class="opt-btn term-group-btn" id="perfCycleGroupBtn_term2_cycle1" onclick="togglePerfCycleGroup(event,'term2','cycle1')">Cycle 1 <span class="arrow">▸</span></button>
+          <div class="term-group" id="perfCycleGroup_term2_cycle1">
+            <button class="opt-btn" onclick="openPerfAlert('term2','cycle1','top')">🌟 Top Performance Students</button>
+            <button class="opt-btn" onclick="openPerfAlert('term2','cycle1','risk')">⚠ At Risk Students</button>
+          </div>
+          <button class="opt-btn term-group-btn" id="perfCycleGroupBtn_term2_cycle2" onclick="togglePerfCycleGroup(event,'term2','cycle2')">Cycle 2 <span class="arrow">▸</span></button>
+          <div class="term-group" id="perfCycleGroup_term2_cycle2">
+            <button class="opt-btn" onclick="openPerfAlert('term2','cycle2','top')">🌟 Top Performance Students</button>
+            <button class="opt-btn" onclick="openPerfAlert('term2','cycle2','risk')">⚠ At Risk Students</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="nav-dropdown" id="configDropdownWrap">
       <button class="nav-tab" data-view="config" id="navTabConfig" onclick="toggleConfigMenu(event)">⚙ Configuration ▾</button>
       <div class="nav-dropdown-menu" id="configMenu">
@@ -1476,7 +1504,7 @@ td:has(> .score-input){background:var(--bg);}
         <button class="opt-btn" onclick="downloadBackup()">⬇ Full Backup</button>
         <button class="opt-btn" onclick="document.getElementById('restoreInput').click()">⬆ Restore Backup</button>
         <div style="height:1px;background:var(--border);margin:6px 2px;"></div>
-        <button class="opt-btn" id="dbDeleteAllBtn" onclick="confirmDeleteAllDb()" style="color:var(--red);font-weight:800;">⚠ Delete All Student Data</button>
+        <button class="opt-btn opt-btn-danger" id="dbDeleteAllBtn" onclick="confirmDeleteAllDb()">⚠ Delete All Student Data</button>
       </div>
     </div>
   </div>
@@ -1641,6 +1669,17 @@ td:has(> .score-input){background:var(--bg);}
     <div class="workspace show" id="examsAnalysisWorkspace">
       <div class="db-filters" id="examsFilters"></div>
       <div id="examsTableArea"></div>
+    </div>
+  </div>
+
+  <div id="perfAlertsView" style="display:none;">
+    <div class="classbar">
+      <div class="classbar-crumbs" id="perfCrumbs"></div>
+      <button class="btn btn-outline" onclick="window.print()">🖨 Print</button>
+    </div>
+    <div class="stepper" id="perfFilterStepper"></div>
+    <div class="workspace show" id="perfAlertsWorkspace">
+      <div id="perfTableArea"></div>
     </div>
   </div>
 
@@ -1883,7 +1922,20 @@ const ATT_STAGES = JSON.parse(JSON.stringify(STAGES));
 
 let state = { termPeriod:null, section:null, stage:null, grade:null, term:null, academicTerm:null, subject:null, reportTerm:'term1', reportType:null, attMonth:null,
   dashboardTerm:null, dashboardMode:null, dashboardSection:null, dashboardStage:null, dashboardGrade:null, dashboardClassroom:null, dashboardStudent:null,
-  examsTerm:null, examsMode:null, examsSection:null, examsStage:null, examsGrade:null, examsClassroom:null };
+  examsTerm:null, examsMode:null, examsSection:null, examsStage:null, examsGrade:null, examsClassroom:null,
+  perfTerm:null, perfCycle:null, perfCategory:null };
+
+// Top Performance / At Risk keeps its own independent Section/Stage/Grade/Class filter,
+// fully separate from the Grade Book's state. Each Term × Cycle × Category combination gets
+// its OWN filter (keyed below) so switching between, say, "Term 1 Cycle 1 Top Performance"
+// and "Term 1 Cycle 1 At Risk" never carries the Section/Stage/Grade/Class choice over.
+let perfFilterStates = {};
+function perfFilterKey(){ return `${state.perfTerm}|${state.perfCycle}|${state.perfCategory}`; }
+function getPerfFilterState(){
+  const k = perfFilterKey();
+  if(!perfFilterStates[k]) perfFilterStates[k] = { __isPerfFilter:true, section:null, stage:null, grade:null, term:null };
+  return perfFilterStates[k];
+}
 // Absence tab keeps its own independent selections (Academic Term / Section / Stage / Grade / Class),
 // completely separate from the Grade Book tab's selections above.
 let attState = { termPeriod:null, section:null, stage:null, grade:null, term:null };
@@ -1950,6 +2002,7 @@ function switchView(view){
   document.getElementById('dashboardView').style.display = view==='dashboard' ? '' : 'none';
   document.getElementById('examsAnalysisView').style.display = view==='examsAnalysis' ? '' : 'none';
   document.getElementById('teachersView').style.display = view==='teachers' ? '' : 'none';
+  document.getElementById('perfAlertsView').style.display = view==='perfAlerts' ? '' : 'none';
   document.querySelectorAll('.nav-tab').forEach(b=> b.classList.toggle('active', b.dataset.view===view));
   if(view==='database') renderDatabase();
   if(view==='teachers') renderTeachersDatabase();
@@ -1957,6 +2010,7 @@ function switchView(view){
   if(view==='attendance'){ renderAttendanceStepper(); renderAttendanceWorkspace(); }
   if(view==='dashboard'){ renderDashboard(); }
   if(view==='examsAnalysis'){ renderExamsAnalysis(); }
+  if(view==='perfAlerts'){ renderPerfFilterStepper(); renderPerfAlerts(); }
 }
 
 let openTermGroup = null;
@@ -2053,6 +2107,31 @@ function renderAttendanceStepper(){
   buildStepperHTML('attendanceStepper', attStepConfig(), 'a-');
 }
 
+// Top Performance / At Risk: Section > Stage > Grade > Class only (no Academic Term or
+// Mark Entry / Subject steps — the Term is already picked from the "Top & At-Risk" menu,
+// and the report always covers every subject at once).
+function perfFilterStepConfig(){
+  const st = getPerfFilterState();
+  return [
+    { key:'section', title:'Section', state: st, getLabel:()=> st.section ? SECTIONS[st.section].label : null,
+      options: Object.entries(SECTIONS).filter(([id])=>scopeSectionAllowed(id)).map(([id,v])=>({id,label:v.label})) },
+    { key:'stage', title:'Stage', state: st, getLabel:()=> st.stage ? STAGES[st.stage].label : null,
+      options: Object.entries(STAGES).filter(([id])=>scopeStageAllowed(id)).map(([id,v])=>({id,label:v.label})), requires:['section'] },
+    { key:'grade', title:'Grade', state: st, getLabel:()=>{
+        if(!st.grade) return null;
+        const g = STAGES[st.stage].grades.find(g=>g.id===st.grade);
+        return g ? g.label : null;
+      }, options: ()=> st.stage ? STAGES[st.stage].grades.map(g=>({id:g.id,label:g.label})) : [], requires:['section','stage'] },
+    { key:'term', title:'Class (optional — whole Grade if left blank)', state: st, getLabel:()=> st.term ? st.term : null,
+      options: ()=> getClassesInGrade(st).filter(c=>scopeClassroomAllowed(c)).map(c=>({id:c,label:c})), requires:['section','stage','grade'] }
+  ];
+}
+function renderPerfFilterStepper(){
+  const holder = document.getElementById('perfFilterStepper');
+  if(!holder) return;
+  buildStepperHTML('perfFilterStepper', perfFilterStepConfig(), 'pf-');
+}
+
 // Renders the selections as a compact breadcrumb trail (Term › Section › Stage › Grade › Class),
 // with the last `prominentCount` steps (the ones that change most often within a session,
 // e.g. Mark Entry + Subject) shown as larger, clearly interactive controls instead of plain crumbs.
@@ -2110,6 +2189,7 @@ function buildStepperHTML(holderId, cfgs, idPrefix, prominentCount){
         renderStepper();
         renderReportsStepper();
         renderAttendanceStepper();
+        renderPerfFilterStepper();
       };
     }
     row.appendChild(div);
@@ -2178,13 +2258,48 @@ function selectValue(key, id, targetState){
   renderStepper();
   renderReportsStepper();
   renderAttendanceStepper();
+  renderPerfFilterStepper();
   renderWorkspace();
   renderReportWorkspace();
   renderAttendanceWorkspace();
+  if(st && st.__isPerfFilter) renderPerfAlerts();
 }
 
+// Hover-to-open / delayed-fade-out for the top nav dropdowns (Reports, Dashboard,
+// Exams Analysis, Top & At-Risk, Configuration). Mouse devices get an instant open on
+// hover and a smooth fade-out ~350ms after the cursor actually leaves the button+menu
+// area, so moving diagonally into the menu doesn't accidentally close it. Click-to-toggle
+// (for touch devices) keeps working exactly as before.
+(function(){
+  const NAV_DROPDOWNS = [
+    ['reportsDropdownWrap','reportsMenu'],
+    ['dashboardDropdownWrap','dashboardMenu'],
+    ['examsDropdownWrap','examsMenu'],
+    ['perfDropdownWrap','perfMenu'],
+    ['configDropdownWrap','configMenu']
+  ];
+  const closeTimers = {};
+  NAV_DROPDOWNS.forEach(([wrapId, menuId])=>{
+    const wrap = document.getElementById(wrapId);
+    const menu = document.getElementById(menuId);
+    if(!wrap || !menu) return;
+    const openNow = ()=>{
+      clearTimeout(closeTimers[wrapId]);
+      menu.classList.add('open');
+    };
+    const scheduleClose = ()=>{
+      clearTimeout(closeTimers[wrapId]);
+      closeTimers[wrapId] = setTimeout(()=>{ menu.classList.remove('open'); }, 350);
+    };
+    wrap.addEventListener('mouseenter', openNow);
+    wrap.addEventListener('mouseleave', scheduleClose);
+    menu.addEventListener('mouseenter', openNow);
+    menu.addEventListener('mouseleave', scheduleClose);
+  });
+})();
+
 document.addEventListener('click', (e)=>{
-  if(!e.target.closest('.stepper-item')){ openStep=null; renderStepper(); renderReportsStepper(); renderAttendanceStepper(); }
+  if(!e.target.closest('.stepper-item')){ openStep=null; renderStepper(); renderReportsStepper(); renderAttendanceStepper(); renderPerfFilterStepper(); }
   if(!e.target.closest('#reportsDropdownWrap')){
     document.getElementById('reportsMenu').classList.remove('open');
     openTermGroup = null;
@@ -2267,6 +2382,166 @@ function toggleExamsTermGroup(e, term){
     document.getElementById('examsTermGroup_'+openExamsTermGroup).classList.add('open');
     document.getElementById('examsTermGroupBtn_'+openExamsTermGroup).classList.add('expanded');
   }
+}
+
+function togglePerfMenu(e){
+  e.stopPropagation();
+  document.getElementById('perfMenu').classList.toggle('open');
+}
+
+let openPerfTermGroup = null;
+let openPerfCycleGroup = null;
+function togglePerfTermGroup(e, term){
+  e.stopPropagation();
+  openPerfTermGroup = (openPerfTermGroup===term) ? null : term;
+  openPerfCycleGroup = null;
+  document.querySelectorAll('#perfMenu .term-group').forEach(el=> el.classList.remove('open'));
+  document.querySelectorAll('#perfMenu .term-group-btn').forEach(el=> el.classList.remove('expanded'));
+  if(openPerfTermGroup){
+    document.getElementById('perfTermGroup_'+openPerfTermGroup).classList.add('open');
+    document.getElementById('perfTermGroupBtn_'+openPerfTermGroup).classList.add('expanded');
+  }
+}
+function togglePerfCycleGroup(e, term, cycle){
+  e.stopPropagation();
+  const key = term+'_'+cycle;
+  openPerfCycleGroup = (openPerfCycleGroup===key) ? null : key;
+  // Only reset the cycle sub-groups belonging to the currently open term, so opening one
+  // Cycle doesn't collapse the Term itself.
+  document.querySelectorAll('#perfTermGroup_'+term+' .term-group').forEach(el=> el.classList.remove('open'));
+  document.querySelectorAll('#perfTermGroup_'+term+' .term-group-btn').forEach(el=> el.classList.remove('expanded'));
+  if(openPerfCycleGroup){
+    document.getElementById('perfCycleGroup_'+key).classList.add('open');
+    document.getElementById('perfCycleGroupBtn_'+key).classList.add('expanded');
+  }
+}
+function openPerfAlert(term, cycle, category){
+  state.perfTerm = term;
+  state.perfCycle = cycle;
+  state.perfCategory = category;
+  const menu = document.getElementById('perfMenu');
+  if(menu) menu.classList.remove('open');
+  document.querySelectorAll('#perfMenu .term-group').forEach(el=> el.classList.remove('open'));
+  document.querySelectorAll('#perfMenu .term-group-btn').forEach(el=> el.classList.remove('expanded'));
+  openPerfTermGroup = null;
+  openPerfCycleGroup = null;
+  switchView('perfAlerts');
+}
+
+/* ---------- Top Performance / At Risk: Cycle max helper ----------
+   Grade 1 & 2 Primary record no Cycle scores at all. Grade 7-8 Prep and Grade 10-11
+   Secondary use an extended Cycle scale (Max. 15); every other grade uses Max. 5. */
+function perfIsJuniorClass(stage, grade){ return stage==='primary' && (grade==='g1' || grade==='g2'); }
+function perfCycleMaxFor(stage, grade){
+  const g78 = stage==='prep' && (grade==='g7' || grade==='g8');
+  const g1011 = stage==='secondary' && (grade==='g10' || grade==='g11');
+  return (g78 || g1011) ? 15 : 5;
+}
+
+/* Scans every Section/Stage/Grade/Class/Subject for the given Term + Cycle and returns every
+   student who qualifies as Top Performance (>=95% of the max) or At Risk (<60% of the max) in
+   at least one subject, together with the list of qualifying subjects. An optional `filter`
+   (Section/Stage/Grade/Class, from the stepper above the table) narrows the scan to a single
+   Grade — or a single Class within that Grade, when a specific Class is picked. */
+function computePerfAlertList(term, cycle, category, filter){
+  filter = filter || {};
+  const field = cycle==='cycle2' ? 'm2Cycle' : 'm1Cycle';
+  const resultMap = {};
+  Object.keys(SECTIONS).forEach(section=>{
+    if(filter.section && filter.section!==section) return;
+    Object.keys(STAGES).forEach(stage=>{
+      if(filter.stage && filter.stage!==stage) return;
+      STAGES[stage].grades.forEach(g=>{
+        const grade = g.id;
+        if(filter.grade && filter.grade!==grade) return;
+        if(perfIsJuniorClass(stage, grade)) return;
+        const ck = `${section}|${stage}|${grade}`;
+        let roster = students[ck] || [];
+        if(filter.term) roster = roster.filter(s=> s.classroom===filter.term);
+        if(!roster.length) return;
+        const max = perfCycleMaxFor(stage, grade);
+        const threshold = category==='risk' ? max*0.6 : max*0.95;
+        STAGES[stage].subjects.forEach(subject=>{
+          const sk = `${ck}|${term}|${subject}`;
+          const subjScores = scores[sk] || {};
+          roster.forEach(s=>{
+            const sc = subjScores[s.id];
+            if(!sc) return;
+            const v = parseFloat(sc[field]);
+            if(isNaN(v)) return;
+            const qualifies = category==='risk' ? (v < threshold) : (v >= threshold);
+            if(!qualifies) return;
+            if(!resultMap[s.id]){
+              resultMap[s.id] = { id:s.id, displayId:s.displayId||'—', name:s.name, subjects:[], section, stage, grade, classroom:s.classroom||'' };
+            }
+            resultMap[s.id].subjects.push({ subject, score: v });
+          });
+        });
+      });
+    });
+  });
+  return Object.values(resultMap)
+    .map(r=>({ ...r, count:r.subjects.length }))
+    .sort((a,b)=> b.count-a.count || a.name.localeCompare(b.name));
+}
+
+const PERF_CATEGORY_LABELS = { top:'Top Performance Students', risk:'At Risk Students' };
+const PERF_CYCLE_LABELS = { cycle1:'Cycle 1', cycle2:'Cycle 2' };
+
+function renderPerfAlerts(){
+  const { perfTerm:term, perfCycle:cycle, perfCategory:category } = state;
+  const crumbs = document.getElementById('perfCrumbs');
+  const termLabel = TERM_LABELS[term] || 'Term 1';
+  const cycleLabel = PERF_CYCLE_LABELS[cycle] || 'Cycle 1';
+  const catLabel = PERF_CATEGORY_LABELS[category] || 'Top Performance Students';
+  if(crumbs) crumbs.innerHTML = `<span class="crumb subj">${termLabel}</span><span class="crumb subj">${cycleLabel}</span><span class="crumb subj">${catLabel}</span>`;
+  const area = document.getElementById('perfTableArea');
+  if(!area) return;
+  if(!term || !cycle || !category){
+    area.innerHTML = `<div class="empty-state"><div class="seal-lg">🎯</div><h3>Choose Term, Cycle &amp; Category</h3><p>Use the "Top &amp; At-Risk" menu above to pick a Term, then a Cycle, then Top Performance or At Risk Students.</p></div>`;
+    return;
+  }
+  const filter = getPerfFilterState();
+  if(!filter.section || !filter.stage || !filter.grade){
+    area.innerHTML = `<div class="empty-state"><div class="seal-lg">🎓</div><h3>Choose a Section, Stage &amp; Grade</h3><p>Use the steps above to pick at least a Grade (Class is optional — leave it blank to scan the whole Grade).</p></div>`;
+    return;
+  }
+  const scopeLabel = filter.term
+    ? `${STAGES[filter.stage].grades.find(g=>g.id===filter.grade).label} • ${escapeXml(filter.term)}`
+    : `${STAGES[filter.stage].grades.find(g=>g.id===filter.grade).label} (whole Grade)`;
+  const list = computePerfAlertList(term, cycle, category, filter);
+  // Students who ALSO qualify for the same category in the other Cycle of the same Term (within
+  // the same filtered scope) get their whole row highlighted red.
+  const otherCycle = cycle==='cycle2' ? 'cycle1' : 'cycle2';
+  const otherIds = new Set(computePerfAlertList(term, otherCycle, category, filter).map(r=>r.id));
+  if(!list.length){
+    const icon = category==='risk' ? '⚠' : '🌟';
+    area.innerHTML = `<div class="empty-state"><div class="seal-lg">${icon}</div><h3>No students found</h3><p>No students in ${scopeLabel} currently meet the ${escapeXml(catLabel)} criteria for ${escapeXml(termLabel)} • ${escapeXml(cycleLabel)}.</p></div>`;
+    return;
+  }
+  const rows = list.map(r=>{
+    const dup = otherIds.has(r.id);
+    const subjectsHtml = r.subjects.map(su=> `${escapeXml(subjectWithIcon(su.subject))} (${Math.round(su.score*10)/10})`).join(', ');
+    return `<tr${dup?' class="perf-dup-row"':''}>
+      <td>${escapeXml(r.displayId)}</td>
+      <td>${escapeXml(r.name)}</td>
+      <td>${escapeXml(r.classroom || '—')}</td>
+      <td>${subjectsHtml}</td>
+      <td class="perf-count-cell">${r.count}</td>
+    </tr>`;
+  }).join('');
+  area.innerHTML = `
+    <div class="classbar" style="box-shadow:none;background:transparent;padding:0 0 10px;">
+      <div class="classbar-crumbs"><span class="crumb">${escapeXml(scopeLabel)}</span></div>
+      <div class="classbar-count">${list.length} student${list.length===1?'':'s'}</div>
+    </div>
+    <div class="table-card">
+      <table>
+        <thead><tr><th>ID</th><th>Student Name</th><th>Class</th><th>Subject(s)</th><th>Count</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <p style="font-size:12px;color:var(--ink-soft);margin-top:8px;">Rows shaded red mark students who also appear in the ${escapeXml(catLabel)} list for the other Cycle in ${escapeXml(termLabel)}, within this same scope.</p>`;
 }
 
 const DASHBOARD_MODE_LABELS = { cycle1:'Cycle 1', cycle1vs2:'Cycle 1 Vs Cycle 2' };
@@ -3911,6 +4186,8 @@ function avgEntered(vals){
 
 function computePrimaryTotals(sc){
   const junior = isJuniorPrimary();
+  const g78 = isG7G8Prep();
+  const g1011 = isG10G11Secondary();
   let avg1 = avgEntered([sc.m1E1,sc.m1E2,sc.m1E3,sc.m1E4]);
   let avg2 = avgEntered([sc.m2E1,sc.m2E2,sc.m2E3,sc.m2E4]);
   let month1Total, month2Total;
@@ -3921,6 +4198,20 @@ function computePrimaryTotals(sc){
     avg2 = avg2 * 4;
     month1Total = avg1 + (parseFloat(sc.m1CW)||0) + (parseFloat(sc.m1Hw)||0) + (parseFloat(sc.m1Oral)||0) + (parseFloat(sc.m1Beh)||0);
     month2Total = avg2 + (parseFloat(sc.m2CW)||0) + (parseFloat(sc.m2Hw)||0) + (parseFloat(sc.m2Oral)||0) + (parseFloat(sc.m2Beh)||0);
+  } else if(g78){
+    // Grade 7-8 Prep: Q. Av. is averaged (ignoring empty cells) then x4 to become out of 20.
+    // Total 1/2 = Q. Av. (20) + C.W. (10) + Beh. (10) = Max. 40.
+    avg1 = avg1 * 4;
+    avg2 = avg2 * 4;
+    month1Total = avg1 + (parseFloat(sc.m1CW)||0) + (parseFloat(sc.m1Beh)||0);
+    month2Total = avg2 + (parseFloat(sc.m2CW)||0) + (parseFloat(sc.m2Beh)||0);
+  } else if(g1011){
+    // Grade 10-11 Secondary: Q. Av. is averaged (ignoring empty cells) then x3 to become out of 15.
+    // Total 1/2 = Q. Av. (15) + C.W. (15) + Beh. (10) = Max. 40.
+    avg1 = avg1 * 3;
+    avg2 = avg2 * 3;
+    month1Total = avg1 + (parseFloat(sc.m1CW)||0) + (parseFloat(sc.m1Beh)||0);
+    month2Total = avg2 + (parseFloat(sc.m2CW)||0) + (parseFloat(sc.m2Beh)||0);
   } else {
     month1Total = avg1 + (parseFloat(sc.m1Hw)||0) + (parseFloat(sc.m1Beh)||0);
     month2Total = avg2 + (parseFloat(sc.m2Hw)||0) + (parseFloat(sc.m2Beh)||0);
@@ -3928,9 +4219,13 @@ function computePrimaryTotals(sc){
 
   const twoMonthsAvg = (month1Total + month2Total) / 2;
   const totalCycles = junior ? 0 : ((parseFloat(sc.m1Cycle)||0) + (parseFloat(sc.m2Cycle)||0));
-  const totalCoursework = twoMonthsAvg + totalCycles + (parseFloat(sc.activity)||0) + (parseFloat(sc.tasks)||0);
-  const maxTotal = junior ? 100 : 40; // junior Term Total: Two Months Av.(75) + Activity(20) + Skills(5) = 100
-  return { avg1, month1Total, avg2, month2Total, twoMonthsAvg, totalCycles, totalCoursework, maxTotal, junior };
+  // Grade 7-8 Prep / Grade 10-11 Secondary Total Coursework = Two Months Av. (40) + Total Cycles (30) = Max. 70 (no Activity/Per. Tasks).
+  const extended = g78 || g1011;
+  const totalCoursework = extended
+    ? (twoMonthsAvg + totalCycles)
+    : (twoMonthsAvg + totalCycles + (parseFloat(sc.activity)||0) + (parseFloat(sc.tasks)||0));
+  const maxTotal = junior ? 100 : (extended ? 70 : 40); // junior Term Total: Two Months Av.(75) + Activity(20) + Skills(5) = 100
+  return { avg1, month1Total, avg2, month2Total, twoMonthsAvg, totalCycles, totalCoursework, maxTotal, junior, g78, g1011 };
 }
 
 function updateScore(studentId, field, value, max){
@@ -4286,7 +4581,7 @@ function renderTable(preserveFocus){
     const langLine = isLanguageSubject(state.subject) ? `Only students whose Second Language is set to <b>${/french/i.test(state.subject)?'French':'German'}</b> are shown for this subject.<br>` : '';
     const religionLine = isReligionSubject(state.subject) ? `Only students whose Religion is set to <b>${state.subject==='Ch-Religion'?'Christian':'Muslim'}</b> are shown for this subject.<br>` : '';
     const saveLine = `Grades are saved automatically as you type — you can still use "Full Backup" to save a copy to your device, or "Restore Backup" to load one later.`;
-    if(isPrimary()){
+    if(isPrimary() || isExtendedGradingStage()){
       const mode = academicSubMode();
       const junior = isJuniorPrimary();
       let modeLine;
@@ -4294,10 +4589,18 @@ function renderTable(preserveFocus){
         if(mode==='month2') modeLine = `This screen is for <b>Month 2</b> marks only: Q.1–Q.4 (5 each) are averaged (ignoring empty cells) then ×4 to give Q. Av. (20). Q. Av. + C.W. (20) + H.W. (20) + Oral (10) + Behaviour &amp; Attendance (5) make up Total 2 (Max. 75).`;
         else if(mode==='coursework') modeLine = `This screen shows the <b>Term Av.</b> summary (Max. 100): Two Months Av. (75, the average of Total 1 and Total 2) + Activity (20) + Skills (5) = Term Total. Grade follows the same percentage bands as other stages; Color follows: 85%+ Blue, 65%+ Green, 50%+ Yellow, below 50% Red.`;
         else modeLine = `This screen is for <b>Month 1</b> marks only: Q.1–Q.4 (5 each) are averaged (ignoring empty cells) then ×4 to give Q. Av. (20). Q. Av. + C.W. (20) + H.W. (20) + Oral (10) + Behaviour &amp; Attendance (5) make up Total 1 (Max. 75).`;
+      } else if(isG7G8Prep()){
+        if(mode==='month2') modeLine = `This screen is for <b>Month 2</b> marks only: Q.1–Q.4 (5 each) are averaged (ignoring empty cells) then ×4 to give Q. Av. (20). Q. Av. (20) + C.W. (10) + Behaviour &amp; Attendance (10) make up Total 2 (Max. 40), plus Cycle 2 (Max. 15).`;
+        else if(mode==='coursework') modeLine = `This screen shows the <b>Total Coursework</b> summary (Max. 70): Two Months Av. (40, the average of Total 1 and Total 2) + Total Cycles (30, Cycle 1 + Cycle 2). Both are calculated automatically from the Month 1 and Month 2 mark-entry screens.`;
+        else modeLine = `This screen is for <b>Month 1</b> marks only: Q.1–Q.4 (5 each) are averaged (ignoring empty cells) then ×4 to give Q. Av. (20). Q. Av. (20) + C.W. (10) + Behaviour &amp; Attendance (10) make up Total 1 (Max. 40), plus Cycle 1 (Max. 15).`;
+      } else if(isG10G11Secondary()){
+        if(mode==='month2') modeLine = `This screen is for <b>Month 2</b> marks only: Q.1–Q.4 (5 each) are averaged (ignoring empty cells) then ×3 to give Q. Av. (15). Q. Av. (15) + C.W. (15) + Behaviour &amp; Attendance (10) make up Total 2 (Max. 40), plus Cycle 2 (Max. 15).`;
+        else if(mode==='coursework') modeLine = `This screen shows the <b>Total Coursework</b> summary (Max. 70): Two Months Av. (40, the average of Total 1 and Total 2) + Total Cycles (30, Cycle 1 + Cycle 2). Both are calculated automatically from the Month 1 and Month 2 mark-entry screens.`;
+        else modeLine = `This screen is for <b>Month 1</b> marks only: Q.1–Q.4 (5 each) are averaged (ignoring empty cells) then ×3 to give Q. Av. (15). Q. Av. (15) + C.W. (15) + Behaviour &amp; Attendance (10) make up Total 1 (Max. 40), plus Cycle 1 (Max. 15).`;
       } else {
-        if(mode==='month2') modeLine = `This screen is for <b>Month 2</b> marks only: Q.1–Q.4, Q. Av. (5), H.W. (5) and Behaviour &amp; Attendance (5) make up Total 2 (Max. 15), plus Cycle 2 (Max. 5).`;
+        if(mode==='month2') modeLine = `This screen is for <b>Month 2</b> marks only: Q.1–Q.4 (5 each) are averaged then ×4 to give Q. Av. (20). Q. Av. (20) + C.W. (20) + Behaviour &amp; Attendance (10) make up Total 2 (Max. 40), plus Cycle 2 (Max. 5).`;
         else if(mode==='coursework') modeLine = `This screen shows the <b>Total Coursework</b> summary (Max. 40): Two Months Average (15) + Total Cycles (10) + Activity (5) + Performance Tasks (10). Two Months Average and Total Cycles are calculated automatically from the Month 1 and Month 2 mark-entry screens.`;
-        else modeLine = `This screen is for <b>Month 1</b> marks only: Q.1–Q.4, Q. Av. (5), H.W. (5) and Behaviour &amp; Attendance (5) make up Total 1 (Max. 15), plus Cycle 1 (Max. 5).`;
+        else modeLine = `This screen is for <b>Month 1</b> marks only: Q.1–Q.4 (5 each) are averaged then ×4 to give Q. Av. (20). Q. Av. (20) + C.W. (20) + Behaviour &amp; Attendance (10) make up Total 1 (Max. 40), plus Cycle 1 (Max. 5).`;
       }
       footNote.innerHTML = `${modeLine}<br>${langLine}${religionLine}${saveLine}`;
     } else {
@@ -4319,7 +4622,7 @@ function renderTable(preserveFocus){
     return;
   }
 
-  if(isPrimary()){ renderPrimaryTable(roster, scoreMap, holder); }
+  if(isPrimary() || isExtendedGradingStage()){ renderPrimaryTable(roster, scoreMap, holder); }
   else { renderStandardTable(roster, scoreMap, holder); }
 }
 
@@ -4402,6 +4705,10 @@ const PRIMARY_ID_HEADERS = `
           <th>Class</th>
           <th>2nd Language</th>`;
 
+function isG7G8Prep(){ return !isPrimary() && state.stage === 'prep' && ['g7','g8'].includes(state.grade); }
+function isG10G11Secondary(){ return !isPrimary() && state.stage === 'secondary' && ['g10','g11'].includes(state.grade); }
+function isExtendedGradingStage(){ return isG7G8Prep() || isG10G11Secondary(); }
+
 function renderPrimaryTable(roster, scoreMap, holder){
   const mode = academicSubMode();
   if(mode==='month2') return renderPrimaryMonth2Table(roster, scoreMap, holder);
@@ -4460,9 +4767,21 @@ function renderPrimaryMonth1Table(roster, scoreMap, holder){
     return;
   }
 
+  // Grade 3-6 Primary uses the original straight-sum Q.Av and Cycle 1 (Max. 5).
+  // Grade 7-8 Prep: Q.Av (20) = avg(ignoring empty)×4; C.W. (10); Beh. (10); Total 1 (Max. 40); Cycle 1 (Max. 15).
+  // Grade 10-11 Secondary: Q.Av (15) = avg(ignoring empty)×3; C.W. (15); Beh. (10); Total 1 (Max. 40); Cycle 1 (Max. 15).
+  const g78 = isG7G8Prep();
+  const g1011 = isG10G11Secondary();
+  const extended = g78 || g1011;
+  const qMult = g78 ? 4 : 3;
+  const qMax = g78 ? 20 : 15;
+  const cwMax = g78 ? 10 : 15;
+  const cycleMax = extended ? 15 : 5;
   let rows = roster.map((s, i)=>{
     const sc = scoreMap[s.id] || emptyScoreObj();
     const t = computePrimaryTotals(sc);
+    const qAv = extended ? avgEntered([sc.m1E1,sc.m1E2,sc.m1E3,sc.m1E4])*qMult
+                     : (sc.m1E1||0 + sc.m1E2||0 + sc.m1E3||0 + sc.m1E4||0)/4*4;
     return `
       <tr>
         ${primaryIdCellsHtml(s, i)}
@@ -4470,11 +4789,11 @@ function renderPrimaryMonth1Table(roster, scoreMap, holder){
         <td>${scoreInputHtml(s.id,'m1E2',sc.m1E2,5)}</td>
         <td>${scoreInputHtml(s.id,'m1E3',sc.m1E3,5)}</td>
         <td>${scoreInputHtml(s.id,'m1E4',sc.m1E4,5)}</td>
-        <td class="pct-cell">${Math.round(t.avg1*10)/10}</td>
-        <td>${scoreInputHtml(s.id,'m1Hw',sc.m1Hw,5)}</td>
-        <td>${scoreInputHtml(s.id,'m1Beh',sc.m1Beh,5)}</td>
-        <td class="total-cell">${Math.round(t.month1Total*10)/10}</td>
-        <td>${scoreInputHtml(s.id,'m1Cycle',sc.m1Cycle,5)}</td>
+        <td class="pct-cell">${Math.round(qAv*10)/10}</td>
+        <td>${scoreInputHtml(s.id,'m1CW',sc.m1CW, extended?cwMax:20)}</td>
+        <td>${scoreInputHtml(s.id,'m1Beh',sc.m1Beh,10)}</td>
+        <td class="total-cell">${Math.round((qAv + (parseFloat(sc.m1CW)||0) + (parseFloat(sc.m1Beh)||0))*10)/10}</td>
+        <td>${scoreInputHtml(s.id,'m1Cycle',sc.m1Cycle, cycleMax)}</td>
         <td><button class="del-btn" onclick="deleteStudent('${s.id}')" title="Delete">✕</button></td>
       </tr>`;
   }).join('');
@@ -4487,11 +4806,11 @@ function renderPrimaryMonth1Table(roster, scoreMap, holder){
           <th>Q. 2<br><small>(Max. 5)</small></th>
           <th>Q. 3<br><small>(Max. 5)</small></th>
           <th>Q. 4<br><small>(Max. 5)</small></th>
-          <th>Q. Av.<br><small>(Max. 5)</small></th>
-          <th>H.W.<br><small>(max. 5)</small></th>
-          <th>Beh. &amp;<br>Attend.<br><small>(Max. 5)</small></th>
-          <th>Total 1<br><small>(Max. 15)</small></th>
-          <th>Cycle 1<br><small>(Max. 5)</small></th>
+          <th>Q. Av.<br><small>(Max. ${extended?qMax:20})</small></th>
+          <th>C.W.<br><small>(Max. ${extended?cwMax:20})</small></th>
+          <th>Beh.<br><small>(Max. 10)</small></th>
+          <th>Total 1<br><small>(Max. 40)</small></th>
+          <th>Cycle 1<br><small>(Max. ${cycleMax})</small></th>
           <th></th>
         </tr>
       </thead>
@@ -4551,9 +4870,21 @@ function renderPrimaryMonth2Table(roster, scoreMap, holder){
     return;
   }
 
+  // Grade 3-6 Primary uses the original straight-sum Q.Av and Cycle 2 (Max. 5).
+  // Grade 7-8 Prep: Q.Av (20) = avg(ignoring empty)×4; C.W. (10); Beh. (10); Total 2 (Max. 40); Cycle 2 (Max. 15).
+  // Grade 10-11 Secondary: Q.Av (15) = avg(ignoring empty)×3; C.W. (15); Beh. (10); Total 2 (Max. 40); Cycle 2 (Max. 15).
+  const g78 = isG7G8Prep();
+  const g1011 = isG10G11Secondary();
+  const extended = g78 || g1011;
+  const qMult = g78 ? 4 : 3;
+  const qMax = g78 ? 20 : 15;
+  const cwMax = g78 ? 10 : 15;
+  const cycleMax = extended ? 15 : 5;
   let rows = roster.map((s, i)=>{
     const sc = scoreMap[s.id] || emptyScoreObj();
     const t = computePrimaryTotals(sc);
+    const qAv = extended ? avgEntered([sc.m2E1,sc.m2E2,sc.m2E3,sc.m2E4])*qMult
+                     : (sc.m2E1||0 + sc.m2E2||0 + sc.m2E3||0 + sc.m2E4||0)/4*4;
     return `
       <tr>
         ${primaryIdCellsHtml(s, i)}
@@ -4561,11 +4892,11 @@ function renderPrimaryMonth2Table(roster, scoreMap, holder){
         <td>${scoreInputHtml(s.id,'m2E2',sc.m2E2,5)}</td>
         <td>${scoreInputHtml(s.id,'m2E3',sc.m2E3,5)}</td>
         <td>${scoreInputHtml(s.id,'m2E4',sc.m2E4,5)}</td>
-        <td class="pct-cell">${Math.round(t.avg2*10)/10}</td>
-        <td>${scoreInputHtml(s.id,'m2Hw',sc.m2Hw,5)}</td>
-        <td>${scoreInputHtml(s.id,'m2Beh',sc.m2Beh,5)}</td>
-        <td class="total-cell">${Math.round(t.month2Total*10)/10}</td>
-        <td>${scoreInputHtml(s.id,'m2Cycle',sc.m2Cycle,5)}</td>
+        <td class="pct-cell">${Math.round(qAv*10)/10}</td>
+        <td>${scoreInputHtml(s.id,'m2CW',sc.m2CW, extended?cwMax:20)}</td>
+        <td>${scoreInputHtml(s.id,'m2Beh',sc.m2Beh,10)}</td>
+        <td class="total-cell">${Math.round((qAv + (parseFloat(sc.m2CW)||0) + (parseFloat(sc.m2Beh)||0))*10)/10}</td>
+        <td>${scoreInputHtml(s.id,'m2Cycle',sc.m2Cycle, cycleMax)}</td>
         <td><button class="del-btn" onclick="deleteStudent('${s.id}')" title="Delete">✕</button></td>
       </tr>`;
   }).join('');
@@ -4578,11 +4909,11 @@ function renderPrimaryMonth2Table(roster, scoreMap, holder){
           <th>Q. 2<br><small>(Max. 5)</small></th>
           <th>Q. 3<br><small>(Max. 5)</small></th>
           <th>Q. 4<br><small>(Max. 5)</small></th>
-          <th>Q. Av.<br><small>(Max. 5)</small></th>
-          <th>H.W.<br><small>(max. 5)</small></th>
-          <th>Beh. &amp;<br>Attend.<br><small>(Max. 5)</small></th>
-          <th>Total 2<br><small>(Max. 15)</small></th>
-          <th>Cycle 2<br><small>(Max. 5)</small></th>
+          <th>Q. Av.<br><small>(Max. ${extended?qMax:20})</small></th>
+          <th>C.W.<br><small>(Max. ${extended?cwMax:20})</small></th>
+          <th>Beh.<br><small>(Max. 10)</small></th>
+          <th>Total 2<br><small>(Max. 40)</small></th>
+          <th>Cycle 2<br><small>(Max. ${cycleMax})</small></th>
           <th></th>
         </tr>
       </thead>
@@ -4633,6 +4964,38 @@ function renderPrimaryCourseworkTable(roster, scoreMap, holder){
             <th>Term Total<br><small>(Max. 100)</small></th>
             <th>Grade</th>
             <th>Color</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+    return;
+  }
+
+  const g78 = isG7G8Prep();
+  const g1011 = isG10G11Secondary();
+
+  if(g78 || g1011){
+    let rows = roster.map((s, i)=>{
+      const sc = scoreMap[s.id] || emptyScoreObj();
+      const t = computePrimaryTotals(sc);
+      return `
+        <tr>
+          ${primaryIdCellsHtml(s, i)}
+          <td class="pct-cell">${Math.round(t.twoMonthsAvg*10)/10}</td>
+          <td class="pct-cell">${Math.round(t.totalCycles*10)/10}</td>
+          <td class="total-cell">${Math.round(t.totalCoursework*10)/10}</td>
+          <td><button class="del-btn" onclick="deleteStudent('${s.id}')" title="Delete">✕</button></td>
+        </tr>`;
+    }).join('');
+
+    holder.innerHTML = `
+      <table>
+        <thead>
+          <tr>${PRIMARY_ID_HEADERS}
+            <th>Two Months<br>Av.<br><small>(Max. 40)</small></th>
+            <th>Total<br>Cycles<br><small>(Max. 30)</small></th>
+            <th>Total<br>Coursework<br><small>(Max. 70)</small></th>
             <th></th>
           </tr>
         </thead>
@@ -6264,27 +6627,27 @@ function getEffectivePermissions(user){
   const role = user.role || 'parent';
   if(role==='admin'){
     // Admin: Full System Access
-    return { database:true, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, settings:true, edit:true,
+    return { database:true, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, perfAlerts:true, settings:true, edit:true,
       sectionScope:null, stageScope:null, classroomScope:null };
   }
   if(role==='hos'){
     // HOS/Deputies: Can View their relevant Section and Stage - Can View or edit Grade Book, Can View or Edit Absence, Can View Reports, Can View Dashboard, Can View Exam Analysis
-    return { database:false, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, settings:false, edit:true,
+    return { database:false, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, perfAlerts:true, settings:false, edit:true,
       sectionScope:user.section||null, stageScope:user.stages||[], classroomScope:null };
   }
   if(role==='hod'){
     // Head of Department: Can view OR edit their subject's grade book within their stage (and their section).
-    return { database:false, grades:true, attendance:false, reports:true, dashboard:false, examsAnalysis:false, settings:false, edit:true,
+    return { database:false, grades:true, attendance:false, reports:true, dashboard:false, examsAnalysis:false, perfAlerts:false, settings:false, edit:true,
       sectionScope:user.section||null, stageScope:user.stages||[], classroomScope:null, subjectScope:user.subjects||[] };
   }
   if(role==='teacher'){
     // Teacher: Can view or edit the grade form for their own subjects and classes only
-    return { database:false, grades:true, attendance:false, reports:false, dashboard:false, examsAnalysis:false, settings:false, edit:true,
+    return { database:false, grades:true, attendance:false, reports:false, dashboard:false, examsAnalysis:false, perfAlerts:false, settings:false, edit:true,
       sectionScope:user.section||null, stageScope:null, classroomScope:user.classrooms||[], subjectScope:user.subjects||[] };
   }
   // Parent/Student: Can View ONLY Reports and Dashboard
   const hasStudentLink = Array.isArray(user.studentIds);
-  return { database:false, grades:false, attendance:false, reports:true, dashboard:true, examsAnalysis:false, settings:false, edit:false,
+  return { database:false, grades:false, attendance:false, reports:true, dashboard:true, examsAnalysis:false, perfAlerts:false, settings:false, edit:false,
     // Once a specific student link exists, section/stage/classroom no longer restrict anything —
     // the exact student-ID scope below is what keeps a parent from seeing classmates' data.
     // Legacy accounts (saved before this feature existed, so `studentIds` is still undefined)
@@ -6415,6 +6778,7 @@ function firstAllowedTab(){
   if(currentUser.effective.reports) return 'reports';
   if(currentUser.effective.dashboard) return 'dashboard';
   if(currentUser.effective.examsAnalysis) return 'examsAnalysis';
+  if(currentUser.effective.perfAlerts) return 'perfAlerts';
   return null;
 }
 
@@ -6432,6 +6796,8 @@ function applyPermissionsUI(){
   document.getElementById('reportsDropdownWrap').style.display = eff.reports ? '' : 'none';
   document.getElementById('dashboardDropdownWrap').style.display = eff.dashboard ? '' : 'none';
   document.getElementById('examsDropdownWrap').style.display = eff.examsAnalysis ? '' : 'none';
+  const perfWrap = document.getElementById('perfDropdownWrap');
+  if(perfWrap) perfWrap.style.display = eff.perfAlerts ? '' : 'none';
   const configWrap = document.getElementById('configDropdownWrap');
   if(configWrap) configWrap.style.display = eff.settings ? '' : 'none';
   const toolbar = document.getElementById('gradesToolbar');
