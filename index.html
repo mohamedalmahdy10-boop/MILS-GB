@@ -1748,9 +1748,10 @@ td:has(> .score-input){background:var(--bg);}
       </div>
       <div class="field">
         <label>Classes</label>
-        <select id="newTeacherClasses" onfocus="populateTeacherClassesDropdown()">
-          <option value="">Select a class...</option>
+        <select id="newTeacherClasses" multiple onfocus="populateTeacherClassesDropdown()" style="min-height: 80px;">
+          <option value="">Select classes...</option>
         </select>
+        <small style="color: var(--ink-soft); margin-top: 4px; display: block;">Hold Ctrl (Cmd on Mac) to select multiple classes</small>
       </div>
       <button class="btn btn-gold" onclick="addTeacherManual()">Save Teacher</button>
       <button class="btn btn-outline" onclick="toggleAddTeacherForm(false)">Cancel</button>
@@ -5320,7 +5321,10 @@ function addTeacherManual(){
   if(!name){ alert('Please enter the teacher\'s name.'); return; }
   const section = document.getElementById('newTeacherSection').value;
   const subject = document.getElementById('newTeacherSubject').value.trim();
-  const classes = document.getElementById('newTeacherClasses').value.trim();
+  const classSelect = document.getElementById('newTeacherClasses');
+  const selectedClasses = Array.from(classSelect.selectedOptions).map(opt => opt.value).filter(v => v);
+  const classes = selectedClasses.join(', ');
+  if(!classes){ alert('Please select at least one class.'); return; }
   teachers.push({ id: uid(), displayId: nextTeacherDisplayId(), name, section, subject, classes });
   toggleAddTeacherForm(false);
   renderTeachersDatabase();
