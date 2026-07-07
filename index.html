@@ -905,8 +905,9 @@ tbody tr:hover{background:#FCFBF7;}
         <label>Role</label>
         <select id="ufRole" onchange="onRoleFormChange()">
           <option value="admin">Admin</option>
-          <option value="teacher">Teacher</option>
+          <option value="hos">HOS/Deputies</option>
           <option value="hod">Head of Department</option>
+          <option value="teacher">Teacher</option>
           <option value="parent">Parent / Student</option>
         </select>
       </div>
@@ -1023,7 +1024,83 @@ tbody tr:hover{background:#FCFBF7;}
     </div>
 
     <div class="perm-grid" style="margin-top:16px;">
+      <button class="btn btn-outline" onclick="downloadActivityLogExcel()">⬇ Download as Excel</button>
       <button class="btn btn-outline" id="clearActivityLogBtn" onclick="clearActivityLog()">🗑 Clear Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= REPORT CARD RELEASE MODAL ================= -->
+<div class="overlay-bg" id="reportCardReleaseOverlay">
+  <div class="users-modal" style="max-width:800px;">
+    <button class="close-x" onclick="closeReportCardReleaseModal()">✕</button>
+    <h2>📋 Report Card Release Configuration</h2>
+    <p class="sub">Schedule when each Report Card becomes visible to Parents and Students (Admin only)</p>
+
+    <div class="perm-grid" style="margin-bottom:20px;">
+      <button class="btn btn-gold" onclick="addReportCardReleaseRow()">+ Add Release Schedule</button>
+    </div>
+
+    <div class="log-table-wrap">
+      <table class="log-table" style="min-width:100%;">
+        <thead>
+          <tr>
+            <th style="width:30%;">Report Card Type</th>
+            <th style="width:20%;">Release Date</th>
+            <th style="width:20%;">Release Time</th>
+            <th style="width:15%;">Status</th>
+            <th style="width:15%;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="reportCardReleaseTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="modal-form" style="margin-top:20px;">
+      <h3 style="margin-top:0;">Add New Release Schedule</h3>
+      <div class="field">
+        <label>Report Card Type</label>
+        <select id="rcReportType" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;">
+          <option value="">Select Report Card</option>
+          <option value="Term 1 Report Card">Term 1 Report Card</option>
+          <option value="Term 2 Report Card">Term 2 Report Card</option>
+          <option value="Mid-Term Report">Mid-Term Report</option>
+          <option value="Final Report">Final Report</option>
+          <option value="Semester 1 Report">Semester 1 Report</option>
+          <option value="Semester 2 Report">Semester 2 Report</option>
+          <option value="Quarterly Report 1">Quarterly Report 1</option>
+          <option value="Quarterly Report 2">Quarterly Report 2</option>
+          <option value="Quarterly Report 3">Quarterly Report 3</option>
+          <option value="Quarterly Report 4">Quarterly Report 4</option>
+          <option value="Custom Report">Custom Report</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div class="field" style="flex:1;min-width:180px;">
+          <label>Release Date</label>
+          <input type="date" id="rcReleaseDate" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;">
+        </div>
+        <div class="field" style="flex:1;min-width:180px;">
+          <label>Release Time</label>
+          <input type="time" id="rcReleaseTime" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;" value="00:00">
+        </div>
+      </div>
+      <div class="field">
+        <label>End Date (Optional - leave empty for no end date)</label>
+        <input type="date" id="rcEndDate" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;">
+      </div>
+      <div class="field">
+        <label>End Time</label>
+        <input type="time" id="rcEndTime" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;" value="23:59">
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <input type="text" id="rcNotes" placeholder="e.g., Available for one week only" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;">
+      </div>
+      <div class="perm-grid" style="margin-top:16px;">
+        <button class="btn btn-gold" onclick="saveReportCardRelease()">💾 Save Release Schedule</button>
+        <button class="btn btn-outline" onclick="resetReportCardForm()">Clear</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1143,6 +1220,7 @@ tbody tr:hover{background:#FCFBF7;}
       <button class="nav-tab" data-view="config" id="navTabConfig" onclick="toggleConfigMenu(event)">⚙ Configuration ▾</button>
       <div class="nav-dropdown-menu" id="configMenu">
         <button class="opt-btn" onclick="openUsersModal()">👤 Manage Users</button>
+        <button class="opt-btn" onclick="openReportCardReleaseModal()">📋 Report Card Release</button>
         <button class="opt-btn" onclick="openActivityLogModal()">🕒 Activity &amp; Login Log</button>
       </div>
     </div>
@@ -4435,7 +4513,236 @@ function clearActivityLog(){
   renderActivityLogTable();
 }
 
-const ROLE_LABELS = { admin:'Admin', teacher:'Teacher', hod:'Head of Department', parent:'Parent / Student' };
+function downloadActivityLogExcel(){
+  if(!currentUser || currentUser.role!=='admin'){ alert('Only the Admin can download the activity log.'); return; }
+  if(activityLog.length === 0){ alert('No activity log data to export.'); return; }
+  
+  const data = activityLog.map(e => ({
+    "Date & Time": activityLogFormatTs(e.ts),
+    "User": e.displayName || e.username || 'System',
+    "Role": ROLE_LABELS[e.role] || e.role || '',
+    "Action": LOG_TYPE_LABELS[e.type] || e.type || '',
+    "Details": e.message || ''
+  }));
+  
+  const ws = XLSX.utils.json_to_sheet(data);
+  
+  // تنسيق الرؤوس
+  const headerStyle = {
+    fill: { fgColor: { rgb: "FF1B2A4A" } },
+    font: { bold: true, color: { rgb: "FFFFFFFF" }, size: 12 },
+    alignment: { horizontal: "center", vertical: "center" }
+  };
+  
+  // تطبيق التنسيق على الرؤوس
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for(let C = range.s.c; C <= range.e.c; ++C){
+    const address = XLSX.utils.encode_col(C) + "1";
+    if(!ws[address]) continue;
+    ws[address].s = headerStyle;
+  }
+  
+  // تعديل عرض الأعمدة
+  ws['!cols'] = [
+    { wch: 20 },  // Date & Time
+    { wch: 25 },  // User
+    { wch: 20 },  // Role
+    { wch: 20 },  // Action
+    { wch: 40 }   // Details
+  ];
+  
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Activity Log");
+  XLSX.writeFile(wb, `Activity_Log_${new Date().toISOString().split('T')[0]}.xlsx`);
+  
+  logActivity('export', 'Downloaded Activity Log as Excel');
+}
+
+/* ========== REPORT CARD RELEASE ========== */
+let reportCardReleases = [];
+const REPORT_CARD_RELEASES_LS_KEY = 'reportCardReleases';
+
+function loadReportCardReleases(){
+  try{
+    const raw = localStorage.getItem(REPORT_CARD_RELEASES_LS_KEY);
+    if(raw) reportCardReleases = JSON.parse(raw);
+  }catch(err){ console.warn('Could not load Report Card Releases', err); }
+}
+
+function saveReportCardReleases(){
+  try{ localStorage.setItem(REPORT_CARD_RELEASES_LS_KEY, JSON.stringify(reportCardReleases)); }
+  catch(err){ console.warn('Could not save Report Card Releases', err); }
+  scheduleGithubPush();
+}
+
+function openReportCardReleaseModal(){
+  if(!currentUser || currentUser.role!=='admin'){ 
+    alert('Only Admin can manage Report Card Release schedules.'); 
+    return; 
+  }
+  loadReportCardReleases();
+  renderReportCardReleaseTable();
+  document.getElementById('reportCardReleaseOverlay').classList.add('show');
+}
+
+function closeReportCardReleaseModal(){
+  document.getElementById('reportCardReleaseOverlay').classList.remove('show');
+}
+
+function renderReportCardReleaseTable(){
+  const tbody = document.getElementById('reportCardReleaseTableBody');
+  if(!tbody) return;
+  
+  if(reportCardReleases.length === 0){
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--ink-soft);">No Report Card Release schedules yet. Add one above.</td></tr>`;
+    return;
+  }
+  
+  tbody.innerHTML = reportCardReleases.map((rc, idx) => {
+    const now = new Date();
+    const releaseDateTime = new Date(rc.releaseDate + 'T' + rc.releaseTime);
+    const endDateTime = rc.endDate ? new Date(rc.endDate + 'T' + rc.endTime) : null;
+    
+    let status = '⏳ Upcoming';
+    let statusColor = 'color:var(--ink-soft)';
+    
+    if(releaseDateTime <= now){
+      if(!endDateTime || endDateTime >= now){
+        status = '✅ Active';
+        statusColor = 'color:var(--green)';
+      } else {
+        status = '⏹️ Expired';
+        statusColor = 'color:var(--ink-soft)';
+      }
+    }
+    
+    return `
+      <tr>
+        <td><b>${rc.reportType}</b></td>
+        <td>${rc.releaseDate} ${rc.releaseTime}</td>
+        <td>${rc.endDate ? rc.endDate + ' ' + rc.endTime : 'No end date'}</td>
+        <td style="${statusColor};font-weight:700;">${status}</td>
+        <td>
+          <button class="edit-a" onclick="editReportCardRelease(${idx})">Edit</button>
+          <button class="del-a" onclick="deleteReportCardRelease(${idx})">Delete</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function addReportCardReleaseRow(){
+  resetReportCardForm();
+  document.getElementById('rcReportType').focus();
+}
+
+function saveReportCardRelease(){
+  const reportType = document.getElementById('rcReportType').value.trim();
+  const releaseDate = document.getElementById('rcReleaseDate').value.trim();
+  const releaseTime = document.getElementById('rcReleaseTime').value.trim();
+  const endDate = document.getElementById('rcEndDate').value.trim();
+  const endTime = document.getElementById('rcEndTime').value.trim();
+  const notes = document.getElementById('rcNotes').value.trim();
+  
+  if(!reportType){ alert('Please select a Report Card type.'); return; }
+  if(!releaseDate){ alert('Please select a Release Date.'); return; }
+  if(!releaseTime){ alert('Please select a Release Time.'); return; }
+  
+  const releaseDateTime = new Date(releaseDate + 'T' + releaseTime);
+  if(endDate){
+    const endDateTime = new Date(endDate + 'T' + endTime);
+    if(endDateTime <= releaseDateTime){
+      alert('End date/time must be after Release date/time.'); 
+      return; 
+    }
+  }
+  
+  const rc = { reportType, releaseDate, releaseTime, endDate, endTime, notes };
+  reportCardReleases.push(rc);
+  reportCardReleases.sort((a,b) => (a.releaseDate + a.releaseTime).localeCompare(b.releaseDate + b.releaseTime));
+  
+  saveReportCardReleases();
+  renderReportCardReleaseTable();
+  resetReportCardForm();
+  
+  logActivity('add', `Added Report Card Release: ${reportType} on ${releaseDate} at ${releaseTime}`);
+}
+
+function editReportCardRelease(idx){
+  if(idx < 0 || idx >= reportCardReleases.length) return;
+  const rc = reportCardReleases[idx];
+  
+  document.getElementById('rcReportType').value = rc.reportType;
+  document.getElementById('rcReleaseDate').value = rc.releaseDate;
+  document.getElementById('rcReleaseTime').value = rc.releaseTime;
+  document.getElementById('rcEndDate').value = rc.endDate || '';
+  document.getElementById('rcEndTime').value = rc.endTime || '23:59';
+  document.getElementById('rcNotes').value = rc.notes || '';
+  
+  // Change button to update
+  const btn = document.querySelector('button[onclick="saveReportCardRelease()"]');
+  if(btn){
+    btn.textContent = '✏️ Update Release Schedule';
+    btn.onclick = function(){
+      deleteReportCardRelease(idx);
+      saveReportCardRelease();
+      btn.textContent = '💾 Save Release Schedule';
+      btn.onclick = function(){ saveReportCardRelease(); };
+    };
+  }
+}
+
+function deleteReportCardRelease(idx){
+  if(idx < 0 || idx >= reportCardReleases.length) return;
+  if(!confirm('Delete this Report Card Release schedule?')) return;
+  
+  const rc = reportCardReleases[idx];
+  reportCardReleases.splice(idx, 1);
+  saveReportCardReleases();
+  renderReportCardReleaseTable();
+  resetReportCardForm();
+  
+  logActivity('delete', `Deleted Report Card Release: ${rc.reportType}`);
+}
+
+function resetReportCardForm(){
+  document.getElementById('rcReportType').value = '';
+  document.getElementById('rcReleaseDate').value = '';
+  document.getElementById('rcReleaseTime').value = '00:00';
+  document.getElementById('rcEndDate').value = '';
+  document.getElementById('rcEndTime').value = '23:59';
+  document.getElementById('rcNotes').value = '';
+  
+  const btn = document.querySelector('button[onclick="saveReportCardRelease()"]');
+  if(btn){
+    btn.textContent = '💾 Save Release Schedule';
+    btn.onclick = function(){ saveReportCardRelease(); };
+  }
+}
+
+function isReportCardVisible(reportName){
+  const now = new Date();
+  for(let rc of reportCardReleases){
+    if(rc.reportType === reportName || reportName.includes(rc.reportType)){
+      const releaseDateTime = new Date(rc.releaseDate + 'T' + rc.releaseTime);
+      const endDateTime = rc.endDate ? new Date(rc.endDate + 'T' + rc.endTime) : null;
+      
+      if(releaseDateTime <= now && (!endDateTime || endDateTime >= now)){
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+
+const ROLE_LABELS = { 
+  admin:'Admin', 
+  hos:'HOS/Deputies', 
+  hod:'Head of Department', 
+  teacher:'Teacher', 
+  parent:'Parent / Student' 
+};
 
 function showWelcomeModal(user){
   const nameEl = document.getElementById('welcomeName');
@@ -4491,31 +4798,39 @@ function findUser(username){
 }
 
 /* ---------- Role -> effective permissions ----------
-   sectionScope / subjectScope / classroomScope === null  -> unrestricted
+   sectionScope / stageScope / classroomScope === null  -> unrestricted
    an array (even empty) -> restricted to exactly those values            */
 function getEffectivePermissions(user){
   const role = user.role || 'parent';
   if(role==='admin'){
+    // Admin: Full System Access
     return { database:true, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, settings:true, edit:true,
-      sectionScope:null, subjectScope:null, classroomScope:null };
+      sectionScope:null, stageScope:null, classroomScope:null };
+  }
+  if(role==='hos'){
+    // HOS/Deputies: Can View their relevant Section and Stage - Can View or edit Grade Book, Can View or Edit Absence, Can View Reports, Can View Dashboard, Can View Exam Analysis
+    return { database:false, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, settings:false, edit:true,
+      sectionScope:user.section||null, stageScope:user.stages||[], classroomScope:null };
   }
   if(role==='hod'){
-    return { database:true, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, settings:'partial', edit:true,
-      sectionScope:user.section||null, subjectScope:null, classroomScope:null };
+    // HODs: Can view grade book after identifying their subject, grade and section
+    return { database:false, grades:true, attendance:false, reports:false, dashboard:false, examsAnalysis:false, settings:false, edit:false,
+      sectionScope:user.section||null, stageScope:null, classroomScope:null };
   }
   if(role==='teacher'){
-    return { database:false, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, settings:false, edit:true,
-      sectionScope:user.section||null, subjectScope:user.subjects||[], classroomScope:user.classrooms||[] };
+    // Teacher: Can view or edit grade form for their subjects and classes
+    return { database:false, grades:true, attendance:false, reports:false, dashboard:false, examsAnalysis:false, settings:false, edit:true,
+      sectionScope:user.section||null, stageScope:null, classroomScope:user.classrooms||[] };
   }
-  // parent
+  // Parent/Student: Can View ONLY Reports and Dashboard
   const hasStudentLink = Array.isArray(user.studentIds);
-  return { database:false, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, settings:false, edit:false,
-    // Once a specific student link exists, section/subject/classroom no longer restrict anything —
+  return { database:false, grades:false, attendance:false, reports:true, dashboard:true, examsAnalysis:false, settings:false, edit:false,
+    // Once a specific student link exists, section/stage/classroom no longer restrict anything —
     // the exact student-ID scope below is what keeps a parent from seeing classmates' data.
     // Legacy accounts (saved before this feature existed, so `studentIds` is still undefined)
     // keep behaving exactly as before, so nobody's access silently changes underneath them.
     sectionScope: hasStudentLink ? null : (user.section||null),
-    subjectScope: hasStudentLink ? null : (user.subjects||[]),
+    stageScope: hasStudentLink ? null : (user.stages||[]),
     classroomScope: hasStudentLink ? null : (user.classrooms||[]),
     studentScope: hasStudentLink ? user.studentIds : null };
 }
@@ -4639,7 +4954,8 @@ function applyPermissionsUI(){
   const eff = currentUser.effective;
   document.getElementById('userBadgeName').textContent = currentUser.displayName || currentUser.username;
   document.getElementById('userBadgeRole').textContent = ROLE_LABELS[currentUser.role] || 'User';
-  document.getElementById('navTabDatabase').style.display = eff.database ? '' : 'none';
+  // Student Database is only for Admin
+  document.getElementById('navTabDatabase').style.display = (eff.database && currentUser.role==='admin') ? '' : 'none';
   document.getElementById('navTabGrades').style.display = eff.grades ? '' : 'none';
   document.getElementById('navTabAttendance').style.display = eff.attendance ? '' : 'none';
   document.getElementById('reportsDropdownWrap').style.display = eff.reports ? '' : 'none';
@@ -4669,7 +4985,7 @@ function openUsersModal(){
     document.getElementById('ufSection').value = currentUser.section;
     document.getElementById('ufSection').disabled = true;
   } else {
-    roleSelect.innerHTML = `<option value="admin">Admin</option><option value="teacher">Teacher</option>
+    roleSelect.innerHTML = `<option value="admin">Admin</option><option value="hos">HOS/Deputies</option><option value="teacher">Teacher</option>
       <option value="hod">Head of Department</option><option value="parent">Parent / Student</option>`;
     document.getElementById('ufSection').disabled = false;
   }
@@ -4747,7 +5063,7 @@ function buildSubjectCheckboxes(selected){
 }
 function onRoleFormChange(){
   const role = document.getElementById('ufRole').value;
-  const needsSection = role==='teacher' || role==='hod';
+  const needsSection = role==='teacher' || role==='hod' || role==='hos';
   const needsScope = role==='teacher';
   const needsStudents = role==='parent';
   document.getElementById('ufSectionField').style.display = needsSection ? '' : 'none';
@@ -4774,7 +5090,7 @@ function resetUserForm(){
 function editUser(username){
   const user = findUser(username);
   if(!user) return;
-  if(currentUser.role==='hod' && (user.role==='admin' || user.role==='hod' || user.section!==currentUser.section)){
+  if(currentUser.role==='hod' && (user.role==='admin' || user.role==='hod' || user.role==='hos' || user.section!==currentUser.section)){
     alert('You can only edit Teacher and Parent/Student accounts within your own section.'); return;
   }
   document.getElementById('editingUsername').value = user.username;
@@ -4804,10 +5120,11 @@ function saveUserFromForm(){
 
   if(!username){ alert('Please enter a username.'); return; }
   if(!password){ alert('Please enter a password.'); return; }
-  if(currentUser.role==='hod' && (role==='admin' || role==='hod')){ alert('You can only create Teacher or Parent/Student accounts.'); return; }
+  if(currentUser.role==='hod' && (role==='admin' || role==='hod' || role==='hos')){ alert('You can only create Teacher or Parent/Student accounts.'); return; }
 
   const userObj = { username, displayName, password, role };
-  if(role==='teacher' || role==='hod') userObj.section = section;
+  if(role==='teacher' || role==='hod' || role==='hos') userObj.section = section;
+  if(role==='hos'){ userObj.stages = []; } // Will be populated later if needed
   if(role==='teacher'){ userObj.subjects = subjects; userObj.classrooms = classrooms; }
   if(role==='parent'){ userObj.studentIds = ufSelectedStudentIds.slice(); }
 
@@ -4859,7 +5176,7 @@ function renderUsersTable(){
       ? `${Array.isArray(u.studentIds) ? u.studentIds.length : 0} linked student(s)`
       : (u.role==='teacher'
         ? `${(u.subjects||[]).length} subject(s), ${(u.classrooms||[]).length} class(es)`
-        : (u.role==='hod' ? 'Entire department' : 'Full system access'));
+        : (u.role==='hod' ? 'Entire department' : (u.role==='hos' ? 'Relevant stages' : 'Full system access')));
     return `
       <tr>
         <td><b>${u.username}</b></td>
@@ -4879,6 +5196,7 @@ function renderUsersTable(){
 function findRoleId(label){
   label = (label||'').toString().trim();
   if(/^admin$/i.test(label) || /مدير/.test(label)) return 'admin';
+  if(/hos|deputies|نائب/.test(label)) return 'hos';
   if(/^teacher$/i.test(label) || /معلم|مدرس/.test(label)) return 'teacher';
   if(/head of department/i.test(label) || /رئيس/.test(label)) return 'hod';
   if(/^parent(\s*\/\s*student)?$/i.test(label) || /^student$/i.test(label) || /ولي أمر|والد|أب|أم|طالب/.test(label)) return 'parent';
@@ -4889,18 +5207,20 @@ function downloadUserTemplate(){
   const sample = [
     { "Username":"mona.teacher", "Display Name":"Mona Adel", "Password":"12345", "Role":"Teacher",
       "Section":"English Section", "Subjects":"Mathematics; Science", "Classes":"3/A; 4/B" },
+    { "Username":"fatima.hos", "Display Name":"Fatima Deputy", "Password":"12345", "Role":"HOS/Deputies",
+      "Section":"French Section", "Subjects":"", "Classes":"" },
     { "Username":"ahmed.hod", "Display Name":"Ahmed Samir", "Password":"12345", "Role":"Head of Department",
       "Section":"French Section", "Subjects":"", "Classes":"" },
     { "Username":"sara.parent", "Display Name":"Sara's Parent", "Password":"12345", "Role":"Parent / Student",
-      "Section":"English Section", "Subjects":"Mathematics", "Classes":"3/A" },
+      "Section":"English Section", "Subjects":"", "Classes":"" },
     { "Username":"", "Display Name":"", "Password":"", "Role":"", "Section":"", "Subjects":"", "Classes":"" }
   ];
   const wsData = XLSX.utils.json_to_sheet(sample);
   const guide = [
     { "Field":"Username", "Allowed Values":"Unique login name, no spaces recommended" },
     { "Field":"Password", "Allowed Values":"Any text — the user can change it later" },
-    { "Field":"Role", "Allowed Values":"Admin / Teacher / Head of Department / Parent / Student" },
-    { "Field":"Section", "Allowed Values":"English Section / French Section — required for Teacher, Head of Department and Parent/Student (leave blank for Admin)" },
+    { "Field":"Role", "Allowed Values":"Admin / HOS/Deputies / Teacher / Head of Department / Parent / Student" },
+    { "Field":"Section", "Allowed Values":"English Section / French Section — required for Teacher, HOS/Deputies, Head of Department and Parent/Student (leave blank for Admin)" },
     { "Field":"Subjects", "Allowed Values":"Semicolon-separated subject names — only for Teacher/Parent/Student. Available: " + ALL_SUBJECTS.join(', ') },
     { "Field":"Classes", "Allowed Values":"Semicolon-separated class values (must match the 'Class' step used in Grade Book, e.g. 3/A) — only for Teacher/Parent/Student" }
   ];
@@ -5378,6 +5698,7 @@ initDarkMode();
 /* ================== INIT ================== */
 loadState();
 loadActivityLog();
+loadReportCardReleases();
 loadGithubConfig();
 renderStepper();
 renderAttendanceStepper();
