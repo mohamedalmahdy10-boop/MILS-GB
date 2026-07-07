@@ -130,9 +130,9 @@ body{
 .masthead-info.open{ display:flex; }
 .masthead-text h1{
   font-family:'Aref Ruqaa',serif;font-weight:700;font-size:30px;margin:0 0 4px;
-  color:var(--ink);
+  color:var(--ink);text-shadow:1px 2px 3px rgba(27,42,74,0.22);
 }
-.masthead-text p{margin:0;color:var(--ink-soft);font-size:14px;}
+.masthead-text p{margin:0;color:var(--gold-deep);font-size:14px;text-shadow:1px 1px 2px rgba(0,0,0,0.18);}
 .masthead-right{display:flex;gap:10px;flex-wrap:wrap;}
 .ghost-btn{
   border:1.5px solid var(--ink);background:transparent;color:var(--ink);
@@ -1410,6 +1410,8 @@ td:has(> .score-input){background:var(--bg);}
         <div style="height:1px;background:var(--border);margin:6px 2px;"></div>
         <button class="opt-btn" onclick="downloadBackup()">⬇ Full Backup</button>
         <button class="opt-btn" onclick="document.getElementById('restoreInput').click()">⬆ Restore Backup</button>
+        <div style="height:1px;background:var(--border);margin:6px 2px;"></div>
+        <button class="opt-btn" id="dbDeleteAllBtn" onclick="confirmDeleteAllDb()" style="color:var(--red);font-weight:800;">⚠ Delete All Student Data</button>
       </div>
     </div>
   </div>
@@ -1588,7 +1590,6 @@ td:has(> .score-input){background:var(--bg);}
       <input type="file" id="dbExcelInput" accept=".xlsx,.xls,.csv" onchange="importDatabaseExcel(this.files[0])">
       <button class="btn btn-outline" onclick="downloadTemplate()">⬇ Download Blank Template</button>
       <button class="btn btn-outline" onclick="deleteSelectedDbStudents()">🗑 Delete Selected</button>
-      <button class="btn btn-outline" id="dbDeleteAllBtn" onclick="confirmDeleteAllDb()">⚠ Delete All Data</button>
     </div>
 
     <div class="db-filters">
