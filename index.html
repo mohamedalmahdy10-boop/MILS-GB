@@ -2306,8 +2306,12 @@ function renderDashboard(){
 function renderDashboardFilters(){
   const wrap = document.getElementById('dashboardFilters');
   if(!wrap) return;
-  const sectionOpts = Object.keys(SECTIONS).map(k=>`<option value="${k}" ${state.dashboardSection===k?'selected':''}>${SECTIONS[k].label}</option>`).join('');
-  const stageOpts = Object.keys(STAGES).map(k=>`<option value="${k}" ${state.dashboardStage===k?'selected':''}>${STAGES[k].label}</option>`).join('');
+  const sectionOpts = Object.keys(SECTIONS)
+    .filter(k=>scopeSectionAllowed(k))
+    .map(k=>`<option value="${k}" ${state.dashboardSection===k?'selected':''}>${SECTIONS[k].label}</option>`).join('');
+  const stageOpts = Object.keys(STAGES)
+    .filter(k=>scopeStageAllowed(k))
+    .map(k=>`<option value="${k}" ${state.dashboardStage===k?'selected':''}>${STAGES[k].label}</option>`).join('');
   const gradeOpts = state.dashboardStage ? STAGES[state.dashboardStage].grades.map(g=>`<option value="${g.id}" ${state.dashboardGrade===g.id?'selected':''}>${g.label}</option>`).join('') : '';
 
   let classOpts = '', studentOpts = '';
@@ -2315,7 +2319,8 @@ function renderDashboardFilters(){
   if(classReady){
     const ck = `${state.dashboardSection}|${state.dashboardStage}|${state.dashboardGrade}`;
     const roster = students[ck] || [];
-    const classes = getClassesInGrade({ section: state.dashboardSection, stage: state.dashboardStage, grade: state.dashboardGrade });
+    const classes = getClassesInGrade({ section: state.dashboardSection, stage: state.dashboardStage, grade: state.dashboardGrade })
+      .filter(c=>scopeClassroomAllowed(c));
     classOpts = classes.map(c=>`<option value="${String(c).replace(/"/g,'&quot;')}" ${state.dashboardClassroom===c?'selected':''}>${c}</option>`).join('');
     const filtered = roster.filter(s=> !state.dashboardClassroom || (s.classroom||'').trim()===state.dashboardClassroom)
       .slice().sort((a,b)=>a.name.localeCompare(b.name));
@@ -2588,14 +2593,19 @@ function renderExamsAnalysis(){
 function renderExamsFilters(){
   const wrap = document.getElementById('examsFilters');
   if(!wrap) return;
-  const sectionOpts = Object.keys(SECTIONS).map(k=>`<option value="${k}" ${state.examsSection===k?'selected':''}>${SECTIONS[k].label}</option>`).join('');
-  const stageOpts = Object.keys(STAGES).map(k=>`<option value="${k}" ${state.examsStage===k?'selected':''}>${STAGES[k].label}</option>`).join('');
+  const sectionOpts = Object.keys(SECTIONS)
+    .filter(k=>scopeSectionAllowed(k))
+    .map(k=>`<option value="${k}" ${state.examsSection===k?'selected':''}>${SECTIONS[k].label}</option>`).join('');
+  const stageOpts = Object.keys(STAGES)
+    .filter(k=>scopeStageAllowed(k))
+    .map(k=>`<option value="${k}" ${state.examsStage===k?'selected':''}>${STAGES[k].label}</option>`).join('');
   const gradeOpts = state.examsStage ? STAGES[state.examsStage].grades.map(g=>`<option value="${g.id}" ${state.examsGrade===g.id?'selected':''}>${g.label}</option>`).join('') : '';
 
   let classOpts = '';
   const classReady = state.examsSection && state.examsStage && state.examsGrade;
   if(classReady){
-    const classes = getClassesInGrade({ section: state.examsSection, stage: state.examsStage, grade: state.examsGrade });
+    const classes = getClassesInGrade({ section: state.examsSection, stage: state.examsStage, grade: state.examsGrade })
+      .filter(c=>scopeClassroomAllowed(c));
     classOpts = classes.map(c=>`<option value="${String(c).replace(/"/g,'&quot;')}" ${state.examsClassroom===c?'selected':''}>${c}</option>`).join('');
   }
 
