@@ -5228,6 +5228,55 @@ function findGradeId(stageId, label){
   return fuzzy ? fuzzy.id : null;
 }
 
+// Normalizes a header/key string so that stray spaces, invisible Unicode
+// marks (e.g. LRM/RLM/BOM often left behind by copy-pasting from Arabic
+// documents or exporting from other systems) and letter case don't cause
+// an otherwise-matching column to be missed.
+function normalizeKey(str){
+  return (str||'').toString()
+    .replace(/[\u200B-\u200F\u202A-\u202E\uFEFF]/g, '') // zero-width / directional marks / BOM
+    .trim()
+    .toLowerCase();
+}
+// Looks up a value in a sheet_to_json row by trying several accepted
+// header names, matching tolerantly (trimmed, case-insensitive, ignoring
+// invisible characters). Tries an exact match first; if nothing matches,
+// falls back to a "contains" match (e.g. a header like "Class Name" or
+// "Class / Section" will still be picked up when searching for "Class").
+function getRowField(row, ...names){
+  const wanted = names.map(normalizeKey);
+  const keys = Object.keys(row);
+  for(const key of keys){
+    const nk = normalizeKey(key);
+    if(wanted.includes(nk)){
+      const val = row[key];
+      if(val !== undefined && val !== null && val.toString().trim() !== '') return val.toString().trim();
+    }
+  }
+  for(const key of keys){
+    const nk = normalizeKey(key);
+    if(wanted.some(w => w && (nk.includes(w) || w.includes(nk)))){
+      const val = row[key];
+      if(val !== undefined && val !== null && val.toString().trim() !== '') return val.toString().trim();
+    }
+  }
+  return '';
+}
+
+// Every ID currently stored anywhere in the Student Database, normalized
+// for comparison (trimmed, case-insensitive) -> the student's name, so a
+// duplicate-ID error message can say who already has that ID.
+function getAllStoredIdMap(){
+  const map = new Map();
+  Object.values(students).forEach(roster=>{
+    (roster||[]).forEach(s=>{
+      const id = (s.displayId||'').toString().trim();
+      if(id) map.set(id.toLowerCase(), s.name);
+    });
+  });
+  return map;
+}
+
 function importDatabaseExcel(file){
   if(!file) return;
   const reader = new FileReader();
@@ -5239,18 +5288,20 @@ function importDatabaseExcel(file){
       const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
       let added = 0;
       const problems = [];
+      const existingIds = getAllStoredIdMap();   // IDs already in the database
+      const seenInFile = new Map();               // IDs already used earlier in this same file
 
       rows.forEach((row, idx)=>{
-        const name = (row['Student Name']||row['Name']||'').toString().trim();
-        const providedId = (row['ID']||row['id']||'').toString().trim();
-        const sectionLabel = (row['Section']||'').toString().trim();
-        const stageLabel = (row['Stage']||'').toString().trim();
-        const gradeLabel = (row['Grade']||'').toString().trim();
-        const classroom = (row['Class']||row['Classroom']||'').toString().trim();
-        let religion = (row['Religion']||'-').toString().trim();
+        const name = getRowField(row, 'Student Name', 'Name');
+        const providedId = getRowField(row, 'ID', 'id');
+        const sectionLabel = getRowField(row, 'Section');
+        const stageLabel = getRowField(row, 'Stage');
+        const gradeLabel = getRowField(row, 'Grade');
+        const classroom = getRowField(row, 'Class', 'Classroom');
+        let religion = getRowField(row, 'Religion') || '-';
         if(!/^(muslim|christian)$/i.test(religion)) religion = '-';
         else religion = religion.charAt(0).toUpperCase() + religion.slice(1).toLowerCase();
-        let lang2 = (row['Second Language']||'-').toString().trim();
+        let lang2 = getRowField(row, 'Second Language') || '-';
         if(!/^(french|german|english)$/i.test(lang2)) lang2 = '-';
         else lang2 = lang2.charAt(0).toUpperCase() + lang2.slice(1).toLowerCase();
 
@@ -5262,9 +5313,27 @@ function importDatabaseExcel(file){
         const gradeId = findGradeId(stageId, gradeLabel);
         if(!gradeId){ problems.push(`${name}: unrecognized "Grade" value ("${gradeLabel}") for ${STAGES[stageId].label}`); return; }
 
+        // Reject duplicate IDs instead of importing them — both against
+        // students already saved in the database and against earlier rows
+        // in this same file.
+        if(providedId){
+          const key = providedId.toLowerCase();
+          if(existingIds.has(key)){
+            problems.push(`${name}: ID "${providedId}" already belongs to "${existingIds.get(key)}" in the database — row skipped`);
+            return;
+          }
+          if(seenInFile.has(key)){
+            problems.push(`${name}: ID "${providedId}" is duplicated in this file (also used by "${seenInFile.get(key)}") — row skipped`);
+            return;
+          }
+          seenInFile.set(key, name);
+        }
+
         const ck = `${sectionId}|${stageId}|${gradeId}`;
         if(!students[ck]) students[ck]=[];
-        students[ck].push({id:uid(), displayId: providedId || nextDisplayId(), name, classroom, religion, lang2});
+        const displayId = providedId || nextDisplayId();
+        students[ck].push({id:uid(), displayId, name, classroom, religion, lang2});
+        if(providedId) existingIds.set(providedId.toLowerCase(), name);
         added++;
       });
 
@@ -5272,6 +5341,16 @@ function importDatabaseExcel(file){
       saveState();
       document.getElementById('importTitle').textContent = 'Bulk Import Result';
       let msg = `${added} student(s) added successfully.`;
+      // Diagnostic line: shows exactly which column headers were detected
+      // in the file, so a missing/misnamed "Class" column is easy to spot.
+      if(rows.length){
+        const detected = Object.keys(rows[0]).map(k=>`"${k}"`).join(', ');
+        msg += `<br><br><span style="color:#888;font-size:12px;">Columns detected in file: ${detected}</span>`;
+        const withClass = rows.filter(r=> getRowField(r,'Class','Classroom')).length;
+        if(withClass < rows.length){
+          msg += `<br><span style="color:#888;font-size:12px;">${rows.length - withClass} of ${rows.length} row(s) had no value recognized for the "Class" column.</span>`;
+        }
+      }
       if(problems.length){
         msg += `<br><br><b>${problems.length} row(s) could not be added:</b><br>` +
           problems.slice(0,8).map(p=>`• ${p}`).join('<br>') +
