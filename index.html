@@ -79,6 +79,7 @@ body{
   padding:28px 18px 60px;
 }
 .wrap{max-width:1180px;margin:0 auto;}
+@media (min-width:1500px){ .wrap{max-width:1360px;} }
 
 /* ---------- Header ---------- */
 .masthead{
@@ -294,7 +295,7 @@ body{
 .main-nav{
   display:flex;gap:3px;margin-bottom:20px;background:var(--paper);
   border-radius:12px;padding:5px;box-shadow:var(--shadow);width:100%;
-  justify-content:flex-end;flex-wrap:nowrap;
+  justify-content:flex-start;flex-wrap:nowrap;
   position:sticky;top:12px;z-index:120;
 }
 .nav-tab{
@@ -934,42 +935,61 @@ td:has(> .score-input){background:var(--bg);}
   padding:32px 30px;text-align:center;
 }
 .login-card .seal{
-  width:78px;height:78px;border-radius:50%;margin:0 auto 14px;
+  width:64px;height:64px;border-radius:50%;margin:0 auto 12px;
   background:#fff;
   display:flex;align-items:center;justify-content:center;overflow:hidden;
   box-shadow:inset 0 0 0 3px rgba(255,255,255,0.6), 0 4px 10px rgba(156,124,21,0.35), 0 0 0 2px var(--gold-light);
 }
 .login-card .seal img{ width:100%; height:100%; object-fit:cover; }
-.login-card h2{font-family:'Aref Ruqaa',serif;margin:0 0 4px;font-size:22px;color:var(--ink);}
-.login-card p.sub{margin:0 0 22px;color:var(--ink-soft);font-size:13px;}
-.login-card .field{display:flex;flex-direction:column;gap:5px;text-align:left;margin-bottom:14px;}
+.login-card h2{font-family:'Aref Ruqaa',serif;margin:0 0 8px;font-size:22px;color:var(--ink);}
+.login-card p.sub{margin:0 0 24px;color:var(--ink-soft);font-size:13px;}
+.login-card .field{display:flex;flex-direction:column;gap:5px;text-align:left;margin-bottom:16px;}
 .login-card .field label{font-size:12px;color:var(--ink-soft);font-weight:700;}
 .login-card .field input{
   border:1.5px solid var(--border);border-radius:8px;padding:11px 13px;font-family:'Tajawal';
   font-size:14px;width:100%;
 }
 .login-card .field input:focus{outline:none;border-color:var(--gold);}
+.login-card .check-field{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+.login-card .check-box{
+  width:18px;height:18px;border:1.5px solid var(--border);border-radius:5px;
+  flex-shrink:0;cursor:pointer;position:relative;appearance:none;-webkit-appearance:none;
+  transition:background .15s,border-color .15s;
+}
+.login-card .check-box:checked{background:var(--ink);border-color:var(--ink);}
+.login-card .check-box:checked::after{
+  content:'';position:absolute;left:5px;top:1px;width:5px;height:9px;
+  border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);
+}
+.login-card .check-label{font-size:13px;color:var(--ink-soft);font-weight:700;cursor:pointer;}
 .login-card .btn-login{
   width:100%;border:none;border-radius:9px;padding:12px;font-family:'Tajawal';font-weight:800;
-  font-size:14px;cursor:pointer;margin-top:6px;transition:background .15s;
+  font-size:14px;cursor:pointer;margin-top:8px;transition:background .15s,opacity .15s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
 }
+.login-card .btn-login:disabled{opacity:.75;cursor:default;}
+.login-card .btn-login .spinner{
+  width:15px;height:15px;border-radius:50%;border:2px solid rgba(255,255,255,0.4);
+  border-top-color:#fff;animation:loginSpin .7s linear infinite;display:none;
+}
+.login-card .btn-login.loading .spinner{display:inline-block;}
+@keyframes loginSpin{ to{ transform:rotate(360deg); } }
 .login-error{
   background:var(--red-bg);color:var(--red);border-radius:8px;padding:9px 12px;
-  font-size:13px;font-weight:700;margin-bottom:14px;display:none;
+  font-size:13px;font-weight:700;margin-bottom:16px;display:none;
 }
 .login-error.show{display:block;}
-.login-hint{margin-top:16px;font-size:11.5px;color:#B8B2A0;}
+.login-hint{margin-top:24px;font-size:11.5px;color:var(--ink-soft);}
 .login-quote{
-  margin:0 0 20px;position:relative;text-align:center;
-  font-family:'Tajawal';font-size:15px;font-weight:600;font-style:italic;
-  color:var(--gold-deep);line-height:1.65;letter-spacing:.1px;
-  padding:18px 22px 16px;background:linear-gradient(135deg, var(--gold-light), #FBF3D9);
-  border-radius:12px;border:1px solid rgba(201,162,39,0.35);
-  box-shadow:0 4px 14px rgba(156,124,21,0.12), inset 0 1px 0 rgba(255,255,255,0.6);
+  margin:0 0 24px;position:relative;text-align:center;
+  font-family:'Tajawal';font-size:13px;font-weight:600;font-style:italic;
+  color:var(--ink-soft);line-height:1.6;letter-spacing:.1px;
+  padding:14px 18px;background:var(--bg);
+  border-radius:10px;border:1px solid var(--border);
 }
 .login-quote::before{
-  content:'“';position:absolute;top:-6px;left:14px;font-family:'Aref Ruqaa',serif;
-  font-style:normal;font-size:46px;color:var(--gold);opacity:.55;line-height:1;
+  content:'“';position:absolute;top:-4px;left:12px;font-family:'Aref Ruqaa',serif;
+  font-style:normal;font-size:34px;color:var(--ink-soft);opacity:.4;line-height:1;
 }
 
 /* ---------- User badge / logout ---------- */
@@ -1066,11 +1086,11 @@ td:has(> .score-input){background:var(--bg);}
         <label>Password</label>
         <input type="password" id="loginPassword" autocomplete="current-password" required>
       </div>
-      <div class="field" style="flex-direction:row;align-items:center;gap:10px;">
-        <input type="checkbox" id="rememberMe" style="width:19px;height:19px;">
-        <label for="rememberMe" style="font-size:15px;color:var(--ink-soft);font-weight:700;">Remember me</label>
+      <div class="check-field">
+        <input type="checkbox" id="rememberMe" class="check-box">
+        <label for="rememberMe" class="check-label">Remember me</label>
       </div>
-      <button type="submit" class="btn-login">Sign In</button>
+      <button type="submit" class="btn-login" id="loginSubmitBtn"><span class="spinner"></span><span>Sign In</span></button>
     </form>
     <p class="login-hint">Default administrator: <b>admin</b> / <b>admin123</b><br>Please change this password after first login.</p>
   </div>
@@ -6687,17 +6707,21 @@ function scopeStudentAllowed(id){
 
 function handleLogin(e){
   e.preventDefault();
+  const btn = document.getElementById('loginSubmitBtn');
+  if(btn){ btn.classList.add('loading'); btn.disabled = true; }
   const username = document.getElementById('loginUsername').value.trim();
   const password = document.getElementById('loginPassword').value;
   const user = findUser(username);
   const errEl = document.getElementById('loginError');
   if(!user || user.password !== password){
     errEl.classList.add('show');
+    if(btn){ btn.classList.remove('loading'); btn.disabled = false; }
     return false;
   }
   errEl.classList.remove('show');
   const remember = document.getElementById('rememberMe').checked;
   loginAs(user, remember, true);
+  if(btn){ btn.classList.remove('loading'); btn.disabled = false; }
   return false;
 }
 
