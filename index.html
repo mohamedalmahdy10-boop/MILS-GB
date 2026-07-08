@@ -450,6 +450,7 @@ body{
 .exam-analysis-table th, .exam-analysis-table td{ border:1px solid var(--border); padding:8px 10px; text-align:center; white-space:nowrap; }
 .exam-analysis-table thead th{ background:var(--ink); color:#fff; font-weight:800; font-size:12.5px; }
 .exam-analysis-table thead tr:nth-child(2) th{ background:var(--ink-2); font-size:11.5px; }
+.exam-staff-name{ font-size:10.5px; font-weight:600; opacity:.85; margin-top:2px; white-space:nowrap; }
 .exam-analysis-table td.range-cell, .exam-analysis-table th.range-cell{ background:var(--ink); color:#fff; font-weight:700; text-align:left; padding-left:14px; }
 .exam-analysis-table tr.total-row td{ background:var(--gold-light); color:var(--ink); font-weight:800; }
 .exam-analysis-table tr.total-row td.range-cell{ background:var(--gold-deep); color:#fff; }
@@ -737,17 +738,91 @@ td:has(> .score-input){background:var(--bg);}
   border-radius:12px;padding:16px 18px;box-shadow:var(--shadow);margin-bottom:18px;
 }
 .att-add-month .field input{min-width:150px;}
-.att-table th:nth-child(n+4), .att-table td:nth-child(n+4){
-  position:static; left:auto; z-index:auto; border-right:1px solid var(--border); background:inherit; font-weight:400;
+.att-excl-field{min-width:230px;}
+.att-excl-add-row{display:flex;gap:8px;}
+.att-excl-add-row input{min-width:140px;}
+.att-excl-add-btn{padding:9px 14px;white-space:nowrap;}
+.att-applyall-check{
+  display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:var(--ink);
+  background:var(--gold-light);border:1.5px solid var(--gold);border-radius:10px;
+  padding:11px 16px;cursor:pointer;user-select:none;line-height:1.35;max-width:280px;
 }
-.att-table thead th:nth-child(n+4){ background:var(--ink); color:#fff; border-right:1px solid rgba(255,255,255,0.18); }
-.att-table tbody td:nth-child(n+4){ background:var(--paper); }
-.att-table tbody tr:hover td:nth-child(n+4){ background:#FCFBF7; }
-.att-check{width:19px;height:19px;cursor:pointer;accent-color:var(--ink);}
-.att-check:disabled{cursor:not-allowed;opacity:.6;}
-.att-table td.total-cell{color:var(--red);}
+.att-applyall-check input{width:17px;height:17px;flex-shrink:0;accent-color:var(--gold-deep);cursor:pointer;}
+.att-excl-chips{display:flex;flex-wrap:wrap;gap:8px;margin:-10px 0 18px;}
+.att-excl-chip{
+  display:inline-flex;align-items:center;gap:6px;background:var(--red-bg);color:var(--red);
+  border:1px solid var(--red);border-radius:20px;padding:5px 6px 5px 12px;font-size:12.5px;font-weight:700;
+}
+.att-excl-chip-x{
+  border:none;background:transparent;color:var(--red);font-size:15px;line-height:1;cursor:pointer;
+  padding:2px 4px;font-weight:800;border-radius:50%;
+}
+.att-excl-chip-x:hover{background:rgba(178,58,58,0.18);}
+/* Reset the generic "freeze first N columns" behavior inherited from the
+   grade table — attendance only freezes the Name column (left) and the
+   Total column (right); the "#" column and day columns scroll normally. */
+.att-table th:nth-child(1), .att-table td:nth-child(1){
+  position:static !important; left:auto !important; z-index:auto !important;
+  background:transparent; border-right:none; font-weight:400; min-width:32px;
+}
+.att-table th:nth-child(2), .att-table td:nth-child(2){
+  position:sticky !important; left:0 !important; z-index:15;
+}
+.att-table thead th:nth-child(2){ z-index:16; }
+.att-table .att-day-col, .att-table .att-total-col{
+  position:static; left:auto; z-index:auto; border-right:1px solid var(--border);
+  background:inherit; font-weight:400;
+}
+.att-table thead .att-day-col{ background:var(--ink); color:#fff; border-right:1px solid rgba(255,255,255,0.18); }
+.att-table tbody .att-day-col{ background:var(--paper); }
+.att-table tbody tr:hover .att-day-col{ background:#FCFBF7; }
+body.dark-mode .att-table tbody tr:hover .att-day-col{ background:var(--paper-2); }
+/* Clearer separator at the end of every school week (7 columns) */
+.att-table .att-day-col.week-end{ border-right:2.5px solid var(--ink-2) !important; }
+body.dark-mode .att-table .att-day-col.week-end{ border-right:2.5px solid var(--gold) !important; }
+
+/* Frozen Name column: fixed row height, ellipsis + native tooltip on hover */
+.att-table .att-name-col{
+  text-align:left; padding-left:16px; font-weight:700; background:var(--paper);
+  max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  cursor:default; border-right:1.5px solid var(--border);
+}
+.att-table thead .att-name-col{ background:var(--ink); color:#fff; }
+.att-table tbody tr:hover .att-name-col{ background:#FCFBF7; }
+body.dark-mode .att-table tbody tr:hover .att-name-col{ background:var(--paper-2); }
+.att-table tbody tr{ height:54px; }
+
+/* Frozen Total column on the right — always visible, no scrolling needed */
+.att-table .att-total-col{
+  position:sticky !important; right:0 !important; z-index:15;
+  background:var(--gold-light); color:var(--red); font-weight:800; font-size:16px;
+  box-shadow:-3px 0 6px rgba(27,42,74,0.10);
+}
+.att-table thead .att-total-col{
+  background:var(--ink); color:#fff; z-index:16; box-shadow:-3px 0 6px rgba(0,0,0,0.25);
+}
+
+/* Bigger custom checkbox matching the site's gold/ink theme */
+.att-check{
+  appearance:none; -webkit-appearance:none; -moz-appearance:none;
+  width:24px; height:24px; border-radius:7px;
+  border:2px solid var(--border); background:var(--paper);
+  cursor:pointer; position:relative; vertical-align:middle;
+  transition:border-color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+.att-check:hover:not(:disabled){ border-color:var(--gold); }
+.att-check:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(201,162,39,0.35); }
+.att-check:checked{
+  background:linear-gradient(180deg, var(--gold) 0%, var(--gold-deep) 100%);
+  border-color:var(--gold-deep);
+}
+.att-check:checked::after{
+  content:''; position:absolute; left:7px; top:3px; width:6px; height:12px;
+  border:solid #fff; border-width:0 2.5px 2.5px 0; transform:rotate(45deg);
+}
+.att-check:disabled{ cursor:not-allowed; opacity:.55; }
 @media print{
-  .att-add-month, .att-month-del{ display:none !important; }
+  .att-add-month, .att-month-del, .att-excl-chips{ display:none !important; }
 }
 
 /* ================== CERTIFICATE (First Month Report) ================== */
@@ -906,7 +981,7 @@ td:has(> .score-input){background:var(--bg);}
 }
 @media print{
   @page{ size:A4 portrait; margin:10mm; }
-  .masthead, .main-nav, #reportsStepper, #attendanceStepper, .att-add-month, .cert-toolbar, .classbar button{ display:none !important; }
+  .masthead, .main-nav, #reportsStepper, #attendanceStepper, .att-add-month, .att-excl-chips, .cert-toolbar, .classbar button{ display:none !important; }
   .wrap{ max-width:none; padding:0; }
   .cert-outer{ box-shadow:none; padding:0; background:none; }
   .cert-outer, .certificate, .cert-inner, .cert-frame{ -webkit-print-color-adjust:exact; print-color-adjust:exact; color-adjust:exact; }
@@ -1549,6 +1624,8 @@ td:has(> .score-input){background:var(--bg);}
       <button class="btn btn-ink" onclick="document.getElementById('excelInput').click()">⇪ Import from Excel</button>
       <input type="file" id="excelInput" accept=".xlsx,.xls,.csv" onchange="importExcel(this.files[0])">
       <button class="btn btn-outline" onclick="exportExcel()">⇩ Export to Excel</button>
+      <button class="btn btn-outline" onclick="openGradeItemUploadModal()">📤 Upload Grades by Item</button>
+      <button class="btn btn-outline" onclick="openBulkGradesImportModal()" title="Import grades for one or more subjects at once">📊 Bulk Import by Subject</button>
       <button class="btn btn-outline" onclick="showDeleteOptions()">🗑 Delete Students</button>
     </div>
 
@@ -1619,10 +1696,6 @@ td:has(> .score-input){background:var(--bg);}
 
       <div class="att-add-month" id="attAddMonthBar">
         <div class="field">
-          <label>Month Label</label>
-          <input type="text" id="attNewLabel" placeholder="e.g. September">
-        </div>
-        <div class="field">
           <label>Start Date</label>
           <input type="date" id="attNewStart">
         </div>
@@ -1630,23 +1703,33 @@ td:has(> .score-input){background:var(--bg);}
           <label>End Date</label>
           <input type="date" id="attNewEnd">
         </div>
-        <button class="btn btn-gold" onclick="addAttendanceMonth()">＋ Create Month Table</button>
+        <div class="field att-excl-field">
+          <label>Exclude a Day (Holiday)</label>
+          <div class="att-excl-add-row">
+            <input type="date" id="attExclInput">
+            <button type="button" class="btn btn-outline att-excl-add-btn" onclick="addAttExcludedDate()">＋ Add</button>
+          </div>
+        </div>
+        <label class="att-applyall-check" title="Sets this same Start/End range and excluded days for every Section, Stage, Grade and Class that teaches this Subject, in this Academic Term & Month">
+          <input type="checkbox" id="attApplyAll">
+          Apply to ALL Sections, Stages, Grades &amp; Classes for this Term, Month &amp; Subject
+        </label>
+        <button class="btn btn-gold" id="attSaveRangeBtn" onclick="saveAttendanceDateRange()">＋ Create Attendance Table</button>
       </div>
-
-      <div class="att-month-bar" id="attMonthBar"></div>
+      <div class="att-excl-chips" id="attExclChips"></div>
 
       <div class="table-card">
         <div id="attTableHolder" class="grade-table-scroll"></div>
       </div>
       <p class="foot-note">
-        Friday and Saturday are automatically excluded from every monthly attendance table. Tick a box to mark a student absent on that day — the Total column adds up all recorded absence days for the month.
+        Friday and Saturday are automatically excluded from every attendance table, along with any holiday dates you add above. Absence is recorded separately for each Subject — tick a box to mark a student absent on that day — the Total column adds up all recorded absence days for this Month, and automatically updates that student's "Beh. &amp; Attend." grade for that same Subject, for the matching Term and Month in the Grade Book. You can still edit that grade by hand afterwards at any time. Checking "Apply to ALL Sections, Stages, Grades &amp; Classes" before creating/updating the table sets the same date range and excluded days for every class that teaches this Subject at once, instead of one class at a time.
       </p>
     </div>
 
     <div class="workspace show" id="attendanceIntroState">
       <div class="empty-state">
         <div class="seal-lg">1</div>
-        <h3>Start by selecting the Academic Term, Section, Stage, Grade and Class</h3>
+        <h3>Start by selecting the Academic Term, Section, Stage, Grade, Class, Subject and Month</h3>
         <p>Use the steps above in order to display the attendance sheet for the class.</p>
       </div>
     </div>
@@ -1871,6 +1954,27 @@ td:has(> .score-input){background:var(--bg);}
   </div>
 </div>
 
+<div class="overlay" id="gradeItemUploadOverlay" onclick="if(event.target.id==='gradeItemUploadOverlay') closeGradeItemUploadModal()">
+  <div class="modal" style="max-width:480px;position:relative;">
+    <button class="close-x" onclick="closeGradeItemUploadModal()">✕</button>
+    <h3 style="margin-top:0;">📤 Upload Grades by Item</h3>
+    <p class="foot-note" style="margin-top:-4px;">Pick which mark-entry item you want to fill in from an Excel sheet. Only that item will be updated for the students already in this class list — everything else on their record stays untouched.</p>
+    <div class="modal-form" style="margin-top:14px;">
+      <div class="field" style="width:100%;">
+        <label>Item to Upload</label>
+        <select id="gradeItemSelect" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;" onchange="renderGradeItemScopeNote()"></select>
+      </div>
+    </div>
+    <p class="foot-note" id="gradeItemScopeNote" style="margin-top:8px;"></p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px;">
+      <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="downloadGradeItemTemplate()">⬇ Download Template for this Item</button>
+      <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="document.getElementById('gradeItemExcelInput').click()">⇪ Choose Excel File &amp; Upload</button>
+      <input type="file" id="gradeItemExcelInput" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleGradeItemExcelFile(this.files[0])">
+    </div>
+    <p class="foot-note" style="margin-top:14px;">The file needs a <b>ID</b> or <b>Student Name</b> column to identify each student, plus a column with the item's own name (e.g. "Month 1 Q. 1") or a column titled <b>Score</b>. The downloadable template already has the right columns and current class list, so it's the easiest way to start. Rows that don't match any student in the current list are skipped and listed after the upload.</p>
+  </div>
+</div>
+
 <div class="overlay" id="deleteOptionsOverlay" onclick="if(event.target.id==='deleteOptionsOverlay') closeOverlay()">
   <div class="modal">
     <h3>حذف الطلاب</h3>
@@ -1880,6 +1984,63 @@ td:has(> .score-input){background:var(--bg);}
       <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="deleteAllStudents()">⚠ حذف جميع الطلاب</button>
       <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="closeOverlay()">إلغاء</button>
     </div>
+  </div>
+</div>
+
+<!-- ============ BULK IMPORT GRADES BY SUBJECT ============ -->
+<div class="overlay" id="bulkGradesImportOverlay" onclick="if(event.target.id==='bulkGradesImportOverlay') closeBulkGradesImportModal()">
+  <div class="modal" style="max-width:520px;">
+    <button class="close-x" onclick="closeBulkGradesImportModal()">✕</button>
+    <h3 style="margin-top:0;">📊 Bulk Import Grades by Subject(s)</h3>
+    <p class="foot-note" style="margin-top:-4px;">Import grades for one subject, multiple subjects, or all subjects at once from an Excel file.</p>
+    
+    <div style="margin-top:16px; border:1px solid var(--border); border-radius:8px; padding:12px; background:var(--paper-2);">
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+        <button class="btn" style="flex:1; min-width:140px; background:var(--gold); color:var(--ink); border:none; cursor:pointer; padding:10px 12px; border-radius:6px;" onclick="setBulkImportMode('single')">
+          📌 Single Subject
+        </button>
+        <button class="btn" style="flex:1; min-width:140px; background:var(--gold); color:var(--ink); border:none; cursor:pointer; padding:10px 12px; border-radius:6px;" onclick="setBulkImportMode('multiple')">
+          📋 Multiple Subjects
+        </button>
+        <button class="btn" style="flex:1; min-width:140px; background:var(--gold); color:var(--ink); border:none; cursor:pointer; padding:10px 12px; border-radius:6px;" onclick="setBulkImportMode('all')">
+          ✓ All Subjects
+        </button>
+      </div>
+      <p id="bulkImportModeInfo" class="foot-note" style="margin:0; font-size:13px; color:var(--ink-soft);"></p>
+    </div>
+
+    <!-- Single Subject Mode -->
+    <div id="bulkImportSingleMode" style="display:none; margin-top:16px;">
+      <label style="display:block; margin-bottom:8px; font-weight:500;">Select Subject</label>
+      <select id="bulkImportSubjectSelect" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;"></select>
+      <p class="foot-note" id="bulkImportSingleInfo" style="margin-top:8px;"></p>
+    </div>
+
+    <!-- Multiple Subjects Mode -->
+    <div id="bulkImportMultipleMode" style="display:none; margin-top:16px;">
+      <label style="display:block; margin-bottom:8px; font-weight:500;">Select Subjects (hold Ctrl/Cmd to select multiple)</label>
+      <select id="bulkImportMultipleSelect" multiple style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;min-height:120px;"></select>
+      <p class="foot-note" style="margin-top:8px;">You can select 2 or more subjects. Your Excel file should have columns for Student ID/Name and each selected subject.</p>
+    </div>
+
+    <!-- All Subjects Mode -->
+    <div id="bulkImportAllMode" style="display:none; margin-top:16px;">
+      <p class="foot-note">📌 Import grades for <b id="bulkImportAllCount">0</b> subjects in one Excel file.</p>
+      <p class="foot-note">Your file should have columns: <b>Student ID</b> (or <b>Student Name</b>), then one column per subject with the subject name as the header.</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px;border-top:1px dashed var(--border);padding-top:14px;">
+      <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="downloadBulkGradesTemplate()">⬇ Download Excel Template</button>
+      <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="document.getElementById('bulkGradesExcelInput').click()">⇪ Choose Excel File &amp; Upload</button>
+      <input type="file" id="bulkGradesExcelInput" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleBulkGradesExcelFile(this.files[0])">
+    </div>
+
+    <p class="foot-note" style="margin-top:14px; border-top:1px dashed var(--border); padding-top:12px; margin-bottom:0;">
+      <b>File format:</b> First column should be <b>Student ID</b> or <b>Student Name</b>. 
+      For <b>Single</b> mode: one score column. 
+      For <b>Multiple/All</b> modes: each column header should match a subject name exactly.
+      Only matching students will be updated; non-matching rows are reported after upload.
+    </p>
   </div>
 </div>
 
@@ -1940,7 +2101,7 @@ const STAGES = {
 const ATT_SECTIONS = JSON.parse(JSON.stringify(SECTIONS));
 const ATT_STAGES = JSON.parse(JSON.stringify(STAGES));
 
-let state = { termPeriod:null, section:null, stage:null, grade:null, term:null, academicTerm:null, subject:null, reportTerm:'term1', reportType:null, attMonth:null,
+let state = { termPeriod:null, section:null, stage:null, grade:null, term:null, academicTerm:null, subject:null, reportTerm:'term1', reportType:null,
   dashboardTerm:null, dashboardMode:null, dashboardSection:null, dashboardStage:null, dashboardGrade:null, dashboardClassroom:null, dashboardStudent:null,
   examsTerm:null, examsMode:null, examsSection:null, examsStage:null, examsGrade:null, examsClassroom:null,
   perfTerm:null, perfCycle:null, perfCategory:null };
@@ -1958,7 +2119,11 @@ function getPerfFilterState(){
 }
 // Absence tab keeps its own independent selections (Academic Term / Section / Stage / Grade / Class),
 // completely separate from the Grade Book tab's selections above.
-let attState = { termPeriod:null, section:null, stage:null, grade:null, term:null };
+let attState = { termPeriod:null, section:null, stage:null, grade:null, term:null, subject:null, academicTerm:null };
+// Working list of "holiday" dates (YYYY-MM-DD) staged in the Absence tab's date-range form —
+// loaded from the currently selected table's month.excluded (if any) whenever the workspace
+// renders, and edited via addAttExcludedDate()/removeAttExcludedDate() before Create/Update is clicked.
+let attNewExcluded = [];
 let openStep = null;
 let currentView = 'database';
 
@@ -1967,7 +2132,9 @@ let students = {};
 // scores[subjKey] = { studentId: {...} } — subjKey includes the term, so each term keeps its own scores
 let scores = {};
 let studentIdCounter = 1;
-// attendance[classKey|classroom] = { months: [ {id, label, start, end, dates:[...], records:{studentId:{dateStr:true}}} ] }
+// attendance[classKey|classroom|termPeriod|term|subject|academicTerm] = { start, end, dates:[...], records:{studentId:{dateStr:true}} }
+// Each Term (1st/2nd) x Month (1st/2nd) combination is its own independent attendance table —
+// selected via the Attendance tab's own stepper, exactly like the Grade Book's Mark Entry step.
 let attendance = {};
 // teachers = [{id, displayId, name, section, subject, classes}]
 let teachers = [];
@@ -1979,9 +2146,48 @@ const EEP_LOGO_B64 = "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQ
 const STAMP_LOGO_B64 = "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";
 
 function classKey(){ return `${state.section}|${state.stage}|${state.grade}`; }
+
+// Looks up the Teachers Database for the teacher assigned to a specific subject + classroom
+// within a section. Used to show "who teaches this" under a subject at the class level.
+function findSubjectTeacherName(section, subject, classroom){
+  if(!classroom || !subject) return null;
+  const subj = String(subject).trim().toLowerCase();
+  const t = teachers.find(t=>{
+    if((t.section||'')!==section) return false;
+    if((t.subject||'').trim().toLowerCase()!==subj) return false;
+    const classList = (t.classes||'').split(',').map(c=>c.trim()).filter(Boolean);
+    return classList.includes(classroom);
+  });
+  return t ? t.name : null;
+}
+
+// Looks up the Head of Department for a subject + stage within a section, from the Manage
+// Users accounts (role "hod"). Used to show "who oversees this" at the whole-grade level,
+// where no single class teacher applies.
+function findHodName(section, stage, subject){
+  if(!subject) return null;
+  const subj = String(subject).trim().toLowerCase();
+  const u = (typeof users!=='undefined' ? users : []).find(u=>{
+    if(u.role!=='hod') return false;
+    if((u.section||'')!==section) return false;
+    if(!Array.isArray(u.stages) || !u.stages.includes(stage)) return false;
+    if(!Array.isArray(u.subjects)) return false;
+    return u.subjects.some(s=> String(s||'').trim().toLowerCase()===subj);
+  });
+  return u ? u.displayName : null;
+}
 // Mark-entry sub-mode: 'month1' | 'month2' | 'coursework' (Term 1 / Term 2 is tracked separately in state.termPeriod)
 function academicSubMode(){
   return state.academicTerm || null;
+}
+// Human-readable label for a Mark Entry screen. "examPaper" is labelled differently depending
+// on which Academic Term it belongs to: "First Term Exam Paper" for Term 1, "End-of-Year Exam
+// Paper" for Term 2 — matching the existing Exams Analysis naming convention.
+function markEntryLabel(termPeriod, academicTerm){
+  if(!academicTerm) return null;
+  if(academicTerm==='examPaper') return termPeriod==='term2' ? 'End-of-Year Exam Paper' : 'First Term Exam Paper';
+  const labels = { month1:'First Month Mark Entry', month2:'Second Month Mark Entry', coursework:'Total Coursework Mark Entry' };
+  return labels[academicTerm] || null;
 }
 // First Month / Second Month / Total Coursework are just different entry SCREENS for the
 // same subject+term data (Total Coursework needs the Month 1 & Month 2 figures to compute its
@@ -1993,8 +2199,9 @@ function isPrimary(){ return state.stage === 'primary'; }
 // Grade 1 & Grade 2 Primary use an extended mark-entry structure (Q.Av./C.W./H.W./Oral out of 20/20/20/10, Total out of 75).
 function isJuniorPrimary(){ return isPrimary() && (state.grade==='g1' || state.grade==='g2'); }
 function nextDisplayId(){ return 'STU-' + String(studentIdCounter++).padStart(4,'0'); }
-// Attendance is tracked per Class within its own Academic Term selection (attState), fully independent of the Grade Book tab
-function attClassKey(){ return `${attState.section}|${attState.stage}|${attState.grade}|${attState.termPeriod}|${attState.term}`; }
+// Attendance is tracked per Class within its own Academic Term + Month selection (attState),
+// fully independent of the Grade Book tab. Each Term × Month combination is its own table.
+function attClassKey(){ return `${attState.section}|${attState.stage}|${attState.grade}|${attState.termPeriod}|${attState.term}|${attState.subject}|${attState.academicTerm}`; }
 
 function classKeyLabels(ck){
   const [sec, stg, grd] = ck.split('|');
@@ -2085,15 +2292,17 @@ function makeStepConfig(st, sectionsData, stagesData){
       }, options: ()=> st.stage ? stagesData[st.stage].grades.map(g=>({id:g.id,label:g.label})) : [], requires:['termPeriod','section','stage'] },
     { key:'term', title:'Class', state: st, getLabel:()=> st.term ? st.term : null,
       options: ()=> getClassesInGrade(st).filter(c=>scopeClassroomAllowed(c)).map(c=>({id:c,label:c})), requires:['termPeriod','section','stage','grade'] },
-    { key:'academicTerm', title:'Mark Entry', state: st, getLabel:()=>{
-        const labels = { month1:'First Month Mark Entry', month2:'Second Month Mark Entry', coursework:'Total Coursework Mark Entry' };
-        return st.academicTerm ? labels[st.academicTerm] : null;
+    { key:'academicTerm', title:'Mark Entry', state: st, getLabel:()=> markEntryLabel(st.termPeriod, st.academicTerm),
+      options: ()=>{
+        const opts = [
+          { id:'month1', label:'First Month Mark Entry' },
+          { id:'month2', label:'Second Month Mark Entry' },
+          { id:'coursework', label:'Total Coursework Mark Entry' }
+        ];
+        if(st.termPeriod==='term1') opts.push({ id:'examPaper', label:'First Term Exam Paper' });
+        else if(st.termPeriod==='term2') opts.push({ id:'examPaper', label:'End-of-Year Exam Paper' });
+        return opts;
       },
-      options: [
-        { id:'month1', label:'First Month Mark Entry' },
-        { id:'month2', label:'Second Month Mark Entry' },
-        { id:'coursework', label:'Total Coursework Mark Entry' }
-      ],
       requires:['termPeriod','section','stage','grade','term'] },
     { key:'subject', title:'Subject', state: st, getLabel:()=> st.subject ? subjectWithIcon(st.subject) : null,
       options: ()=> st.stage ? stagesData[st.stage].subjects.filter(s=>scopeSubjectAllowed(s)).map(s=>({id:s,label:subjectWithIcon(s)})) : [], requires:['termPeriod','section','stage','grade','term','academicTerm'] }
@@ -2106,8 +2315,32 @@ function stepConfig(){
 
 // Absence tab uses its own independent ATT_SECTIONS / ATT_STAGES lists — editing either
 // list (Grade Book's or Absence's) never affects the other.
+// After Term / Section / Stage / Grade / Class, the Attendance tab has its own "Month" step
+// (1st Month / 2nd Month only — no "Total Coursework", attendance has no such concept) which
+// picks out one independent attendance table, the same way Mark Entry does for the Grade Book.
 function attStepConfig(){
-  return makeStepConfig(attState, ATT_SECTIONS, ATT_STAGES).slice(0,5);
+  const base = makeStepConfig(attState, ATT_SECTIONS, ATT_STAGES).slice(0,5);
+  // Absence is recorded per Subject (each subject has its own sessions/schedule), so the
+  // Attendance tab picks a Subject right after Class, before the Month step.
+  const subjectStep = {
+    key:'subject', title:'Subject', state: attState,
+    getLabel:()=> attState.subject ? subjectWithIcon(attState.subject) : null,
+    options: ()=> attState.stage ? ATT_STAGES[attState.stage].subjects.filter(s=>scopeSubjectAllowed(s)).map(s=>({id:s,label:subjectWithIcon(s)})) : [],
+    requires:['termPeriod','section','stage','grade','term']
+  };
+  const monthStep = {
+    key:'academicTerm', title:'Month', state: attState,
+    getLabel:()=>{
+      const labels = { month1:'1st Month', month2:'2nd Month' };
+      return attState.academicTerm ? labels[attState.academicTerm] : null;
+    },
+    options: [
+      { id:'month1', label:'1st Month' },
+      { id:'month2', label:'2nd Month' }
+    ],
+    requires:['termPeriod','section','stage','grade','term','subject']
+  };
+  return [...base, subjectStep, monthStep];
 }
 
 function renderStepper(){
@@ -2124,7 +2357,7 @@ function renderReportsStepper(){
 function renderAttendanceStepper(){
   const holder = document.getElementById('attendanceStepper');
   if(!holder) return;
-  buildStepperHTML('attendanceStepper', attStepConfig(), 'a-');
+  buildStepperHTML('attendanceStepper', attStepConfig(), 'a-', 1);
 }
 
 // Top Performance / At Risk: Section > Stage > Grade > Class only (no Academic Term or
@@ -2267,8 +2500,11 @@ function buildStepperHTML(holderId, cfgs, idPrefix, prominentCount){
 function selectValue(key, id, targetState){
   const st = targetState || state;
   st[key]=id;
-  // reset downstream selections (only resets keys that exist on the target state object)
-  const order = ['termPeriod','section','stage','grade','term','academicTerm','subject'];
+  // reset downstream selections (only resets keys that exist on the target state object).
+  // Grade Book order: ...Class, Mark Entry(academicTerm), Subject. Attendance order: ...Class, Subject, Month(academicTerm).
+  const order = (st===attState)
+    ? ['termPeriod','section','stage','grade','term','subject','academicTerm']
+    : ['termPeriod','section','stage','grade','term','academicTerm','subject'];
   const idx = order.indexOf(key);
   if(idx>-1){
     order.slice(idx+1).forEach(k=>{ if(k in st) st[k]=null; });
@@ -2309,7 +2545,7 @@ function selectValue(key, id, targetState){
     };
     const scheduleClose = ()=>{
       clearTimeout(closeTimers[wrapId]);
-      closeTimers[wrapId] = setTimeout(()=>{ menu.classList.remove('open'); }, 350);
+      closeTimers[wrapId] = setTimeout(()=>{ menu.classList.remove('open'); }, 650);
     };
     wrap.addEventListener('mouseenter', openNow);
     wrap.addEventListener('mouseleave', scheduleClose);
@@ -3011,7 +3247,13 @@ function renderExamsTable(){
     return;
   }
 
-  const subjHeaderCells = result.columns.map(c=>`<th colspan="2">${escapeHtml(c.subject)}</th>`).join('');
+  const subjHeaderCells = result.columns.map(c=>{
+    const staffName = classroom
+      ? findSubjectTeacherName(section, c.subject, classroom)
+      : findHodName(section, stage, c.subject);
+    const staffLine = staffName ? `<div class="exam-staff-name">${escapeHtml(staffName)}</div>` : '';
+    return `<th colspan="2">${escapeHtml(c.subject)}${staffLine}</th>`;
+  }).join('');
   const subHeaderCells = result.columns.map(()=>`<th>Count</th><th>%</th>`).join('');
   const bodyRows = SCORE_BANDS.map((band,i)=>{
     const cells = result.columns.map(c=>{
@@ -3147,7 +3389,6 @@ function renderWorkspace(){
   document.getElementById('introState').classList.toggle('show', !ready);
   if(!ready){ updateIntroState('introState', cfgs); return; }
 
-  const markEntryLabels = { month1:'First Month Mark Entry', month2:'Second Month Mark Entry', coursework:'Total Coursework Mark Entry' };
   const gradeLabel = STAGES[state.stage].grades.find(g=>g.id===state.grade).label;
   document.getElementById('crumbs').innerHTML = `
     <span class="crumb">${TERM_LABELS[state.termPeriod]}</span>
@@ -3155,7 +3396,7 @@ function renderWorkspace(){
     <span class="crumb stage-${state.stage}">${STAGES[state.stage].label}</span>
     <span class="crumb">${gradeLabel}</span>
     <span class="crumb">${state.term}</span>
-    <span class="crumb">${markEntryLabels[state.academicTerm]}</span>
+    <span class="crumb">${markEntryLabel(state.termPeriod, state.academicTerm)}</span>
     <span class="crumb subj">${subjectWithIcon(state.subject)}</span>
   `;
   toggleAddForm(false);
@@ -3407,7 +3648,8 @@ function renderMarkEntryReport(){
     });
 
     const subjPct = subjTotal ? Math.round((subjEntered/subjTotal*100)*10)/10 : 0;
-    subjectBlocks.push({ subject, fieldRows, subjEntered, subjTotal, subjEmpty: subjTotal-subjEntered, subjPct });
+    const teacherName = findSubjectTeacherName(state.section, subject, state.term);
+    subjectBlocks.push({ subject, fieldRows, subjEntered, subjTotal, subjEmpty: subjTotal-subjEntered, subjPct, teacherName });
   });
 
   if(!subjectBlocks.length){
@@ -3432,7 +3674,8 @@ function renderMarkEntryReport(){
       const c = markEntryColor(fr.pct);
       bodyRows += `<tr>`;
       if(idx===0){
-        bodyRows += `<td class="me-subject-cell" rowspan="${rowspan}">${escapeHtml(block.subject)}<small>${block.subjPct}% complete</small></td>`;
+        const teacherLine = block.teacherName ? `<small>${escapeHtml(block.teacherName)}</small>` : '';
+        bodyRows += `<td class="me-subject-cell" rowspan="${rowspan}">${escapeHtml(block.subject)}${teacherLine}<small>${block.subjPct}% complete</small></td>`;
       }
       bodyRows += `
           <td class="me-item-cell">${escapeHtml(fr.label)}</td>
@@ -4188,12 +4431,20 @@ function clamp(v,max){
 }
 
 function emptyScoreObj(){
-  if(isPrimary()) return {
-    m1E1:null, m1E2:null, m1E3:null, m1E4:null, m1Hw:null, m1Beh:null, m1Cycle:null, m1CW:null, m1Oral:null,
-    m2E1:null, m2E2:null, m2E3:null, m2E4:null, m2Hw:null, m2Beh:null, m2Cycle:null, m2CW:null, m2Oral:null,
-    activity:null, tasks:null
-  };
-  return {m1:null,m2:null,mid:null,final:null};
+  // Grades/stages that have a "Beh. & Attend." column (Primary, and the extended Grade 7-8
+  // Prep / Grade 10-11 Secondary layouts) start it filled in with its own maximum grade
+  // (5 for Primary, 10 for the extended Prep/Secondary grades) instead of blank, so a class
+  // whose attendance hasn't been recorded yet doesn't get penalized in its running Total.
+  // Recording absences in the Absence tab (or editing the cell by hand) overwrites this default.
+  if(isPrimary() || isExtendedGradingStage()){
+    const behMax = isPrimary() ? 5 : 10;
+    return {
+      m1E1:null, m1E2:null, m1E3:null, m1E4:null, m1Hw:null, m1Beh:behMax, m1Cycle:null, m1CW:null, m1Oral:null,
+      m2E1:null, m2E2:null, m2E3:null, m2E4:null, m2Hw:null, m2Beh:behMax, m2Cycle:null, m2CW:null, m2Oral:null,
+      activity:null, tasks:null, examPaper:null
+    };
+  }
+  return {m1:null,m2:null,mid:null,final:null, examPaper:null};
 }
 
 // Average of only the entered (non-empty) values, ignoring blanks
@@ -4350,6 +4601,16 @@ function getAttRoster(){
   const ck = `${attState.section}|${attState.stage}|${attState.grade}`;
   const roster = students[ck] || [];
   let filtered = attState.term ? roster.filter(s => (s.classroom||'') === attState.term) : roster;
+  // Same as the Grade Book's subjectFilteredRoster(): Second-Language and Religion subjects
+  // only apply to the students actually taking that language/religion.
+  if(isLanguageSubject(attState.subject)){
+    const lang = /french/i.test(attState.subject) ? 'French' : 'German';
+    filtered = filtered.filter(s=> s.lang2 === lang);
+  } else if(attState.subject === 'Ch-Religion'){
+    filtered = filtered.filter(s=> s.religion === 'Christian');
+  } else if(attState.subject === 'Religion'){
+    filtered = filtered.filter(s=> s.religion === 'Muslim');
+  }
   filtered = filtered.filter(s => scopeStudentAllowed(s.id));
   return filtered;
 }
@@ -4369,12 +4630,33 @@ function subjectFilteredRoster(){
   return roster;
 }
 
+// Same subject-based filtering as subjectFilteredRoster(), but scoped to the WHOLE Grade
+// (every Class/Section within it) instead of just the currently-selected Class. Scores are
+// already stored per Grade (subjKey() has no Class component), so this simply widens which
+// students are shown/edited — used by the First Term / End-of-Year Exam Paper mark-entry
+// screen, which is entered once for the entire Grade rather than one Class at a time.
+function subjectFilteredGradeRoster(){
+  let roster = getRoster().filter(s => scopeStudentAllowed(s.id));
+  if(isLanguageSubject(state.subject)){
+    const lang = /french/i.test(state.subject) ? 'French' : 'German';
+    return roster.filter(s=> s.lang2 === lang);
+  }
+  if(state.subject === 'Ch-Religion'){
+    return roster.filter(s=> s.religion === 'Christian');
+  }
+  if(state.subject === 'Religion'){
+    return roster.filter(s=> s.religion === 'Muslim');
+  }
+  return roster;
+}
+
 /* ================== ATTENDANCE ================== */
 const ATT_DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 // Builds the list of school-day dates (YYYY-MM-DD) between start and end inclusive,
-// skipping Friday (5) and Saturday (6). Returns null if the range itself is invalid.
-function generateAttendanceDates(startStr, endStr){
+// skipping Friday (5), Saturday (6), and any date present in excludedSet (holidays manually
+// added in the Absence tab's form). Returns null if the range itself is invalid.
+function generateAttendanceDates(startStr, endStr, excludedSet){
   const start = new Date(startStr+'T00:00:00');
   const end = new Date(endStr+'T00:00:00');
   if(isNaN(start.getTime()) || isNaN(end.getTime()) || start>end) return null;
@@ -4382,15 +4664,99 @@ function generateAttendanceDates(startStr, endStr){
   const d = new Date(start);
   while(d<=end){
     const day = d.getDay();
-    if(day!==5 && day!==6){
-      const y = d.getFullYear();
-      const m = String(d.getMonth()+1).padStart(2,'0');
-      const dd = String(d.getDate()).padStart(2,'0');
-      dates.push(`${y}-${m}-${dd}`);
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    const ds = `${y}-${m}-${dd}`;
+    if(day!==5 && day!==6 && !(excludedSet && excludedSet.has(ds))){
+      dates.push(ds);
     }
     d.setDate(d.getDate()+1);
   }
   return dates;
+}
+
+// ---- Excluded ("holiday") dates staged in the Absence tab's date-range form ----
+function renderAttExclChips(){
+  const holder = document.getElementById('attExclChips');
+  if(!holder) return;
+  if(!attNewExcluded.length){ holder.innerHTML=''; return; }
+  const canEdit = !!(currentUser && currentUser.effective && currentUser.effective.edit);
+  const sorted = [...attNewExcluded].sort();
+  holder.innerHTML = sorted.map(ds=>{
+    const d = new Date(ds+'T00:00:00');
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const label = `${dd}/${mm}/${d.getFullYear()}`;
+    return `<span class="att-excl-chip">🚫 ${label}${canEdit ? `<button type="button" class="att-excl-chip-x" title="Remove this excluded day" onclick="removeAttExcludedDate('${ds}')">×</button>` : ''}</span>`;
+  }).join('');
+}
+
+function addAttExcludedDate(){
+  const input = document.getElementById('attExclInput');
+  if(!input || !input.value) return;
+  if(!attNewExcluded.includes(input.value)) attNewExcluded.push(input.value);
+  input.value = '';
+  renderAttExclChips();
+}
+
+function removeAttExcludedDate(dateStr){
+  attNewExcluded = attNewExcluded.filter(d=>d!==dateStr);
+  renderAttExclChips();
+}
+
+// Every {section,stage,grade,term(=classroom)} combination that currently has at least one
+// enrolled student, filtered through the current user's Section/Stage/Classroom scope — used
+// by "Apply to ALL classes" so one date range (and holiday list) can be pushed to every class
+// at once instead of setting it up one class at a time. Only stages that actually teach the
+// given subject are included, since Absence is recorded per Subject.
+function getAllAttClassTargets(subject){
+  const targets = [];
+  Object.keys(students).forEach(classKey_=>{
+    const roster = students[classKey_] || [];
+    if(!roster.length) return;
+    const [section, stage, grade] = classKey_.split('|');
+    if(!ATT_SECTIONS[section] || !ATT_STAGES[stage]) return;
+    if(!scopeSectionAllowed(section) || !scopeStageAllowed(stage)) return;
+    if(subject && !(ATT_STAGES[stage].subjects||[]).includes(subject)) return;
+    const classes = [...new Set(roster.map(s=>s.classroom).filter(c=>c && c!==''))];
+    classes.filter(c=>scopeClassroomAllowed(c)).forEach(term=>{
+      targets.push({ section, stage, grade, term });
+    });
+  });
+  return targets;
+}
+
+// Writes the given date range/dates/excluded list into ONE class's attendance table for ONE
+// subject (creating or updating it), keeping any existing absence records whose date is still
+// within range, and re-syncs the "Beh. & Attend." grade link — for that subject only — for
+// every student in that class taking it.
+function applyAttendanceDateRangeToClass(section, stage, grade, term, subject, termPeriod, academicTerm, start, end, dates, excludedList){
+  const ck = `${section}|${stage}|${grade}|${termPeriod}|${term}|${subject}|${academicTerm}`;
+  const prevRecords = (attendance[ck] && attendance[ck].records) || {};
+  const dateSet = new Set(dates);
+  const newRecords = {};
+  Object.keys(prevRecords).forEach(studentId=>{
+    const kept = {};
+    Object.keys(prevRecords[studentId]).forEach(d=>{ if(dateSet.has(d)) kept[d]=true; });
+    if(Object.keys(kept).length) newRecords[studentId] = kept;
+  });
+  attendance[ck] = { start, end, dates, excluded: excludedList, records: newRecords };
+
+  const classKey_ = `${section}|${stage}|${grade}`;
+  let roster = (students[classKey_]||[]).filter(s=>(s.classroom||'')===term);
+  if(isLanguageSubject(subject)){
+    const lang = /french/i.test(subject) ? 'French' : 'German';
+    roster = roster.filter(s=> s.lang2 === lang);
+  } else if(subject === 'Ch-Religion'){
+    roster = roster.filter(s=> s.religion === 'Christian');
+  } else if(subject === 'Religion'){
+    roster = roster.filter(s=> s.religion === 'Muslim');
+  }
+  roster.forEach(s=>{
+    const total = Object.keys(newRecords[s.id] || {}).length;
+    applyAttendanceToGrades(section, stage, grade, termPeriod, academicTerm, s.id, total, subject);
+  });
 }
 
 function renderAttendanceWorkspace(){
@@ -4398,114 +4764,113 @@ function renderAttendanceWorkspace(){
   const intro = document.getElementById('attendanceIntroState');
   if(!ws || !intro) return;
   const cfgs = attStepConfig();
-  const ready = !!(attState.termPeriod && attState.section && attState.stage && attState.grade && attState.term);
+  const ready = !!(attState.termPeriod && attState.section && attState.stage && attState.grade && attState.term && attState.subject && attState.academicTerm);
   ws.style.display = ready ? '' : 'none';
   intro.style.display = ready ? 'none' : '';
   if(!ready){ updateIntroState('attendanceIntroState', cfgs); return; }
 
   const gradeLabel = ATT_STAGES[attState.stage].grades.find(g=>g.id===attState.grade).label;
+  const monthLabel = attState.academicTerm==='month1' ? '1st Month' : '2nd Month';
   document.getElementById('attendanceCrumbs').innerHTML = `
     <span class="crumb">${TERM_LABELS[attState.termPeriod]}</span>
     <span class="crumb">${ATT_SECTIONS[attState.section].label}</span>
     <span class="crumb stage-${attState.stage}">${ATT_STAGES[attState.stage].label}</span>
     <span class="crumb">${gradeLabel}</span>
-    <span class="crumb subj">${attState.term}</span>
+    <span class="crumb">${attState.term}</span>
+    <span class="crumb subj">${subjectWithIcon(attState.subject)}</span>
+    <span class="crumb">${monthLabel}</span>
   `;
+  const canEdit = !!(currentUser && currentUser.effective && currentUser.effective.edit);
   const addBar = document.getElementById('attAddMonthBar');
-  if(addBar) addBar.style.display = (currentUser && currentUser.effective && currentUser.effective.edit) ? '' : 'none';
+  if(addBar) addBar.style.display = canEdit ? '' : 'none';
 
-  renderAttendanceMonthTabs();
+  const ck = attClassKey();
+  const month = attendance[ck];
+  const startInput = document.getElementById('attNewStart');
+  const endInput = document.getElementById('attNewEnd');
+  const saveBtn = document.getElementById('attSaveRangeBtn');
+  if(startInput) startInput.value = month ? month.start : '';
+  if(endInput) endInput.value = month ? month.end : '';
+  if(saveBtn) saveBtn.textContent = month ? '💾 Update Date Range' : '＋ Create Attendance Table';
+
+  attNewExcluded = (month && Array.isArray(month.excluded)) ? [...month.excluded] : [];
+  renderAttExclChips();
+  const applyAllChk = document.getElementById('attApplyAll');
+  if(applyAllChk) applyAllChk.checked = false;
+
   renderAttendanceTable();
 }
 
-function renderAttendanceMonthTabs(){
-  const holder = document.getElementById('attMonthBar');
-  if(!holder) return;
-  const ck = attClassKey();
-  const months = (attendance[ck] && attendance[ck].months) || [];
-  const canEdit = !!(currentUser && currentUser.effective && currentUser.effective.edit);
-
-  if(months.length===0){
-    holder.innerHTML = `<span style="color:var(--ink-soft);font-size:13px;">No monthly attendance table has been created for this class yet.</span>`;
-    state.attMonth = null;
-    return;
+// Immediately (not debounced) pushes to Firebase after a critical write like creating/updating
+// an attendance table, and tells the user directly if that push fails — so a sync problem is
+// visible right away instead of silently relying on the background auto-save debounce.
+function pushAttendanceChangeNow(){
+  saveStateLocalOnly();
+  if(typeof githubReady==='function' && githubReady()){
+    if(typeof githubPushTimer!=='undefined') clearTimeout(githubPushTimer);
+    pushToGithub().then(ok=>{
+      if(!ok){
+        alert('This attendance table was saved on this device, but syncing it to Firebase failed. Please check your internet connection, then try again — or use "Push to Firebase" from the Configuration menu.');
+      }
+    });
   }
-  if(!state.attMonth || !months.find(m=>m.id===state.attMonth)){
-    state.attMonth = months[months.length-1].id;
-  }
-  holder.innerHTML = months.map(m=>{
-    const active = m.id===state.attMonth;
-    const delBtn = canEdit ? `<button type="button" class="del-btn att-month-del" title="Delete this month's table" onclick="deleteAttendanceMonth('${m.id}')">✕</button>` : '';
-    return `
-      <span class="att-month-chip">
-        <button type="button" class="btn ${active?'btn-ink':'btn-outline'}" onclick="selectAttendanceMonth('${m.id}')">${escapeHtml(m.label)}</button>
-        ${delBtn}
-      </span>`;
-  }).join('');
 }
 
-function addAttendanceMonth(){
-  if(!(currentUser && currentUser.effective && currentUser.effective.edit)){ alert('You do not have permission to create attendance tables.'); return; }
-  const labelInput = document.getElementById('attNewLabel');
+// Creates (or edits the date range of) the attendance table for the currently selected
+// Term × Section × Stage × Grade × Class × Month — or, if "Apply to ALL classes" is ticked,
+// the SAME date range and excluded/holiday days for every Section × Stage × Grade × Class that
+// has students, all at once. Existing absence records for dates that remain within the new
+// range are kept; records for dates that fall outside it (or that are newly excluded) are dropped.
+function saveAttendanceDateRange(){
+  if(!(currentUser && currentUser.effective && currentUser.effective.edit)){ alert('You do not have permission to set up attendance tables.'); return; }
   const startInput = document.getElementById('attNewStart');
   const endInput = document.getElementById('attNewEnd');
   const start = startInput.value;
   const end = endInput.value;
   if(!start || !end){ alert('Please choose both a start date and an end date.'); return; }
-  const dates = generateAttendanceDates(start, end);
+  const excludedList = [...new Set(attNewExcluded)].sort();
+  const dates = generateAttendanceDates(start, end, new Set(excludedList));
   if(!dates){ alert('The end date must be on or after the start date.'); return; }
-  if(dates.length===0){ alert('There are no school days (excluding Friday & Saturday) in that date range.'); return; }
+  if(dates.length===0){ alert('There are no school days left in that date range — check your Start/End dates and excluded days.'); return; }
   if(dates.length>40 && !confirm(`This range contains ${dates.length} school days — that's more than a typical month. Continue anyway?`)) return;
 
-  const ck = attClassKey();
-  if(!attendance[ck]) attendance[ck] = { months: [] };
-  let label = labelInput.value.trim();
-  if(!label) label = `Month ${attendance[ck].months.length+1}`;
+  const applyAllChk = document.getElementById('attApplyAll');
+  const applyAll = !!(applyAllChk && applyAllChk.checked);
+  const monthLabel = attState.academicTerm==='month1' ? '1st Month' : '2nd Month';
+  const subjLabel = subjectWithIcon(attState.subject);
 
-  const month = { id: uid(), label, start, end, dates, records:{} };
-  attendance[ck].months.push(month);
-  state.attMonth = month.id;
+  if(applyAll){
+    const targets = getAllAttClassTargets(attState.subject);
+    if(!targets.length){ alert('No classes teaching this subject were found to apply this to.'); return; }
+    const holidayNote = excludedList.length ? `, excluding ${excludedList.length} holiday day(s)` : '';
+    if(!confirm(`This will set the ${monthLabel} attendance date range (${start} → ${end}${holidayNote}) for "${subjLabel}" in ALL ${targets.length} class(es) — every Section, Stage, Grade and Class that teaches this subject — in ${TERM_LABELS[attState.termPeriod]}. Existing absence records outside the new range/excluded days will be dropped for every class. Continue?`)) return;
+    targets.forEach(t=>{
+      applyAttendanceDateRangeToClass(t.section, t.stage, t.grade, t.term, attState.subject, attState.termPeriod, attState.academicTerm, start, end, dates, excludedList);
+    });
+    pushAttendanceChangeNow();
+    renderAttendanceWorkspace();
+    logActivity('add', `Set up ${monthLabel} attendance table for "${subjLabel}" for ALL classes (${TERM_LABELS[attState.termPeriod]})`);
+    return;
+  }
 
-  labelInput.value=''; startInput.value=''; endInput.value='';
-  saveState();
-  renderAttendanceMonthTabs();
-  renderAttendanceTable();
-  logActivity('add', `Created attendance table "${month.label}" (${ATT_STAGES[attState.stage].label}, ${attState.term||'—'})`);
-}
-
-function deleteAttendanceMonth(id){
-  if(!(currentUser && currentUser.effective && currentUser.effective.edit)){ alert('You do not have permission to delete attendance tables.'); return; }
-  if(!confirm('Delete this monthly attendance table? All absence records in it will be permanently removed.')) return;
-  const ck = attClassKey();
-  if(!attendance[ck]) return;
-  const removed = attendance[ck].months.find(m=>m.id===id);
-  attendance[ck].months = attendance[ck].months.filter(m=>m.id!==id);
-  if(state.attMonth===id) state.attMonth = null;
-  saveState();
-  renderAttendanceMonthTabs();
-  renderAttendanceTable();
-  logActivity('delete', `Deleted attendance table "${removed?removed.label:id}" (${ATT_STAGES[attState.stage].label}, ${attState.term||'—'})`);
-}
-
-function selectAttendanceMonth(id){
-  state.attMonth = id;
-  renderAttendanceMonthTabs();
-  renderAttendanceTable();
+  applyAttendanceDateRangeToClass(attState.section, attState.stage, attState.grade, attState.term, attState.subject, attState.termPeriod, attState.academicTerm, start, end, dates, excludedList);
+  pushAttendanceChangeNow();
+  renderAttendanceWorkspace();
+  logActivity('add', `Set up ${monthLabel} attendance table for "${subjLabel}" (${ATT_STAGES[attState.stage].label}, ${attState.term||'—'})`);
 }
 
 function renderAttendanceTable(){
   const holder = document.getElementById('attTableHolder');
   if(!holder) return;
   const ck = attClassKey();
-  const months = (attendance[ck] && attendance[ck].months) || [];
-  const month = months.find(m=>m.id===state.attMonth);
+  const month = attendance[ck];
 
   if(!month){
     holder.innerHTML = `
       <div class="empty-state">
         <div class="seal-lg">—</div>
-        <h3>No month selected</h3>
-        <p>Use the form above to create a monthly attendance table for this class.</p>
+        <h3>No date range set yet</h3>
+        <p>Use the form above to set the Start and End dates for this Term's Month attendance table.</p>
       </div>`;
     return;
   }
@@ -4524,29 +4889,31 @@ function renderAttendanceTable(){
   const canEdit = !!(currentUser && currentUser.effective && currentUser.effective.edit);
   if(!month.records) month.records = {};
 
-  const headerCols = month.dates.map(ds=>{
+  const headerCols = month.dates.map((ds,idx)=>{
     const d = new Date(ds+'T00:00:00');
     const dd = String(d.getDate()).padStart(2,'0');
     const mm = String(d.getMonth()+1).padStart(2,'0');
-    return `<th>${ATT_DAY_NAMES[d.getDay()]}<br><small>${dd}/${mm}</small></th>`;
+    const weekEndCls = (idx+1)%7===0 ? ' week-end' : '';
+    return `<th class="att-day-col${weekEndCls}">${ATT_DAY_NAMES[d.getDay()]}<br><small>${dd}/${mm}</small></th>`;
   }).join('');
 
   const rows = roster.map((s,i)=>{
     const rec = month.records[s.id] || {};
     let total = 0;
-    const cells = month.dates.map(ds=>{
+    const cells = month.dates.map((ds,idx)=>{
       const checked = !!rec[ds];
       if(checked) total++;
-      return `<td><input type="checkbox" class="att-check" ${checked?'checked':''} ${canEdit?'':'disabled'}
-                onchange="flashInlineSaved(this);toggleAttendance('${month.id}','${s.id}','${ds}',this.checked)"></td>`;
+      const weekEndCls = (idx+1)%7===0 ? ' week-end' : '';
+      return `<td class="att-day-col${weekEndCls}"><input type="checkbox" class="att-check" ${checked?'checked':''} ${canEdit?'':'disabled'}
+                onchange="flashInlineSaved(this);toggleAttendance('${s.id}','${ds}',this.checked)"></td>`;
     }).join('');
+    const fullName = escapeHtml(s.name);
     return `
       <tr>
-        <td><span class="seat-badge">${s.displayId||'—'}</span></td>
         <td>${i+1}</td>
-        <td class="name-col">${escapeHtml(s.name)}</td>
+        <td class="name-col att-name-col" title="${fullName}">${fullName}</td>
         ${cells}
-        <td class="total-cell" id="attTotal-${s.id}">${total}</td>
+        <td class="total-cell att-total-col" id="attTotal-${s.id}">${total}</td>
       </tr>`;
   }).join('');
 
@@ -4555,9 +4922,9 @@ function renderAttendanceTable(){
       <table class="att-table">
         <thead>
           <tr>
-            <th>Seat</th><th>#</th><th class="name-col">Name</th>
+            <th>#</th><th class="name-col att-name-col">Name</th>
             ${headerCols}
-            <th>Total</th>
+            <th class="att-total-col">Total</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -4565,9 +4932,9 @@ function renderAttendanceTable(){
     </div>`;
 }
 
-function toggleAttendance(monthId, studentId, dateStr, checked){
+function toggleAttendance(studentId, dateStr, checked){
   const ck = attClassKey();
-  const month = ((attendance[ck]||{}).months||[]).find(m=>m.id===monthId);
+  const month = attendance[ck];
   if(!month) return;
   if(!month.records) month.records = {};
   if(!month.records[studentId]) month.records[studentId] = {};
@@ -4577,26 +4944,87 @@ function toggleAttendance(monthId, studentId, dateStr, checked){
   const total = Object.keys(month.records[studentId]).length;
   const cell = document.getElementById('attTotal-'+studentId);
   if(cell) cell.textContent = total;
+
+  applyAttendanceToGrades(attState.section, attState.stage, attState.grade, attState.termPeriod, attState.academicTerm, studentId, total, attState.subject);
+
   saveState();
   const stu = getAttRoster().find(s=>s.id===studentId);
-  logActivity('edit', `Marked ${stu?stu.name:'a student'} as ${checked?'absent':'present'} on ${dateStr} (${month.label})`);
+  logActivity('edit', `Marked ${stu?stu.name:'a student'} as ${checked?'absent':'present'} on ${dateStr} — auto-updated Beh. & Attend. (${subjectWithIcon(attState.subject)})`);
 }
 
-// Removes any attendance records for a student that's being deleted, across every class/month.
+// ---- Attendance → Grades linking ----
+// Absence is recorded per Subject, so each attendance table (Section/Stage/Grade/Class/Term/
+// Month/Subject) automatically writes a computed "Beh. & Attend." grade into THAT one subject
+// only, for the matching Term Period + Month. The teacher can still freely overwrite that
+// value by hand afterwards in Mark Entry — it's just the starting point, recalculated
+// whenever the attendance count for that student/month changes.
+//   Primary Stage (incl. the extended Grade 1-6 mark-entry layouts): Max. 5, −0.5 per 3 absence days.
+//   Grade 7-8 Prep / Grade 10-11 Secondary: Max. 10, −1 per 3 absence days.
+//   Other grades (e.g. Grade 9 Prep, Grade 12 Secondary) have no Beh. & Attend. field — skipped.
+function applyAttendanceToGrades(section, stage, grade, termPeriod, monthKey, studentId, absenceDays, subject){
+  if(monthKey!=='month1' && monthKey!=='month2') return;
+  if(!subject) return;
+  const field = monthKey==='month1' ? 'm1Beh' : 'm2Beh';
+  const stageData = STAGES[stage];
+  if(!stageData) return;
+  const primaryStage = stage==='primary';
+  const extendedStage = (stage==='prep' && ['g7','g8'].includes(grade)) || (stage==='secondary' && ['g10','g11'].includes(grade));
+  if(!primaryStage && !extendedStage) return; // this grade has no Beh. & Attend. field to link
+
+  const max = primaryStage ? 5 : 10;
+  const per3 = primaryStage ? 0.5 : 1;
+  const deduction = Math.floor((absenceDays||0)/3) * per3;
+  const finalScore = Math.max(0, Math.round((max - deduction)*100)/100);
+
+  const classKey_ = `${section}|${stage}|${grade}`;
+  const sk = `${classKey_}|${termPeriod}|${subject}`;
+  if(!scores[sk]) scores[sk] = {};
+  if(!scores[sk][studentId]){
+    scores[sk][studentId] = {
+      m1E1:null,m1E2:null,m1E3:null,m1E4:null,m1Hw:null,m1Beh:max,m1Cycle:null,m1CW:null,m1Oral:null,
+      m2E1:null,m2E2:null,m2E3:null,m2E4:null,m2Hw:null,m2Beh:max,m2Cycle:null,m2CW:null,m2Oral:null,
+      activity:null, tasks:null
+    };
+  }
+  scores[sk][studentId][field] = finalScore;
+}
+
+// Recomputes the Beh. & Attend. link for every student in the current Attendance selection —
+// used after the date range changes, since that can shift every student's absence total at once.
+function recomputeAttendanceLinksForCurrentClass(){
+  const ck = attClassKey();
+  const month = attendance[ck];
+  const roster = getAttRoster();
+  roster.forEach(s=>{
+    const rec = (month && month.records && month.records[s.id]) || {};
+    const total = Object.keys(rec).length;
+    applyAttendanceToGrades(attState.section, attState.stage, attState.grade, attState.termPeriod, attState.academicTerm, s.id, total, attState.subject);
+  });
+}
+
+// Removes any attendance records for a student that's being deleted, across every class/term/month.
 function deleteAttendanceForStudent(id){
   Object.keys(attendance).forEach(ck=>{
-    ((attendance[ck]||{}).months||[]).forEach(m=>{
-      if(m.records && m.records[id]) delete m.records[id];
-    });
+    const month = attendance[ck];
+    if(month && month.records && month.records[id]) delete month.records[id];
   });
 }
 
 function renderTable(preserveFocus){
-  const roster = subjectFilteredRoster();
   const scoreMap = getScoreMap();
-  document.getElementById('studentCount').textContent = `${roster.length} students`;
   const holder = document.getElementById('tableHolder');
   const footNote = document.getElementById('footNote');
+
+  if(state.academicTerm === 'examPaper'){
+    const gradeRoster = subjectFilteredGradeRoster();
+    document.getElementById('studentCount').textContent = `${gradeRoster.length} students (whole Grade)`;
+    renderExamPaperScreen(gradeRoster, scoreMap, holder, footNote);
+    return;
+  }
+
+  const roster = subjectFilteredRoster();
+  document.getElementById('studentCount').textContent = `${roster.length} students`;
+
   if(footNote){
     const langLine = isLanguageSubject(state.subject) ? `Only students whose Second Language is set to <b>${/french/i.test(state.subject)?'French':'German'}</b> are shown for this subject.<br>` : '';
     const religionLine = isReligionSubject(state.subject) ? `Only students whose Religion is set to <b>${state.subject==='Ch-Religion'?'Christian':'Muslim'}</b> are shown for this subject.<br>` : '';
@@ -4644,6 +5072,66 @@ function renderTable(preserveFocus){
 
   if(isPrimary() || isExtendedGradingStage()){ renderPrimaryTable(roster, scoreMap, holder); }
   else { renderStandardTable(roster, scoreMap, holder); }
+}
+
+// Standalone "First Term Exam Paper" (Term 1) / "End-of-Year Exam Paper" (Term 2) mark-entry
+// screen. It's the same single-column layout for every Stage/Grade — only the maximum grade
+// changes (Max. 60 Primary, Max. 30 Prep & Secondary) — and it's saved as its own field
+// ("examPaper"), independent of the Month 1 / Month 2 / Total Coursework screens and totals.
+function renderExamPaperScreen(roster, scoreMap, holder, footNote){
+  hideMonthPill();
+  const max = examPaperMax();
+  const screenLabel = markEntryLabel(state.termPeriod, state.academicTerm);
+
+  if(footNote){
+    const langLine = isLanguageSubject(state.subject) ? `Only students whose Second Language is set to <b>${/french/i.test(state.subject)?'French':'German'}</b> are shown for this subject.<br>` : '';
+    const religionLine = isReligionSubject(state.subject) ? `Only students whose Religion is set to <b>${state.subject==='Ch-Religion'?'Christian':'Muslim'}</b> are shown for this subject.<br>` : '';
+    const saveLine = `Grades are saved automatically as you type — you can still use "Full Backup" to save a copy to your device, or "Restore Backup" to load one later.`;
+    footNote.innerHTML = `This screen records the <b>${screenLabel}</b> score on its own (Max. ${max}) — it is entered and saved independently of the Month 1, Month 2 and Total Coursework screens and their totals.<br>${langLine}${religionLine}${saveLine}`;
+  }
+
+  if(roster.length===0){
+    holder.innerHTML = `
+      <div class="empty-state">
+        <div class="seal-lg">?</div>
+        <h3>No students in this class yet</h3>
+        <p>${isLanguageSubject(state.subject)
+            ? `No students have their Second Language set to ${/french/i.test(state.subject)?'French':'German'} yet. Add one, or set a student's Second Language from the Database tab.`
+            : isReligionSubject(state.subject)
+            ? `No students have their Religion set to ${state.subject==='Ch-Religion'?'Christian':'Muslim'} yet. Add one, or set a student's Religion from the Database tab.`
+            : `Add students manually or import a list from an Excel file.`}</p>
+      </div>`;
+    return;
+  }
+
+  let rows = roster.map((s, i)=>{
+    const sc = scoreMap[s.id] || emptyScoreObj();
+    const val = sc.examPaper;
+    const hasVal = val!==null && val!==undefined && val!=='';
+    const pct = hasVal ? Math.round((parseFloat(val)/max*100)*10)/10 : null;
+    const g = hasVal ? letterGrade(pct) : null;
+    return `
+      <tr>
+        ${primaryIdCellsHtml(s, i)}
+        <td>${scoreInputHtml(s.id,'examPaper',val,max)}</td>
+        <td class="pct-cell">${hasVal ? pct+'%' : '—'}</td>
+        <td>${g ? `<span class="badge ${g.c}">${g.t}</span>` : '—'}</td>
+        <td><button class="del-btn" onclick="deleteStudent('${s.id}')" title="Delete">✕</button></td>
+      </tr>`;
+  }).join('');
+
+  holder.innerHTML = `
+    <table>
+      <thead>
+        <tr>${PRIMARY_ID_HEADERS}
+          <th>${screenLabel}<br><small>(Max. ${max})</small></th>
+          <th>Percentage</th>
+          <th>Grade</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
 }
 
 function renderStandardTable(roster, scoreMap, holder){
@@ -4728,6 +5216,9 @@ const PRIMARY_ID_HEADERS = `
 function isG7G8Prep(){ return !isPrimary() && state.stage === 'prep' && ['g7','g8'].includes(state.grade); }
 function isG10G11Secondary(){ return !isPrimary() && state.stage === 'secondary' && ['g10','g11'].includes(state.grade); }
 function isExtendedGradingStage(){ return isG7G8Prep() || isG10G11Secondary(); }
+// First Term Exam Paper / End-of-Year Exam Paper mark-entry screen: Max. 60 for Primary Stage,
+// Max. 30 for Prep & Secondary Stages (independent of Month 1/2/Coursework and their totals).
+function examPaperMax(){ return isPrimary() ? 60 : 30; }
 
 function renderPrimaryTable(roster, scoreMap, holder){
   const mode = academicSubMode();
@@ -4828,7 +5319,7 @@ function renderPrimaryMonth1Table(roster, scoreMap, holder){
           <th>Q. 4<br><small>(Max. 5)</small></th>
           <th>Q. Av.<br><small>(Max. ${extended?qMax:20})</small></th>
           <th>C.W.<br><small>(Max. ${extended?cwMax:20})</small></th>
-          <th>Beh.<br><small>(Max. 10)</small></th>
+          <th>Beh. &amp;<br>Attend.<br><small>(Max. 10)</small></th>
           <th>Total 1<br><small>(Max. 40)</small></th>
           <th>Cycle 1<br><small>(Max. ${cycleMax})</small></th>
           <th></th>
@@ -4931,7 +5422,7 @@ function renderPrimaryMonth2Table(roster, scoreMap, holder){
           <th>Q. 4<br><small>(Max. 5)</small></th>
           <th>Q. Av.<br><small>(Max. ${extended?qMax:20})</small></th>
           <th>C.W.<br><small>(Max. ${extended?cwMax:20})</small></th>
-          <th>Beh.<br><small>(Max. 10)</small></th>
+          <th>Beh. &amp;<br>Attend.<br><small>(Max. 10)</small></th>
           <th>Total 2<br><small>(Max. 40)</small></th>
           <th>Cycle 2<br><small>(Max. ${cycleMax})</small></th>
           <th></th>
@@ -5164,7 +5655,8 @@ function exportExcel(){
       "Student Name": s.name,
       "Classroom": s.classroom,
       "Religion": (s.religion && s.religion!=='-') ? s.religion : '',
-      "Second Language": (s.lang2 && s.lang2!=='-') ? s.lang2 : ''
+      "Second Language": (s.lang2 && s.lang2!=='-') ? s.lang2 : '',
+      [markEntryLabel(state.termPeriod,'examPaper')]: sc.examPaper??''
     };
     if(isPrimary()){
       const t = computePrimaryTotals(sc);
@@ -5215,6 +5707,192 @@ function exportExcel(){
   XLSX.utils.book_append_sheet(wb, ws, "Grades");
   const fname = `${SECTIONS[state.section].label}_${gradeLabel}_${termLabel}_${state.subject}.xlsx`.replace(/\s+/g,'_');
   XLSX.writeFile(wb, fname);
+}
+
+/* ================== UPLOAD GRADES BY ITEM (single-column Excel upload) ================== */
+// Returns the list of editable score fields shown on the CURRENT mark-entry screen
+// (same set of columns as renderTable would draw as <input> cells), each with a
+// human-readable label and its max grade. Used to populate the item dropdown and to
+// know which column of an uploaded sheet to read/clamp against.
+function editableFieldsForCurrentScreen(){
+  const mode = academicSubMode();
+  if(mode==='examPaper'){
+    return [{ field:'examPaper', label: markEntryLabel(state.termPeriod,'examPaper'), max: examPaperMax() }];
+  }
+  if(isPrimary() || isExtendedGradingStage()){
+    const junior = isJuniorPrimary();
+    const g78 = isG7G8Prep();
+    const g1011 = isG10G11Secondary();
+    const extended = g78 || g1011;
+
+    if(mode==='month1'){
+      if(junior) return [
+        {field:'m1E1',label:'Month 1 Q. 1',max:5}, {field:'m1E2',label:'Month 1 Q. 2',max:5},
+        {field:'m1E3',label:'Month 1 Q. 3',max:5}, {field:'m1E4',label:'Month 1 Q. 4',max:5},
+        {field:'m1CW',label:'Month 1 C.W.',max:20}, {field:'m1Hw',label:'Month 1 H.W.',max:20},
+        {field:'m1Oral',label:'Month 1 Oral',max:10}, {field:'m1Beh',label:'Month 1 Beh. & Attend.',max:5},
+        {field:'m1Cycle',label:'Cycle 1',max:5}
+      ];
+      if(extended) return [
+        {field:'m1E1',label:'Month 1 Q. 1',max:5}, {field:'m1E2',label:'Month 1 Q. 2',max:5},
+        {field:'m1E3',label:'Month 1 Q. 3',max:5}, {field:'m1E4',label:'Month 1 Q. 4',max:5},
+        {field:'m1CW',label:'Month 1 C.W.',max:(g78?10:15)}, {field:'m1Beh',label:'Month 1 Beh. & Attend.',max:10},
+        {field:'m1Cycle',label:'Cycle 1',max:15}
+      ];
+      return [
+        {field:'m1E1',label:'Month 1 Q. 1',max:5}, {field:'m1E2',label:'Month 1 Q. 2',max:5},
+        {field:'m1E3',label:'Month 1 Q. 3',max:5}, {field:'m1E4',label:'Month 1 Q. 4',max:5},
+        {field:'m1CW',label:'Month 1 C.W.',max:20}, {field:'m1Beh',label:'Month 1 Beh. & Attend.',max:10},
+        {field:'m1Cycle',label:'Cycle 1',max:5}
+      ];
+    }
+    if(mode==='month2'){
+      if(junior) return [
+        {field:'m2E1',label:'Month 2 Q. 1',max:5}, {field:'m2E2',label:'Month 2 Q. 2',max:5},
+        {field:'m2E3',label:'Month 2 Q. 3',max:5}, {field:'m2E4',label:'Month 2 Q. 4',max:5},
+        {field:'m2CW',label:'Month 2 C.W.',max:20}, {field:'m2Hw',label:'Month 2 H.W.',max:20},
+        {field:'m2Oral',label:'Month 2 Oral',max:10}, {field:'m2Beh',label:'Month 2 Beh. & Attend.',max:5},
+        {field:'m2Cycle',label:'Cycle 2',max:5}
+      ];
+      if(extended) return [
+        {field:'m2E1',label:'Month 2 Q. 1',max:5}, {field:'m2E2',label:'Month 2 Q. 2',max:5},
+        {field:'m2E3',label:'Month 2 Q. 3',max:5}, {field:'m2E4',label:'Month 2 Q. 4',max:5},
+        {field:'m2CW',label:'Month 2 C.W.',max:(g78?10:15)}, {field:'m2Beh',label:'Month 2 Beh. & Attend.',max:10},
+        {field:'m2Cycle',label:'Cycle 2',max:15}
+      ];
+      return [
+        {field:'m2E1',label:'Month 2 Q. 1',max:5}, {field:'m2E2',label:'Month 2 Q. 2',max:5},
+        {field:'m2E3',label:'Month 2 Q. 3',max:5}, {field:'m2E4',label:'Month 2 Q. 4',max:5},
+        {field:'m2CW',label:'Month 2 C.W.',max:20}, {field:'m2Beh',label:'Month 2 Beh. & Attend.',max:10},
+        {field:'m2Cycle',label:'Cycle 2',max:5}
+      ];
+    }
+    // coursework screen
+    if(junior) return [{field:'activity',label:'Activity',max:20}, {field:'tasks',label:'Skills',max:5}];
+    if(extended) return []; // Total Coursework here is fully computed from Month 1/2 — nothing to upload
+    return [{field:'activity',label:'Activity',max:5}, {field:'tasks',label:'Per. Tasks',max:10}];
+  }
+  // Standard (non-Primary, non-extended) subjects: same 4 fields regardless of Mark Entry screen
+  return [
+    {field:'m1',label:'Month 1',max:10}, {field:'m2',label:'Month 2',max:10},
+    {field:'mid',label:'Mid-Year',max:20}, {field:'final',label:'Final Exam',max:60}
+  ];
+}
+
+function gradeItemUploadReadOnly(){
+  return !!(currentUser && currentUser.effective && currentUser.effective.edit===false);
+}
+
+function openGradeItemUploadModal(){
+  if(gradeItemUploadReadOnly()){ alert('Your account does not have edit access to the Grade Book.'); return; }
+  const fields = editableFieldsForCurrentScreen();
+  const sel = document.getElementById('gradeItemSelect');
+  if(fields.length===0){
+    sel.innerHTML = `<option value="">No editable item on this screen</option>`;
+  } else {
+    sel.innerHTML = fields.map(f=>`<option value="${f.field}">${f.label} (Max. ${f.max})</option>`).join('');
+  }
+  renderGradeItemScopeNote();
+  document.getElementById('gradeItemUploadOverlay').classList.add('show');
+}
+function closeGradeItemUploadModal(){
+  document.getElementById('gradeItemUploadOverlay').classList.remove('show');
+}
+function currentGradeItemFieldDef(){
+  const fields = editableFieldsForCurrentScreen();
+  const sel = document.getElementById('gradeItemSelect');
+  return fields.find(f=> f.field===sel.value) || null;
+}
+// The Exam Paper item covers the whole Grade at once; every other item is scoped to the
+// currently-selected Class. Surfaces that distinction right in the upload modal.
+function renderGradeItemScopeNote(){
+  const note = document.getElementById('gradeItemScopeNote');
+  if(!note) return;
+  note.innerHTML = academicSubMode()==='examPaper'
+    ? `This item is entered once for the <b>whole Grade</b> — the template and upload cover every student in ${STAGES[state.stage] ? STAGES[state.stage].grades.find(g=>g.id===state.grade).label : 'this grade'}, across all classes, not just "${state.term}".`
+    : `This item is scoped to the current Class ("${state.term}") — only students in this class are included.`;
+}
+
+// The Exam Paper item (First Term / End-of-Year) is entered once for the whole Grade, so its
+// upload/template use every student in the Grade; every other item stays scoped to the
+// currently-selected Class, same as the on-screen mark-entry table.
+function rosterForGradeItemUpload(){
+  return academicSubMode()==='examPaper' ? subjectFilteredGradeRoster() : subjectFilteredRoster();
+}
+
+function downloadGradeItemTemplate(){
+  const def = currentGradeItemFieldDef();
+  if(!def){ alert('There is no editable item to upload on the current Mark Entry screen — the Total Coursework screen for this grade is fully calculated automatically.'); return; }
+  const roster = rosterForGradeItemUpload();
+  const scoreMap = getScoreMap();
+  const rows = roster.map(s=>{
+    const sc = scoreMap[s.id] || emptyScoreObj();
+    return { "ID": s.displayId||'', "Student Name": s.name, [def.label]: sc[def.field]??'' };
+  });
+  const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{ "ID":'', "Student Name":'', [def.label]:'' }]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Template");
+  const gradeLabel = STAGES[state.stage].grades.find(g=>g.id===state.grade).label;
+  const scopeLabel = academicSubMode()==='examPaper' ? 'Whole_Grade' : state.term;
+  const base = `${def.label}_${gradeLabel}_${scopeLabel}_${state.subject}_Template`.replace(/[\s.]+/g,'_');
+  const fname = `${base}.xlsx`;
+  XLSX.writeFile(wb, fname);
+}
+
+function handleGradeItemExcelFile(file){
+  if(!file) return;
+  const def = currentGradeItemFieldDef();
+  if(!def){
+    alert('There is no editable item to upload on the current Mark Entry screen.');
+    document.getElementById('gradeItemExcelInput').value='';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+      const roster = rosterForGradeItemUpload();
+      const scoreMap = getScoreMap();
+      let updated = 0;
+      const notFound = [];
+
+      rows.forEach(row=>{
+        const idVal = (row['ID']||row['id']||row['Student ID']||'').toString().trim();
+        const nameVal = (row['Name']||row['Student Name']||row['name']||'').toString().trim();
+        let scoreVal;
+        if(row[def.label]!==undefined && row[def.label]!=='') scoreVal = row[def.label];
+        else if(row['Score']!==undefined && row['Score']!=='') scoreVal = row['Score'];
+        else if(row['score']!==undefined && row['score']!=='') scoreVal = row['score'];
+        if(scoreVal===undefined || scoreVal==='') return;
+
+        let stu = null;
+        if(idVal) stu = roster.find(s=> (s.displayId||'').toString().trim().toLowerCase()===idVal.toLowerCase());
+        if(!stu && nameVal) stu = roster.find(s=> s.name.trim().toLowerCase()===nameVal.toLowerCase());
+        if(!stu){ if(idVal||nameVal) notFound.push(idVal||nameVal); return; }
+
+        if(!scoreMap[stu.id]) scoreMap[stu.id] = emptyScoreObj();
+        scoreMap[stu.id][def.field] = clamp(scoreVal, def.max);
+        updated++;
+      });
+
+      renderTable();
+      saveState();
+      closeGradeItemUploadModal();
+      document.getElementById('importTitle').textContent = 'Upload Complete';
+      document.getElementById('importMsg').textContent =
+        `${updated} score(s) updated for "${def.label}".` +
+        (notFound.length ? ` ${notFound.length} row(s) could not be matched to a student in the current list: ${notFound.slice(0,10).join(', ')}${notFound.length>10?'…':''}.` : '');
+      logActivity('edit', `Bulk-uploaded "${def.label}" via Excel for ${updated} student(s) — ${state.subject||''} (${state.term||'—'})`);
+      document.getElementById('importResultOverlay').classList.add('show');
+    }catch(err){
+      alert('Could not read the file. Make sure it is a valid Excel file with an ID or Student Name column, and a matching score column.');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  document.getElementById('gradeItemExcelInput').value='';
 }
 
 /* ================== FULL BACKUP (JSON) ================== */
@@ -5561,7 +6239,7 @@ function confirmDeleteAllDb(){
   studentIdCounter = 1;
   renderDatabase();
   if(currentView==='grades'){ state.term=null; state.subject=null; renderStepper(); renderWorkspace(); }
-  if(currentView==='attendance'){ attState.term=null; state.attMonth=null; renderAttendanceStepper(); renderAttendanceWorkspace(); }
+  if(currentView==='attendance'){ attState.term=null; attState.subject=null; attState.academicTerm=null; renderAttendanceStepper(); renderAttendanceWorkspace(); }
   saveState();
   alert('All data has been deleted.');
 }
@@ -7382,6 +8060,14 @@ let githubConfig = null; // { enabled }
 let fbUnsubscribe = null;
 let fbApplyingRemote = false; // guard so a remote snapshot doesn't immediately re-trigger a push
 let fbLastPushedAt = 0;
+// Every push tags the document with a version number one higher than the last version we
+// know about (ours or a remote one we've already applied). The live listener only applies an
+// incoming snapshot if its version is strictly newer than this. This protects against a slow
+// round-trip: if the local push takes a while to echo back (or never lands as an "echo" within
+// the old fixed time window) and the person keeps entering grades in the meantime, the stale
+// echo/snapshot is recognized as not-newer and is ignored instead of overwriting the freshly
+// entered grades still sitting only in memory/localStorage.
+let knownDataVersion = 0;
 
 function loadGithubConfig(){
   try{
@@ -7443,6 +8129,7 @@ function applyRemotePayload(payload){
   attendance = payload.attendance || {};
   teachers = payload.teachers || [];
   teacherIdCounter = payload.teacherIdCounter || 1;
+  knownDataVersion = Math.max(knownDataVersion, payload.dataVersion || 0);
   if(Array.isArray(payload.users) && payload.users.length){ users = payload.users; saveUsersLocalOnly(); }
   if(Array.isArray(payload.activityLog) && payload.activityLog.length){
     const map = {};
@@ -7487,9 +8174,13 @@ function startFirebaseLiveSync(){
   if(fbUnsubscribe) return;
   fbUnsubscribe = FB_DOC_REF.onSnapshot(snap=>{
     if(!snap.exists) return;
-    // Ignore the echo of our own just-pushed write.
+    const data = snap.data();
+    // Ignore our own push's echo — recognized by version, not just elapsed time, so a slow
+    // round-trip can't slip past the guard and stomp on grades entered in the meantime.
+    const incomingVersion = data.dataVersion || 0;
+    if(incomingVersion>0 && incomingVersion<=knownDataVersion) return;
     if(Date.now() - fbLastPushedAt < 1500) return;
-    applyRemotePayload(snap.data());
+    applyRemotePayload(data);
     setSyncStatus('synced');
   }, err=>{
     console.warn('Firebase live sync error', err);
@@ -7504,7 +8195,13 @@ async function pushToGithub(){
   if(!githubReady()) return false;
   setSyncStatus('syncing');
   try{
-    const payload = { students, scores, studentIdCounter, attendance, teachers, teacherIdCounter, users, activityLog, presenceBucket: presenceBucket || null, savedAt: new Date().toISOString() };
+    // Bump the version now (not after the network round-trip finishes) so any further local
+    // edits made while this push is in flight are already "ahead of" the version we're about
+    // to send — the eventual echo/snapshot for THIS push carries the older, lower version and
+    // gets ignored by the listener instead of overwriting those newer edits.
+    const versionToPush = knownDataVersion + 1;
+    const payload = { students, scores, studentIdCounter, attendance, teachers, teacherIdCounter, users, activityLog, presenceBucket: presenceBucket || null, dataVersion: versionToPush, savedAt: new Date().toISOString() };
+    knownDataVersion = versionToPush;
     fbLastPushedAt = Date.now();
     await FB_DOC_REF.set(payload, { merge:false });
     setSyncStatus('synced');
@@ -7865,6 +8562,249 @@ tryAutoLogin();
 // browser instantly, not just the one that originally saved it.
 if(githubReady()){ setSyncStatus('idle'); }
 pullFromGithub(true).then(()=>{ if(githubReady()) startFirebaseLiveSync(); refreshHeaderQuickWidgets(); });
+
+/* ================== BULK GRADES IMPORT BY SUBJECT(S) ================== */
+
+let bulkImportState = { mode: null, subjects: [] };
+
+function openBulkGradesImportModal(){
+  bulkImportState = { mode: null, subjects: [] };
+  document.getElementById('bulkGradesImportOverlay').classList.add('show');
+  // Clear all mode displays and inputs
+  document.getElementById('bulkImportSingleMode').style.display = 'none';
+  document.getElementById('bulkImportMultipleMode').style.display = 'none';
+  document.getElementById('bulkImportAllMode').style.display = 'none';
+  document.getElementById('bulkImportModeInfo').textContent = '👉 Select an import mode above';
+  // Populate subject dropdowns with current term subjects
+  populateBulkImportSubjectDropdowns();
+}
+
+function closeBulkGradesImportModal(){
+  document.getElementById('bulkGradesImportOverlay').classList.remove('show');
+  document.getElementById('bulkGradesExcelInput').value = '';
+  bulkImportState = { mode: null, subjects: [] };
+}
+
+function getAvailableSubjects(){
+  // Get all subjects that apply to the current stage (same list used to
+  // build the subject stepper/breadcrumb elsewhere in the app).
+  if(!state.stage || !STAGES[state.stage]) return [];
+  return STAGES[state.stage].subjects.slice().sort();
+}
+
+function populateBulkImportSubjectDropdowns(){
+  const subjects = getAvailableSubjects();
+  
+  // Single select
+  const singleSel = document.getElementById('bulkImportSubjectSelect');
+  singleSel.innerHTML = '';
+  subjects.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s;
+    opt.textContent = s;
+    singleSel.appendChild(opt);
+  });
+  
+  // Multiple select
+  const multiSel = document.getElementById('bulkImportMultipleSelect');
+  multiSel.innerHTML = '';
+  subjects.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s;
+    opt.textContent = s;
+    multiSel.appendChild(opt);
+  });
+  
+  // All mode info
+  document.getElementById('bulkImportAllCount').textContent = subjects.length;
+}
+
+function setBulkImportMode(mode){
+  bulkImportState.mode = mode;
+  bulkImportState.subjects = [];
+  
+  // Hide all mode divs
+  document.getElementById('bulkImportSingleMode').style.display = 'none';
+  document.getElementById('bulkImportMultipleMode').style.display = 'none';
+  document.getElementById('bulkImportAllMode').style.display = 'none';
+  
+  if(mode === 'single'){
+    document.getElementById('bulkImportSingleMode').style.display = 'block';
+    bulkImportState.subjects = [document.getElementById('bulkImportSubjectSelect').value];
+    document.getElementById('bulkImportModeInfo').textContent = '📌 Select a single subject to import grades for';
+    updateBulkImportSingleInfo();
+    document.getElementById('bulkImportSubjectSelect').onchange = ()=>{
+      bulkImportState.subjects = [document.getElementById('bulkImportSubjectSelect').value];
+      updateBulkImportSingleInfo();
+    };
+  }
+  else if(mode === 'multiple'){
+    document.getElementById('bulkImportMultipleMode').style.display = 'block';
+    document.getElementById('bulkImportModeInfo').textContent = '📋 Select 2+ subjects to import grades for all of them';
+    document.getElementById('bulkImportMultipleSelect').onchange = ()=>{
+      const selected = Array.from(document.getElementById('bulkImportMultipleSelect').selectedOptions).map(o => o.value);
+      if(selected.length >= 2) bulkImportState.subjects = selected;
+    };
+  }
+  else if(mode === 'all'){
+    document.getElementById('bulkImportAllMode').style.display = 'block';
+    bulkImportState.subjects = getAvailableSubjects();
+    document.getElementById('bulkImportModeInfo').textContent = `✓ Import grades for all ${bulkImportState.subjects.length} subjects at once`;
+  }
+}
+
+function updateBulkImportSingleInfo(){
+  const subject = bulkImportState.subjects[0] || '';
+  const info = document.getElementById('bulkImportSingleInfo');
+  if(subject){
+    info.textContent = `Uploading grades for: ${subject}`;
+  }
+}
+
+function downloadBulkGradesTemplate(){
+  const mode = bulkImportState.mode;
+  if(!mode){
+    alert('Please select an import mode first');
+    return;
+  }
+  
+  const subjects = bulkImportState.subjects.length > 0 ? bulkImportState.subjects : getAvailableSubjects();
+  
+  // Union of each subject's eligible roster (e.g. French vs German 2nd-language students),
+  // so the template includes every student who could have a score in at least one column.
+  const origSubject = state.subject;
+  const rosterById = new Map();
+  subjects.forEach(subj => {
+    state.subject = subj;
+    rosterForGradeItemUpload().forEach(s => rosterById.set(s.id, s));
+  });
+  state.subject = origSubject;
+  const roster = Array.from(rosterById.values());
+  
+  const data = [];
+  roster.forEach(s => {
+    const row = {
+      'Student ID': s.displayId || '',
+      'Student Name': s.name || ''
+    };
+    subjects.forEach(subj => {
+      row[subj] = '';
+    });
+    data.push(row);
+  });
+  
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Grades');
+  
+  const fileName = mode === 'single' 
+    ? `grades_${subjects[0]||'template'}_${state.grade}_${state.term}.xlsx`
+    : mode === 'multiple'
+    ? `grades_multiple_${state.grade}_${state.term}.xlsx`
+    : `grades_all_${state.grade}_${state.term}.xlsx`;
+  
+  XLSX.writeFile(wb, fileName);
+}
+
+// The Bulk Import by Subject tool writes one value per student per subject, so it only makes
+// sense on a Mark Entry screen that has exactly one editable item (e.g. First Term /
+// End-of-Year Exam Paper). Reuses the same field/max definitions as "Upload Grades by Item"
+// so the value lands in the exact field the Grade Book table actually reads from.
+function bulkImportFieldDef(){
+  const fields = editableFieldsForCurrentScreen();
+  return fields.length === 1 ? fields[0] : null;
+}
+
+function handleBulkGradesExcelFile(file){
+  if(!file) return;
+  
+  const mode = bulkImportState.mode;
+  const subjects = bulkImportState.subjects;
+  
+  if(!mode || (mode !== 'all' && subjects.length === 0)){
+    alert('Please select subjects to import first');
+    document.getElementById('bulkGradesExcelInput').value = '';
+    return;
+  }
+
+  const def = bulkImportFieldDef();
+  if(!def){
+    alert('Bulk Import by Subject only works on a Mark Entry screen with a single score item, such as First Term / End-of-Year Exam Paper. Switch to that screen, or use "Upload Grades by Item" instead.');
+    document.getElementById('bulkGradesExcelInput').value = '';
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+      
+      // Each subject can have its own eligible roster (e.g. French vs German 2nd-language
+      // students, or Muslim/Christian-only Religion classes), so build one roster per subject
+      // instead of reusing whichever subject happened to be active on screen.
+      const origSubject = state.subject;
+      const subjectRosters = {};
+      subjects.forEach(subj => {
+        state.subject = subj;
+        subjectRosters[subj] = rosterForGradeItemUpload();
+      });
+      state.subject = origSubject;
+      
+      let updated = 0;
+      const notFound = [];
+      const updates = {}; // Track updates per student
+      
+      rows.forEach(row => {
+        const idVal = (row['Student ID'] || row['ID'] || row['id'] || '').toString().trim();
+        const nameVal = (row['Student Name'] || row['Name'] || row['name'] || '').toString().trim();
+        
+        // Process each selected subject
+        subjects.forEach(subject => {
+          const scoreVal = row[subject];
+          if(scoreVal === undefined || scoreVal === '') return;
+          
+          const roster = subjectRosters[subject] || [];
+          let stu = null;
+          if(idVal) stu = roster.find(s => (s.displayId||'').toString().trim().toLowerCase() === idVal.toLowerCase());
+          if(!stu && nameVal) stu = roster.find(s => s.name.trim().toLowerCase() === nameVal.toLowerCase());
+          if(!stu){ if(idVal||nameVal) notFound.push(`${idVal||nameVal} (${subject})`); return; }
+          
+          // Store in the real per-subject score bucket, same key format the Grade Book
+          // table itself reads from (classKey|termPeriod|subject), in the field for the
+          // currently-open Mark Entry item.
+          const sk = `${classKey()}|${state.termPeriod}|${subject}`;
+          if(!scores[sk]) scores[sk] = {};
+          if(!scores[sk][stu.id]) scores[sk][stu.id] = emptyScoreObj();
+          scores[sk][stu.id][def.field] = clamp(scoreVal, def.max);
+          
+          if(!updates[stu.id]) updates[stu.id] = 0;
+          updates[stu.id]++;
+          updated++;
+        });
+      });
+      
+      renderTable();
+      saveState();
+      closeBulkGradesImportModal();
+      
+      document.getElementById('importTitle').textContent = 'Bulk Import Complete';
+      document.getElementById('importMsg').textContent =
+        `✓ ${updated} grade(s) updated for "${def.label}" across ${subjects.length} subject(s).` +
+        (notFound.length ? ` ⚠️ ${notFound.length} row(s) not matched: ${notFound.slice(0,5).join(', ')}${notFound.length>5?'…':''}` : '');
+      logActivity('edit', `Bulk-imported "${def.label}" for subjects: ${subjects.join(', ')} — ${updated} updates for ${state.grade} (${state.term||'—'})`);
+      document.getElementById('importResultOverlay').classList.add('show');
+      
+    }catch(err){
+      console.error(err);
+      alert('Could not read the file. Make sure it is a valid Excel file with "Student ID" or "Student Name" column and subject columns.');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  document.getElementById('bulkGradesExcelInput').value = '';
+}
 </script>
 </body>
 </html>
