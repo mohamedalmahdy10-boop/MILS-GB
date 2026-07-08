@@ -1209,7 +1209,7 @@ body.dark-mode .att-table tbody tr:hover .att-name-col{ background:var(--paper-2
         <label>Role</label>
         <select id="ufRole" onchange="onRoleFormChange()">
           <option value="admin">Admin</option>
-          <option value="hos">HOS/Deputies</option>
+          <option value="hos">HOS/Deputy</option>
           <option value="hod">Head of Department</option>
           <option value="teacher">Teacher</option>
           <option value="parent">Parent / Student</option>
@@ -1348,6 +1348,32 @@ body.dark-mode .att-table tbody tr:hover .att-name-col{ background:var(--paper-2
     <div class="perm-grid" style="margin-top:16px;">
       <button class="btn btn-outline" onclick="downloadActivityLogExcel()">⬇ Download as Excel</button>
       <button class="btn btn-outline" id="clearActivityLogBtn" onclick="clearActivityLog()">🗑 Clear Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= BLOCKED STUDENTS MODAL ================= -->
+<div class="overlay-bg" id="blockedStudentsOverlay">
+  <div class="users-modal" style="max-width:640px;">
+    <button class="close-x" onclick="closeBlockedStudentsModal()">✕</button>
+    <h2>🚫 Blocked Students</h2>
+    <p class="sub">Check any student to block their linked Parent/Student account from the whole system. Blocked accounts will see "Account is NOT active" instead of any tab, right after logging in (Admin only).</p>
+
+    <div class="field">
+      <label>Search by name or ID</label>
+      <input type="text" id="bsSearch" placeholder="Type to search..." oninput="renderBlockedStudentsPicker()" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;">
+    </div>
+    <div id="bsStudentsWrap" style="max-height:340px;overflow:auto;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;margin-top:8px;"></div>
+
+    <div class="field" style="margin-top:14px;">
+      <label>Currently Blocked (<span id="bsBlockedCount">0</span>)</label>
+      <div class="att-excl-chips" id="bsBlockedChips" style="margin:6px 0 0;"></div>
+    </div>
+    <p class="foot-note" id="bsSelectedNote" style="margin-top:8px;"></p>
+
+    <div class="perm-grid" style="margin-top:16px;">
+      <button class="btn btn-gold" onclick="saveBlockedStudents()">💾 Save</button>
+      <button class="btn btn-outline" onclick="closeBlockedStudentsModal()">Cancel</button>
     </div>
   </div>
 </div>
@@ -1686,6 +1712,7 @@ body.dark-mode .att-table tbody tr:hover .att-name-col{ background:var(--paper-2
       <button class="nav-tab" data-view="config" id="navTabConfig" onclick="toggleConfigMenu(event)">⚙ Configuration ▾</button>
       <div class="nav-dropdown-menu" id="configMenu">
         <button class="opt-btn" onclick="openUsersModal()">👤 Manage Users</button>
+        <button class="opt-btn" onclick="openBlockedStudentsModal()">🚫 Blocked Students</button>
         <button class="opt-btn" onclick="openReportCardReleaseModal()">📋 Report Card Release</button>
         <button class="opt-btn" onclick="openTermMonthDatesModal()">🗓 Term &amp; Month Dates</button>
         <button class="opt-btn" onclick="openActivityLogModal()">🕒 Activity &amp; Login Log</button>
@@ -1702,6 +1729,12 @@ body.dark-mode .att-table tbody tr:hover .att-name-col{ background:var(--paper-2
     <div style="font-size:34px;">🔒</div>
     <h3 style="margin:0;color:var(--ink);">No tabs available</h3>
     <p style="margin:0;">Your account does not have access to any tab yet. Please contact an administrator.</p>
+  </div>
+
+  <div class="no-access" id="accountBlockedPanel" style="display:none;">
+    <div style="font-size:34px;color:var(--red);">🚫</div>
+    <h3 style="margin:0;color:var(--red);">Account is NOT active</h3>
+    <p style="margin:0;">Please contact the school administrator for more information.</p>
   </div>
 
   <div id="gradesView" style="display:none;">
@@ -2309,7 +2342,30 @@ function classKeyLabels(ck){
   };
 }
 
+// Hides every tab's content and the nav bar itself, leaving only the
+// "Account is NOT active" message on screen. Used for a Parent/Student
+// login whose linked child has been checked in Configuration ▸ Blocked
+// Students — the block applies to the whole account, not just Reports.
+function showAccountBlockedScreen(){
+  currentView = null;
+  ['gradesView','databaseView','reportsView','attendanceView','dashboardView','examsAnalysisView','teachersView','perfAlertsView'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
+  const noAccess = document.getElementById('noAccessPanel');
+  if(noAccess) noAccess.style.display = 'none';
+  const blockedPanel = document.getElementById('accountBlockedPanel');
+  if(blockedPanel) blockedPanel.style.display = 'flex';
+  const nav = document.getElementById('mainNav');
+  if(nav) nav.style.display = 'none';
+  document.querySelectorAll('.nav-tab').forEach(b=> b.classList.remove('active'));
+}
+
 function switchView(view){
+  if(isViewerAccountBlocked()){
+    showAccountBlockedScreen();
+    return;
+  }
   if(!canAccessTab(view)){
     const allowed = firstAllowedTab();
     if(allowed && allowed!==view){ switchView(allowed); }
@@ -7222,6 +7278,115 @@ function saveTermMonthDates(){
   if(typeof renderAttendanceWorkspace==='function') renderAttendanceWorkspace();
 }
 
+/* ========== BLOCKED STUDENTS ========== */
+let blockedStudentIds = [];
+const BLOCKED_STUDENTS_LS_KEY = 'blockedStudentIds';
+
+function loadBlockedStudentsLocalOnly(){
+  try{
+    const raw = localStorage.getItem(BLOCKED_STUDENTS_LS_KEY);
+    blockedStudentIds = raw ? JSON.parse(raw) : [];
+  }catch(err){ console.warn('Could not load Blocked Students', err); blockedStudentIds = []; }
+}
+
+function saveBlockedStudentsLocalOnly(){
+  try{ localStorage.setItem(BLOCKED_STUDENTS_LS_KEY, JSON.stringify(blockedStudentIds)); }
+  catch(err){ console.warn('Could not save Blocked Students', err); }
+}
+
+// True when the currently logged-in Parent/Student account is linked to a
+// student who has been checked in the Blocked Students list. Admin, HOS, HOD
+// and Teacher accounts are never affected by this — only the student's own
+// Parent/Student login is gated.
+function isViewerAccountBlocked(){
+  if(!currentUser || currentUser.role!=='parent') return false;
+  const scope = currentUser.effective && currentUser.effective.studentScope;
+  if(!Array.isArray(scope) || !scope.length) return false;
+  return scope.some(id=> blockedStudentIds.includes(id));
+}
+
+function openBlockedStudentsModal(){
+  if(!currentUser || currentUser.role!=='admin'){ alert('Only Admin can manage Blocked Students.'); return; }
+  loadBlockedStudentsLocalOnly();
+  const search = document.getElementById('bsSearch');
+  if(search) search.value = '';
+  renderBlockedStudentsPicker();
+  document.getElementById('blockedStudentsOverlay').classList.add('show');
+}
+
+function closeBlockedStudentsModal(){
+  document.getElementById('blockedStudentsOverlay').classList.remove('show');
+}
+
+function renderBlockedStudentsPicker(){
+  const wrap = document.getElementById('bsStudentsWrap');
+  if(!wrap) return;
+  const q = (document.getElementById('bsSearch').value||'').trim().toLowerCase();
+  let list = allStudentsFlat();
+  if(q) list = list.filter(s=> s.name.toLowerCase().includes(q) || (s.displayId||'').toLowerCase().includes(q));
+  list.sort((a,b)=> a.name.localeCompare(b.name));
+  wrap.innerHTML = list.map(s=>{
+    const sectionLabel = SECTIONS[s.section] ? SECTIONS[s.section].label : s.section;
+    const gradeObj = STAGES[s.stage] ? STAGES[s.stage].grades.find(g=>g.id===s.grade) : null;
+    const gradeLabel = gradeObj ? gradeObj.label : s.grade;
+    const where = [sectionLabel, gradeLabel, s.classroom].filter(Boolean).join(' / ');
+    const label = `${s.name}${s.displayId?` (${s.displayId})`:''} — ${where}`;
+    const checked = blockedStudentIds.includes(s.id) ? 'checked' : '';
+    return `<label class="perm-check"><input type="checkbox" value="${s.id}" onchange="toggleBlockedStudent('${s.id}', this.checked)" ${checked}> ${escapeHtml(label)}</label>`;
+  }).join('') || `<p class="foot-note">No matching students found.</p>`;
+  updateBlockedStudentsNote();
+}
+
+function updateBlockedStudentsNote(){
+  const note = document.getElementById('bsSelectedNote');
+  if(note){
+    note.textContent = blockedStudentIds.length
+      ? `${blockedStudentIds.length} student(s) blocked — their Parent/Student account will see "Account is NOT active" and no tab at all.`
+      : 'No students blocked yet.';
+  }
+  renderBlockedStudentsChips();
+}
+
+// Small removable-chip summary (same visual pattern as the attendance "excluded
+// day" chips) so the Admin can see, at a glance, every student currently
+// blocked — even ones filtered out of view by the search box above — and
+// unblock them with one click without having to search each one back up.
+function renderBlockedStudentsChips(){
+  const chipsWrap = document.getElementById('bsBlockedChips');
+  const countEl = document.getElementById('bsBlockedCount');
+  if(countEl) countEl.textContent = blockedStudentIds.length;
+  if(!chipsWrap) return;
+  if(!blockedStudentIds.length){
+    chipsWrap.innerHTML = `<p class="foot-note" style="margin:0;">No students blocked yet.</p>`;
+    return;
+  }
+  const all = allStudentsFlat();
+  const byId = {};
+  all.forEach(s=> byId[s.id]=s);
+  chipsWrap.innerHTML = blockedStudentIds.map(id=>{
+    const s = byId[id];
+    const label = s ? `${s.name}${s.displayId?` (${s.displayId})`:''}` : id;
+    return `<span class="att-excl-chip">🚫 ${escapeHtml(label)}<button type="button" class="att-excl-chip-x" title="Unblock this student" onclick="toggleBlockedStudent('${id}', false); renderBlockedStudentsPicker();">×</button></span>`;
+  }).join('');
+}
+
+function toggleBlockedStudent(id, checked){
+  if(checked){
+    if(!blockedStudentIds.includes(id)) blockedStudentIds.push(id);
+  } else {
+    blockedStudentIds = blockedStudentIds.filter(x=> x!==id);
+  }
+  updateBlockedStudentsNote();
+}
+
+function saveBlockedStudents(){
+  saveBlockedStudentsLocalOnly();
+  scheduleGithubPush();
+  logActivity('edit', `Updated Blocked Students list (${blockedStudentIds.length} blocked)`);
+  closeBlockedStudentsModal();
+  if(currentView==='reports') switchView('reports');
+}
+
 /* ========== REPORT CARD RELEASE ========== */
 let reportCardReleases = [];
 const REPORT_CARD_RELEASES_LS_KEY = 'reportCardReleases';
@@ -7441,6 +7606,10 @@ function getUpcomingReportCardReleases(){
 }
 
 function updateQuickStatsWidget(){
+  const wrap = document.getElementById('quickStatsWidget');
+  const isAdmin = !!(currentUser && currentUser.role==='admin');
+  if(wrap) wrap.style.display = isAdmin ? '' : 'none';
+  if(!isAdmin) return;
   const elStudents = document.getElementById('qsStudents');
   const elAvg = document.getElementById('qsAvg');
   const elPending = document.getElementById('qsPending');
@@ -7588,7 +7757,7 @@ setInterval(refreshHeaderQuickWidgets, 60 * 1000);
 
 const ROLE_LABELS = { 
   admin:'Admin', 
-  hos:'HOS/Deputies', 
+  hos:'HOS/Deputy', 
   hod:'Head of Department', 
   teacher:'Teacher', 
   parent:'Parent / Student' 
@@ -7658,7 +7827,7 @@ function getEffectivePermissions(user){
       sectionScope:null, stageScope:null, classroomScope:null };
   }
   if(role==='hos'){
-    // HOS/Deputies: Can View their relevant Section and Stage - Can View or edit Grade Book, Can View or Edit Absence, Can View Reports, Can View Dashboard, Can View Exam Analysis
+    // HOS/Deputy: Can View their relevant Section and Stage - Can View or edit Grade Book, Can View or Edit Absence, Can View Reports, Can View Dashboard, Can View Exam Analysis
     return { database:false, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, perfAlerts:true, settings:false, edit:true,
       sectionScope:user.section||null, stageScope:user.stages||[], classroomScope:null };
   }
@@ -7712,6 +7881,73 @@ function scopeStudentAllowed(id){
   return !sc || sc.includes(id);
 }
 
+// Since the app runs in a single browser tab, logging out one user and logging
+// in as another (e.g. Admin -> HOS on a shared computer) does NOT reload the
+// page, so any Section/Stage/Class/Subject picked by the PREVIOUS user is
+// still sitting in memory (and, for the Grade Book/Reports stepper, in
+// localStorage too). Without this check, a newly logged-in HOS/Teacher/HOD
+// could briefly see a class table for a Stage outside their assigned scope
+// just because it was the last thing selected before them. Called right
+// after `currentUser.effective` is (re)computed, this walks every
+// scope-sensitive selection in the app and resets anything the new scope
+// doesn't allow, forcing a fresh Section/Stage/Class pick instead.
+function sanitizeScopedState(){
+  if(!currentUser || !currentUser.effective) return;
+
+  // Grade Book / Reports shared stepper state
+  if(state.section && !scopeSectionAllowed(state.section)){
+    state.section = null; state.stage = null; state.grade = null; state.term = null; state.academicTerm = null; state.subject = null;
+  } else if(state.stage && !scopeStageAllowed(state.stage)){
+    state.stage = null; state.grade = null; state.term = null; state.academicTerm = null; state.subject = null;
+  } else if(state.term && !scopeClassroomAllowed(state.term)){
+    state.term = null;
+  }
+  if(state.subject && !scopeSubjectAllowed(state.subject)) state.subject = null;
+
+  // Attendance tab's own independent stepper state
+  if(attState.section && !scopeSectionAllowed(attState.section)){
+    attState.section = null; attState.stage = null; attState.grade = null; attState.term = null; attState.subject = null;
+  } else if(attState.stage && !scopeStageAllowed(attState.stage)){
+    attState.stage = null; attState.grade = null; attState.term = null; attState.subject = null;
+  } else if(attState.term && !scopeClassroomAllowed(attState.term)){
+    attState.term = null;
+  }
+  if(attState.subject && !scopeSubjectAllowed(attState.subject)) attState.subject = null;
+
+  // Cycle Dashboard filters
+  if(state.dashboardSection && !scopeSectionAllowed(state.dashboardSection)){
+    state.dashboardSection = null; state.dashboardStage = null; state.dashboardGrade = null; state.dashboardClassroom = null; state.dashboardStudent = null;
+  } else if(state.dashboardStage && !scopeStageAllowed(state.dashboardStage)){
+    state.dashboardStage = null; state.dashboardGrade = null; state.dashboardClassroom = null; state.dashboardStudent = null;
+  } else if(state.dashboardClassroom && !scopeClassroomAllowed(state.dashboardClassroom)){
+    state.dashboardClassroom = null; state.dashboardStudent = null;
+  }
+
+  // Exams Analysis filters
+  if(state.examsSection && !scopeSectionAllowed(state.examsSection)){
+    state.examsSection = null; state.examsStage = null; state.examsGrade = null; state.examsClassroom = null; state.examsSubject = null;
+  } else if(state.examsStage && !scopeStageAllowed(state.examsStage)){
+    state.examsStage = null; state.examsGrade = null; state.examsClassroom = null; state.examsSubject = null;
+  } else if(state.examsClassroom && !scopeClassroomAllowed(state.examsClassroom)){
+    state.examsClassroom = null;
+  }
+  if(state.examsSubject && !scopeSubjectAllowed(state.examsSubject)) state.examsSubject = null;
+
+  // Top Performance / At-Risk filters — one saved selection per Term/Cycle/Category
+  if(perfFilterStates && typeof perfFilterStates === 'object'){
+    Object.values(perfFilterStates).forEach(st=>{
+      if(!st) return;
+      if(st.section && !scopeSectionAllowed(st.section)){
+        st.section = null; st.stage = null; st.grade = null; st.term = null;
+      } else if(st.stage && !scopeStageAllowed(st.stage)){
+        st.stage = null; st.grade = null; st.term = null;
+      } else if(st.term && !scopeClassroomAllowed(st.term)){
+        st.term = null;
+      }
+    });
+  }
+}
+
 function handleLogin(e){
   e.preventDefault();
   const btn = document.getElementById('loginSubmitBtn');
@@ -7735,6 +7971,7 @@ function handleLogin(e){
 function loginAs(user, remember, showWelcome){
   currentUser = user;
   currentUser.effective = getEffectivePermissions(user);
+  sanitizeScopedState();
   try{
     sessionStorage.setItem(SESSION_LS_KEY, user.username);
     if(remember){
@@ -7754,12 +7991,17 @@ function loginAs(user, remember, showWelcome){
   const allowed = firstAllowedTab();
   if(allowed){
     document.getElementById('noAccessPanel').style.display = 'none';
+    document.getElementById('accountBlockedPanel').style.display = 'none';
+    document.getElementById('mainNav').style.display = '';
     switchView(allowed);
+  } else if(isViewerAccountBlocked()){
+    showAccountBlockedScreen();
   } else {
     document.getElementById('gradesView').style.display = 'none';
     document.getElementById('databaseView').style.display = 'none';
     document.getElementById('reportsView').style.display = 'none';
     document.getElementById('attendanceView').style.display = 'none';
+    document.getElementById('accountBlockedPanel').style.display = 'none';
     document.getElementById('noAccessPanel').style.display = 'flex';
   }
   if(showWelcome) showWelcomeModal(user);
@@ -7797,12 +8039,14 @@ function tryAutoLogin(){
 
 function canAccessTab(tab){
   if(!currentUser || !currentUser.effective) return false;
+  if(isViewerAccountBlocked()) return false; // blocked accounts can't open ANY tab
   if(tab==='teachers') return currentUser.role === 'admin'; // Teachers Database only for Admin
   return !!currentUser.effective[tab];
 }
 
 function firstAllowedTab(){
   if(!currentUser || !currentUser.effective) return null;
+  if(isViewerAccountBlocked()) return null; // blocked accounts get the "Account is NOT active" screen instead of any tab
   if(currentUser.effective.database) return 'database';
   if(currentUser.effective.grades) return 'grades';
   if(currentUser.effective.attendance) return 'attendance';
@@ -7837,6 +8081,10 @@ function applyPermissionsUI(){
   if(delAllBtn) delAllBtn.style.display = currentUser.role==='admin' ? '' : 'none';
   const notifWrap = document.getElementById('notifBellWrap');
   if(notifWrap) notifWrap.style.display = currentUser.role==='admin' ? '' : 'none';
+  const syncEl = document.getElementById('githubSyncStatus');
+  if(syncEl && currentUser.role!=='admin') syncEl.style.display = 'none';
+  const quickStatsEl = document.getElementById('quickStatsWidget');
+  if(quickStatsEl) quickStatsEl.style.display = currentUser.role==='admin' ? '' : 'none';
   setTimeout(updateStickySpacing, 0);
 }
 
@@ -7856,7 +8104,7 @@ function openUsersModal(){
     document.getElementById('ufSection').value = currentUser.section;
     document.getElementById('ufSection').disabled = true;
   } else {
-    roleSelect.innerHTML = `<option value="admin">Admin</option><option value="hos">HOS/Deputies</option><option value="teacher">Teacher</option>
+    roleSelect.innerHTML = `<option value="admin">Admin</option><option value="hos">HOS/Deputy</option><option value="teacher">Teacher</option>
       <option value="hod">Head of Department</option><option value="parent">Parent / Student</option>`;
     document.getElementById('ufSection').disabled = false;
   }
@@ -8090,7 +8338,7 @@ function saveUserFromForm(){
     renderUsersTable();
     renderTeachersDatabase();
     resetUserForm();
-    if(currentUser){ currentUser.effective = getEffectivePermissions(currentUser); applyPermissionsUI(); }
+    if(currentUser){ currentUser.effective = getEffectivePermissions(currentUser); sanitizeScopedState(); applyPermissionsUI(); }
     logActivity('edit', `Updated user account "${username}" (${ROLE_LABELS[role]||role})${role==='teacher' ? ' + updated Teachers Database' : ''}`);
   } else {
     if(findUser(username)){ alert('This username already exists.'); return; }
@@ -8113,7 +8361,7 @@ function saveUserFromForm(){
     saveState(); // Save teachers as well
     renderUsersTable();
     resetUserForm();
-    if(currentUser){ currentUser.effective = getEffectivePermissions(currentUser); applyPermissionsUI(); }
+    if(currentUser){ currentUser.effective = getEffectivePermissions(currentUser); sanitizeScopedState(); applyPermissionsUI(); }
     logActivity('add', `Created user account "${username}" (${ROLE_LABELS[role]||role})${role==='teacher' ? ' + added to Teachers Database' : ''}`);
   }
 }
@@ -8182,7 +8430,7 @@ function downloadUserTemplate(){
   const sample = [
     { "Username":"mona.teacher", "Display Name":"Mona Adel", "Password":"12345", "Role":"Teacher",
       "Section":"English Section", "Subjects":"Mathematics; Science", "Classes":"3/A; 4/B" },
-    { "Username":"fatima.hos", "Display Name":"Fatima Deputy", "Password":"12345", "Role":"HOS/Deputies",
+    { "Username":"fatima.hos", "Display Name":"Fatima Deputy", "Password":"12345", "Role":"HOS/Deputy",
       "Section":"French Section", "Subjects":"", "Classes":"" },
     { "Username":"ahmed.hod", "Display Name":"Ahmed Samir", "Password":"12345", "Role":"Head of Department",
       "Section":"French Section", "Subjects":"", "Classes":"" },
@@ -8194,8 +8442,8 @@ function downloadUserTemplate(){
   const guide = [
     { "Field":"Username", "Allowed Values":"Unique login name, no spaces recommended" },
     { "Field":"Password", "Allowed Values":"Any text — the user can change it later" },
-    { "Field":"Role", "Allowed Values":"Admin / HOS/Deputies / Teacher / Head of Department / Parent / Student" },
-    { "Field":"Section", "Allowed Values":"English Section / French Section — required for Teacher, HOS/Deputies, Head of Department and Parent/Student (leave blank for Admin)" },
+    { "Field":"Role", "Allowed Values":"Admin / HOS/Deputy / Teacher / Head of Department / Parent / Student" },
+    { "Field":"Section", "Allowed Values":"English Section / French Section — required for Teacher, HOS/Deputy, Head of Department and Parent/Student (leave blank for Admin)" },
     { "Field":"Subjects", "Allowed Values":"Semicolon-separated subject names — only for Teacher/Parent/Student. Available: " + ALL_SUBJECTS.join(', ') },
     { "Field":"Classes", "Allowed Values":"Semicolon-separated class values (must match the 'Class' step used in Grade Book, e.g. 3/A) — only for Teacher/Parent/Student" }
   ];
@@ -8415,6 +8663,7 @@ function githubPullReady(){ return true; } // Firestore doc is always reachable,
 function setSyncStatus(state){
   const el = document.getElementById('githubSyncStatus');
   if(!el) return;
+  if(!currentUser || currentUser.role!=='admin'){ el.style.display = 'none'; return; }
   if(!githubConfig || !githubConfig.enabled){ el.style.display = 'none'; return; }
   const map = {
     idle:    ['☁ Not synced yet', '#B8B2A0'],
@@ -8471,6 +8720,10 @@ function applyRemotePayload(payload){
     termMonthDates = normalizeTermMonthDates(payload.termMonthDates);
     saveTermMonthDatesLocalOnly();
   }
+  if(Array.isArray(payload.blockedStudentIds)){
+    blockedStudentIds = payload.blockedStudentIds;
+    saveBlockedStudentsLocalOnly();
+  }
   if(payload.presenceBucket && !presenceBucket){
     presenceBucket = payload.presenceBucket;
     try{ localStorage.setItem(PRESENCE_BUCKET_LS_KEY, presenceBucket); }catch(err){}
@@ -8480,6 +8733,18 @@ function applyRemotePayload(payload){
   if(typeof renderTeachersDatabase==='function') renderTeachersDatabase();
   if(typeof renderTable==='function') renderTable();
   if(typeof renderAttendanceWorkspace==='function') renderAttendanceWorkspace();
+  if(currentUser){
+    if(isViewerAccountBlocked()){
+      showAccountBlockedScreen();
+    } else if(document.getElementById('accountBlockedPanel') && document.getElementById('accountBlockedPanel').style.display==='flex'){
+      // was blocked, just got unblocked remotely — restore normal navigation
+      document.getElementById('mainNav').style.display = '';
+      document.getElementById('accountBlockedPanel').style.display = 'none';
+      const allowed = firstAllowedTab();
+      if(allowed) switchView(allowed);
+      else document.getElementById('noAccessPanel').style.display = 'flex';
+    }
+  }
   fbApplyingRemote = false;
 }
 
@@ -8533,7 +8798,7 @@ async function pushToGithub(){
     // to send — the eventual echo/snapshot for THIS push carries the older, lower version and
     // gets ignored by the listener instead of overwriting those newer edits.
     const versionToPush = knownDataVersion + 1;
-    const payload = { students, scores, studentIdCounter, attendance, teachers, teacherIdCounter, users, activityLog, termMonthDates, presenceBucket: presenceBucket || null, dataVersion: versionToPush, savedAt: new Date().toISOString() };
+    const payload = { students, scores, studentIdCounter, attendance, teachers, teacherIdCounter, users, activityLog, termMonthDates, blockedStudentIds, presenceBucket: presenceBucket || null, dataVersion: versionToPush, savedAt: new Date().toISOString() };
     knownDataVersion = versionToPush;
     fbLastPushedAt = Date.now();
     await FB_DOC_REF.set(payload, { merge:false });
@@ -8760,6 +9025,7 @@ setTimeout(updateStickySpacing, 0);
 loadState();
 loadActivityLog();
 loadReportCardReleases();
+loadBlockedStudentsLocalOnly();
 loadTermMonthDates();
 loadGithubConfig();
 loadLastGradebookSelection();
