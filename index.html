@@ -317,6 +317,7 @@ body{
 .nav-tab[data-view="config"].active::after{background:var(--purple);}
 .nav-tab[data-view="teachers"].active::after{background:var(--teal);}
 .nav-tab[data-view="perfAlerts"].active::after{background:var(--red);}
+.nav-tab[data-view="classLists"].active::after{background:var(--amber);}
 .nav-tab:not(.active)::after{background:transparent;}
 .nav-dropdown{position:relative;}
 .nav-dropdown-menu{
@@ -1719,7 +1720,13 @@ body.dark-mode .att-table tbody tr:hover .att-name-col{ background:var(--paper-2
   </div>
 
   <div class="main-nav" id="mainNav">
-    <button class="nav-tab active" data-view="database" id="navTabDatabase" onclick="switchView('database')">🗂 Student Database</button>
+    <div class="nav-dropdown" id="databaseDropdownWrap">
+      <button class="nav-tab active" data-view="database" id="navTabDatabase" onclick="toggleDatabaseMenu(event)">🗂 Students ▾</button>
+      <div class="nav-dropdown-menu" id="databaseMenu">
+        <button class="opt-btn" onclick="switchView('database');closeDatabaseMenu();">🗂 Students Database</button>
+        <button class="opt-btn" onclick="switchView('classLists');closeDatabaseMenu();">📋 Class Lists</button>
+      </div>
+    </div>
     <button class="nav-tab" data-view="teachers" id="navTabTeachers" onclick="switchView('teachers')">🧑‍🏫 Teachers Database</button>
     <button class="nav-tab" data-view="grades" id="navTabGrades" onclick="switchView('grades')">📘 Grade Book</button>
     <button class="nav-tab" data-view="attendance" id="navTabAttendance" onclick="switchView('attendance')">📅 Absence</button>
@@ -2029,9 +2036,33 @@ body.dark-mode .att-table tbody tr:hover .att-name-col{ background:var(--paper-2
     </div>
   </div>
 
+  <div id="classListsView" style="display:none;">
+    <div class="classbar">
+      <div class="classbar-crumbs" id="classListsCrumbs"></div>
+      <button class="btn btn-outline" onclick="window.print()">🖨 Print</button>
+    </div>
+    <div class="stepper" id="classListsStepper"></div>
+    <div class="workspace show" id="classListsIntroState">
+      <div class="empty-state">
+        <div class="seal-lg">📋</div>
+        <h3>Generate Class Lists</h3>
+        <p>Use the steps above to select Section, Stage, Grade and Class, then view the class list with student information.</p>
+      </div>
+    </div>
+    <div class="workspace show" id="classListsWorkspace" style="display:none;">
+      <div class="toolbar" style="margin-bottom:16px;">
+        <button class="btn btn-outline" onclick="downloadClassListExcel()">⬇ Download as Excel</button>
+        <button class="btn btn-outline" onclick="downloadClassListPDF()">⬇ Download as PDF</button>
+      </div>
+      <div class="table-card">
+        <div id="classListTableHolder"></div>
+      </div>
+    </div>
+  </div>
+
   <div id="databaseView">
     <div class="classbar" style="margin-bottom:14px;">
-      <div class="classbar-crumbs"><span class="crumb">Student Database</span></div>
+      <div class="classbar-crumbs"><span class="crumb">Students</span></div>
       <div class="classbar-count" id="dbCount">0 students</div>
     </div>
 
@@ -2495,6 +2526,7 @@ function switchView(view){
   document.getElementById('examsAnalysisView').style.display = view==='examsAnalysis' ? '' : 'none';
   document.getElementById('teachersView').style.display = view==='teachers' ? '' : 'none';
   document.getElementById('perfAlertsView').style.display = view==='perfAlerts' ? '' : 'none';
+  document.getElementById('classListsView').style.display = view==='classLists' ? '' : 'none';
   document.querySelectorAll('.nav-tab').forEach(b=> b.classList.toggle('active', b.dataset.view===view));
   if(view==='database') renderDatabase();
   if(view==='teachers') renderTeachersDatabase();
@@ -2503,6 +2535,7 @@ function switchView(view){
   if(view==='dashboard'){ renderDashboard(); }
   if(view==='examsAnalysis'){ renderExamsAnalysis(); }
   if(view==='perfAlerts'){ renderPerfFilterStepper(); renderPerfAlerts(); }
+  if(view==='classLists'){ renderClassListsStepper(); renderClassListsWorkspace(); }
 }
 
 let openTermGroup = null;
@@ -2798,7 +2831,8 @@ function selectValue(key, id, targetState){
     ['examsDropdownWrap','examsMenu'],
     ['perfDropdownWrap','perfMenu'],
     ['examSchedDropdownWrap','examSchedMenu'],
-    ['configDropdownWrap','configMenu']
+    ['configDropdownWrap','configMenu'],
+    ['databaseDropdownWrap','databaseMenu']
   ];
   const closeTimers = {};
   NAV_DROPDOWNS.forEach(([wrapId, menuId])=>{
@@ -2850,6 +2884,10 @@ document.addEventListener('click', (e)=>{
     const cm = document.getElementById('configMenu');
     if(cm) cm.classList.remove('open');
   }
+  if(!e.target.closest('#databaseDropdownWrap')){
+    const dbm = document.getElementById('databaseMenu');
+    if(dbm) dbm.classList.remove('open');
+  }
   if(!e.target.closest('#visitorsWidget')){
     const dd = document.getElementById('visitorsDropdown');
     if(dd) dd.classList.remove('open');
@@ -2877,6 +2915,15 @@ function toggleReportsMenu(e){
 function toggleConfigMenu(e){
   e.stopPropagation();
   document.getElementById('configMenu').classList.toggle('open');
+}
+
+function toggleDatabaseMenu(e){
+  e.stopPropagation();
+  document.getElementById('databaseMenu').classList.toggle('open');
+}
+function closeDatabaseMenu(){
+  const dm = document.getElementById('databaseMenu');
+  if(dm) dm.classList.remove('open');
 }
 
 function toggleDashboardMenu(e){
@@ -10145,6 +10192,132 @@ function handleBulkGradesExcelFile(file){
   };
   reader.readAsArrayBuffer(file);
   document.getElementById('bulkGradesExcelInput').value = '';
+}
+
+/* ============ CLASS LISTS ============ */
+function renderClassListsStepper(){
+  const st = state;
+  const config = makeStepConfig(st, SECTIONS, STAGES);
+  renderStepper('classListsStepper', config, () => {
+    renderClassListsWorkspace();
+  });
+}
+
+function renderClassListsWorkspace(){
+  const classListsIntro = document.getElementById('classListsIntroState');
+  const classListsWs = document.getElementById('classListsWorkspace');
+  
+  if(!state.section || !state.stage || !state.grade || !state.classroom){
+    classListsWs.style.display = 'none';
+    classListsIntro.style.display = '';
+    return;
+  }
+  
+  classListsIntro.style.display = 'none';
+  classListsWs.style.display = '';
+  
+  const classKey_ = `${state.section}|${state.stage}|${state.grade}`;
+  const roster = students[classKey_] || [];
+  const classStudents = roster.filter(s => s.classroom === state.classroom).sort((a, b) => 
+    (a.displayId || '').localeCompare(b.displayId || '')
+  );
+  
+  // Update breadcrumbs
+  const crumbs = document.getElementById('classListsCrumbs');
+  crumbs.innerHTML = `
+    <span class="crumb">${SECTION_LABELS[state.section]}</span>
+    <span class="crumb">${STAGE_LABELS[state.stage]}</span>
+    <span class="crumb">Grade ${state.grade}</span>
+    <span class="crumb">${state.classroom}</span>
+  `;
+  
+  // Build the table
+  let html = `
+    <table class="data-table" style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:var(--ink);color:var(--paper);">
+          <th style="padding:10px;text-align:center;border:1px solid var(--border);">No.</th>
+          <th style="padding:10px;text-align:left;border:1px solid var(--border);">Student ID</th>
+          <th style="padding:10px;text-align:left;border:1px solid var(--border);">Student Name</th>
+          <th style="padding:10px;text-align:center;border:1px solid var(--border);">Gender</th>
+          <th style="padding:10px;text-align:left;border:1px solid var(--border);">Second Language</th>
+          <th style="padding:10px;text-align:left;border:1px solid var(--border);">Religion</th>
+          <th style="padding:10px;text-align:left;border:1px solid var(--border);">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+  
+  classStudents.forEach((stu, idx) => {
+    const secondLang = stu.secondLanguage || '—';
+    const religion = stu.religion || '—';
+    const notes = stu.notes || '';
+    const gender = stu.gender ? (stu.gender === 'M' ? '♂' : '♀') : '—';
+    
+    html += `
+      <tr style="background:${idx % 2 === 0 ? 'var(--paper)' : 'var(--paper-2)'};border-bottom:1px solid var(--border);">
+        <td style="padding:10px;text-align:center;border:1px solid var(--border);">${idx + 1}</td>
+        <td style="padding:10px;text-align:left;border:1px solid var(--border);">${stu.displayId || ''}</td>
+        <td style="padding:10px;text-align:left;border:1px solid var(--border);font-weight:500;">${stu.name}</td>
+        <td style="padding:10px;text-align:center;border:1px solid var(--border);">${gender}</td>
+        <td style="padding:10px;text-align:left;border:1px solid var(--border);">${secondLang}</td>
+        <td style="padding:10px;text-align:left;border:1px solid var(--border);">${religion}</td>
+        <td style="padding:10px;text-align:left;border:1px solid var(--border);">${notes}</td>
+      </tr>
+    `;
+  });
+  
+  html += `
+      </tbody>
+    </table>
+  `;
+  
+  document.getElementById('classListTableHolder').innerHTML = html;
+}
+
+function downloadClassListExcel(){
+  const classKey_ = `${state.section}|${state.stage}|${state.grade}`;
+  const roster = students[classKey_] || [];
+  const classStudents = roster.filter(s => s.classroom === state.classroom).sort((a, b) => 
+    (a.displayId || '').localeCompare(b.displayId || '')
+  );
+  
+  const wsData = [];
+  wsData.push(['No.', 'Student ID', 'Student Name', 'Gender', 'Second Language', 'Religion', 'Notes']);
+  
+  classStudents.forEach((stu, idx) => {
+    wsData.push([
+      idx + 1,
+      stu.displayId || '',
+      stu.name,
+      stu.gender === 'M' ? 'Male' : (stu.gender === 'F' ? 'Female' : ''),
+      stu.secondLanguage || '',
+      stu.religion || '',
+      stu.notes || ''
+    ]);
+  });
+  
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [
+    {wch: 6},
+    {wch: 15},
+    {wch: 25},
+    {wch: 10},
+    {wch: 18},
+    {wch: 12},
+    {wch: 25}
+  ];
+  
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Class List');
+  const filename = `ClassList_${SECTION_LABELS[state.section]}_Grade${state.grade}_${state.classroom}_${new Date().toISOString().split('T')[0]}.xlsx`;
+  XLSX.writeFile(wb, filename);
+  
+  logActivity('export', `Exported class list for ${SECTION_LABELS[state.section]} Grade ${state.grade} (${state.classroom})`);
+}
+
+function downloadClassListPDF(){
+  alert('PDF export is coming soon. For now, you can use the Print function (Ctrl+P or Cmd+P) to save as PDF.');
 }
 </script>
 </body>
