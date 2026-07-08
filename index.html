@@ -738,6 +738,14 @@ td:has(> .score-input){background:var(--bg);}
 }
 .del-btn:hover{color:var(--red);background:var(--red-bg);}
 
+.order-btns{display:flex;flex-direction:column;gap:2px;align-items:center;}
+.order-btn{
+  background:none;border:1px solid var(--border);color:var(--ink-2);font-size:10px;cursor:pointer;
+  padding:1px 6px;border-radius:4px;line-height:1.4;
+}
+.order-btn:hover:not(:disabled){color:var(--gold-deep);border-color:var(--gold-deep);background:var(--gold-light);}
+.order-btn:disabled{opacity:.3;cursor:not-allowed;}
+
 .empty-state{
   padding:60px 20px;text-align:center;color:var(--ink-soft);
 }
@@ -6826,6 +6834,33 @@ function downloadTemplate(){
 /* ================== TEACHERS DATABASE VIEW ================== */
 function nextTeacherDisplayId(){ return 'TCH-' + String(teacherIdCounter++).padStart(4,'0'); }
 
+// Maps the Manage Users section code ('en'/'fr') to the label format used in the
+// Teachers Database (English/French/Both), so auto-imported teacher accounts line
+// up correctly with the Section filter/column in the Teachers Database.
+function sectionLabelFromCode(code){
+  if(code==='en') return 'English';
+  if(code==='fr') return 'French';
+  return code || 'English';
+}
+
+// Moves a teacher one position up/down within the Teachers Database, so admins can
+// arrange the list manually (e.g. by seniority, department order, etc.).
+function moveTeacherInDb(id, direction){
+  if(!currentUser || currentUser.role !== 'admin'){
+    alert('⛔ Teachers Database is only available to Administrators.');
+    return;
+  }
+  const idx = teachers.findIndex(t=>t.id===id);
+  if(idx===-1) return;
+  const newIdx = idx + direction;
+  if(newIdx<0 || newIdx>=teachers.length) return;
+  const tmp = teachers[idx];
+  teachers[idx] = teachers[newIdx];
+  teachers[newIdx] = tmp;
+  renderTeachersDatabase();
+  saveState();
+}
+
 function toggleAddTeacherForm(force){
   // Teachers Database access restricted to Admin users only
   if(!currentUser || currentUser.role !== 'admin'){ 
@@ -6968,6 +7003,11 @@ function renderTeachersDatabase(){
   document.getElementById('teachersCount').textContent = `${list.length} teachers`;
   const holder = document.getElementById('teachersTableHolder');
 
+  // Manual reordering (▲▼) only makes unambiguous sense when the list isn't narrowed
+  // by a search/filter, since the buttons move a teacher's position within the full
+  // underlying database. While a filter/search is active we disable the arrows.
+  const reorderEnabled = !search && !fSection && !fSubject && !fClass;
+
   if(list.length===0){
     holder.innerHTML = `
       <div class="empty-state">
@@ -6978,9 +7018,20 @@ function renderTeachersDatabase(){
     return;
   }
 
-  const rows = list.map(t=>`
+  const rows = list.map(t=>{
+    const fullIdx = teachers.findIndex(x=>x.id===t.id);
+    const atTop = fullIdx<=0;
+    const atBottom = fullIdx>=teachers.length-1;
+    const orderCell = reorderEnabled
+      ? `<div class="order-btns">
+           <button class="order-btn" ${atTop?'disabled':''} onclick="moveTeacherInDb('${t.id}',-1)" title="Move up">▲</button>
+           <button class="order-btn" ${atBottom?'disabled':''} onclick="moveTeacherInDb('${t.id}',1)" title="Move down">▼</button>
+         </div>`
+      : `<span class="foot-note" title="Clear search &amp; filters to reorder">—</span>`;
+    return `
     <tr>
       <td><input type="checkbox" class="teacherCheckbox" value="${t.id}"></td>
+      <td>${orderCell}</td>
       <td><span class="seat-badge">${t.displayId||'—'}</span></td>
       <td class="name-col">
         <input type="text" class="db-edit-select" value="${(t.name||'').replace(/"/g,'&quot;')}" onchange="flashInlineSaved(this);updateTeacherField('${t.id}','name',this.value)">
@@ -6996,16 +7047,18 @@ function renderTeachersDatabase(){
         <input type="text" class="db-edit-select" value="${(t.subject||'').replace(/"/g,'&quot;')}" onchange="flashInlineSaved(this);updateTeacherField('${t.id}','subject',this.value)">
       </td>
       <td>
-        <input type="text" class="db-edit-select" value="${(t.classes||'').replace(/"/g,'&quot;')}" placeholder="e.g. 3/A, 3/B" onchange="flashInlineSaved(this);updateTeacherField('${t.id}','classes',this.value)">
+        <input type="text" class="db-edit-select" value="${(t.classes||'').replace(/"/g,'&quot;')}" placeholder="e.g. 3/A, 3/B (add later anytime)" onchange="flashInlineSaved(this);updateTeacherField('${t.id}','classes',this.value)">
       </td>
       <td><button class="del-btn" onclick="deleteTeacherFromDb('${t.id}')" title="Delete">✕</button></td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 
   holder.innerHTML = `
     <table>
       <thead>
         <tr>
           <th style="width:30px;"><input type="checkbox" id="teacherSelectAllCheckbox" onclick="toggleSelectAllTeachers()"></th>
+          <th style="width:56px;">Order</th>
           <th>ID</th>
           <th class="name-col">Teachers Name</th>
           <th>Section</th>
@@ -8961,17 +9014,30 @@ function saveUserFromForm(){
   if(editing){
     const user = findUser(editing);
     if(!user) return;
+    const previousRole = user.role;
     Object.assign(user, userObj);
     
-    // Auto-update teacher in Teachers Database if role is teacher
+    // Auto-sync the Teachers Database whenever this account is (or becomes) a Teacher.
+    // Match primarily by the linked username (reliable even if the name changes later);
+    // fall back to matching by name for teacher rows that pre-date this linking, and
+    // as a last resort create a fresh Teachers Database row (e.g. role just switched to Teacher).
     if(role === 'teacher'){
-      const teacher = teachers.find(t => t.name === editing || t.name === displayName);
-      if(teacher){
-        teacher.name = displayName || username;
-        teacher.section = section;
-        teacher.subject = subjects.length > 0 ? subjects[0] : '';
-        teacher.classes = classrooms.join(', ');
+      let teacher = teachers.find(t => t.username === editing) || teachers.find(t => t.username === username);
+      if(!teacher) teacher = teachers.find(t => !t.username && (t.name === editing || t.name === displayName));
+      if(!teacher){
+        teacher = { id: uid(), displayId: nextTeacherDisplayId(), classes: '' };
+        teachers.push(teacher);
       }
+      teacher.username = username;
+      teacher.name = displayName || username;
+      teacher.section = sectionLabelFromCode(section);
+      teacher.subject = subjects.join(', ');
+      // Classes stay whatever was picked in Manage Users; admins can also add/adjust
+      // them later directly from the Teachers Database "Classes" column.
+      teacher.classes = classrooms.length ? classrooms.join(', ') : (teacher.classes || '');
+    } else if(previousRole === 'teacher'){
+      // Role changed away from Teacher: drop the linked Teachers Database row.
+      teachers = teachers.filter(t => !(t.username===editing || t.username===username));
     }
     
     if(currentUser && currentUser.username === user.username){
@@ -8989,14 +9055,18 @@ function saveUserFromForm(){
     if(findUser(username)){ alert('This username already exists.'); return; }
     users.push(userObj);
     
-    // Auto-import teacher to Teachers Database
+    // Auto-import teacher to Teachers Database, filling Section & Subject from what was
+    // just entered in Manage Users. Classes can be left blank here and added/edited later
+    // directly in the Teachers Database. New rows are appended to the end of the manually
+    // orderable list, ready to be moved with the ▲▼ buttons.
     if(role === 'teacher'){
       const teacherEntry = {
         id: uid(),
         displayId: nextTeacherDisplayId(),
         name: displayName || username,
-        section: section,
-        subject: subjects.length > 0 ? subjects[0] : '',
+        username: username,
+        section: sectionLabelFromCode(section),
+        subject: subjects.join(', '),
         classes: classrooms.join(', ')
       };
       teachers.push(teacherEntry);
@@ -9019,10 +9089,11 @@ function deleteUserRow(username){
   }
   if(!confirm(`Delete user "${username}"?`)) return;
   
-  // Delete from Teachers Database if user was a teacher
+  // Delete from Teachers Database if user was a teacher (match by linked username first,
+  // falling back to name-matching for legacy rows created before linking existed)
   if(user && user.role === 'teacher'){
     const displayName = user.displayName || username;
-    teachers = teachers.filter(t => t.name !== displayName && t.name !== username);
+    teachers = teachers.filter(t => t.username ? t.username !== username : (t.name !== displayName && t.name !== username));
   }
   
   users = users.filter(u=> u.username !== username);
@@ -9236,10 +9307,26 @@ function importUsersExcel(file){
         }
         users.push(userObj);
         added++;
+
+        // Auto-import teacher accounts into the Teachers Database too, filling
+        // Section & Subject from the row just imported (Classes can be added later).
+        if(role === 'teacher'){
+          teachers.push({
+            id: uid(),
+            displayId: nextTeacherDisplayId(),
+            name: displayName || username,
+            username: username,
+            section: sectionLabelFromCode(sectionId),
+            subject: userObj.subjects.join(', '),
+            classes: userObj.classrooms.join(', ')
+          });
+        }
       });
 
       saveUsers();
+      saveState(); // Save teachers as well
       renderUsersTable();
+      renderTeachersDatabase();
       document.getElementById('importTitle').textContent = 'Users Import Result';
       let msg = `${added} user(s) added successfully.`;
       if(problems.length){
