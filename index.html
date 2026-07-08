@@ -2103,7 +2103,7 @@ const ATT_STAGES = JSON.parse(JSON.stringify(STAGES));
 
 let state = { termPeriod:null, section:null, stage:null, grade:null, term:null, academicTerm:null, subject:null, reportTerm:'term1', reportType:null,
   dashboardTerm:null, dashboardMode:null, dashboardSection:null, dashboardStage:null, dashboardGrade:null, dashboardClassroom:null, dashboardStudent:null,
-  examsTerm:null, examsMode:null, examsSection:null, examsStage:null, examsGrade:null, examsClassroom:null,
+  examsTerm:null, examsMode:null, examsSection:null, examsStage:null, examsGrade:null, examsClassroom:null, examsSubject:null,
   perfTerm:null, perfCycle:null, perfCategory:null };
 
 // Top Performance / At Risk keeps its own independent Section/Stage/Grade/Class filter,
@@ -3081,14 +3081,16 @@ function getExamModeLabel(term, mode){
   return EXAMS_MODE_LABELS[mode] || mode;
 }
 
-// Which raw score field feeds each exam mode, its maximum grade (as shown in the mark-entry
-// tables), and which stages actually record that field. Cycle 1 / Cycle 2 only exist for the
-// Primary Stage (non-junior grades); First Term Exam Paper (the "Final Exam" column) only
-// exists for Prep & Secondary Stage subjects.
+// Which raw score field feeds each exam mode and which stages actually record that field.
+// Cycle 1 / Cycle 2 only exist for the Primary Stage (non-junior grades). The First Term /
+// End-of-Year Exam Paper is recorded once for the whole Grade via the "examPaper" Mark Entry
+// screen, for every stage — its maximum grade is 60 for Primary and 30 for Prep/Secondary
+// (same as examPaperMax() on the Grade Book screen), so max is resolved per-stage rather than
+// being a single fixed number here.
 const EXAM_FIELD_INFO = {
-  cycle1:    { field:'m1Cycle', max:5,  appliesToStage: st => st==='primary' },
-  cycle2:    { field:'m2Cycle', max:5,  appliesToStage: st => st==='primary' },
-  finalexam: { field:'final',   max:60, appliesToStage: st => st!=='primary' }
+  cycle1:    { field:'m1Cycle',   max:5,                      appliesToStage: st => st==='primary' },
+  cycle2:    { field:'m2Cycle',   max:5,                      appliesToStage: st => st==='primary' },
+  finalexam: { field:'examPaper', max: st => st==='primary' ? 60 : 30, appliesToStage: st => true }
 };
 
 // Score-range bands used for the analysis table (percentage of each column's own maximum).
@@ -3140,6 +3142,10 @@ function renderExamsFilters(){
     classOpts = classes.map(c=>`<option value="${String(c).replace(/"/g,'&quot;')}" ${state.examsClassroom===c?'selected':''}>${c}</option>`).join('');
   }
 
+  const subjectOpts = state.examsStage
+    ? STAGES[state.examsStage].subjects.filter(s=>scopeSubjectAllowed(s)).map(s=>`<option value="${escapeXml(s)}" ${state.examsSubject===s?'selected':''}>${escapeHtml(s)}</option>`).join('')
+    : '';
+
   wrap.innerHTML = `
     <div>
       <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;">Section</label>
@@ -3164,31 +3170,39 @@ function renderExamsFilters(){
       <select id="exfClassroom" onchange="setExamsFilter('classroom',this.value)" ${classReady?'':'disabled'}>
         <option value="">All classes</option>${classOpts}
       </select>
+    </div>
+    <div>
+      <label style="display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:4px;">Subject</label>
+      <select id="exfSubject" onchange="setExamsFilter('subject',this.value)" ${state.examsStage?'':'disabled'}>
+        <option value="">All Subjects</option>${subjectOpts}
+      </select>
     </div>`;
 }
 
 function setExamsFilter(kind, value){
   if(kind==='section') state.examsSection = value || null;
-  if(kind==='stage'){ state.examsStage = value || null; state.examsGrade = null; state.examsClassroom = null; }
+  if(kind==='stage'){ state.examsStage = value || null; state.examsGrade = null; state.examsClassroom = null; state.examsSubject = null; }
   if(kind==='grade'){ state.examsGrade = value || null; state.examsClassroom = null; }
   if(kind==='classroom') state.examsClassroom = value || null;
+  if(kind==='subject') state.examsSubject = value || null;
   renderExamsFilters();
   renderExamsTable();
 }
 
 /* ---------- Exams Analysis: data ---------- */
-function computeExamsAnalysis(section, stage, grade, classroom, term, mode){
+function computeExamsAnalysis(section, stage, grade, classroom, term, mode, subjectFilter){
   const info = EXAM_FIELD_INFO[mode];
   if(!info) return { invalid:true, reason:'Unknown exam type.' };
   if(!info.appliesToStage(stage)){
     return { invalid:true, reason: mode==='finalexam'
-      ? 'First Term Exam Paper scores are only recorded for Prep and Secondary Stage subjects.'
+      ? 'Exam Paper scores are not recorded for this stage.'
       : 'Cycle scores are only recorded for Primary Stage subjects.' };
   }
   const junior = stage==='primary' && (grade==='g1' || grade==='g2');
   if(junior){
     return { invalid:true, reason:'Cycle scores are not recorded for Grade 1 & Grade 2 Primary.' };
   }
+  const max = typeof info.max === 'function' ? info.max(stage) : info.max;
   const ck = `${section}|${stage}|${grade}`;
   let roster = students[ck] || [];
   if(classroom) roster = roster.filter(s=> (s.classroom||'').trim() === classroom);
@@ -3196,7 +3210,8 @@ function computeExamsAnalysis(section, stage, grade, classroom, term, mode){
     return { invalid:true, reason:'There are no students registered for this class yet.' };
   }
 
-  const subjects = STAGES[stage].subjects;
+  const allSubjects = STAGES[stage].subjects;
+  const subjects = subjectFilter ? allSubjects.filter(s=>s===subjectFilter) : allSubjects;
   const columns = [];
   subjects.forEach(subject=>{
     const sk = `${ck}|${term}|${subject}`;
@@ -3215,18 +3230,18 @@ function computeExamsAnalysis(section, stage, grade, classroom, term, mode){
     if(!vals.length) return;
     const bandCounts = SCORE_BANDS.map(()=>0);
     vals.forEach(v=>{
-      const pct = (v/info.max)*100;
+      const pct = (v/max)*100;
       bandCounts[bandIndexForPct(pct)]++;
     });
     columns.push({ subject, total:vals.length, bandCounts });
   });
-  return { invalid:false, columns, max:info.max };
+  return { invalid:false, columns, max };
 }
 
 function renderExamsTable(){
   const area = document.getElementById('examsTableArea');
   if(!area) return;
-  const { examsSection:section, examsStage:stage, examsGrade:grade, examsClassroom:classroom, examsTerm:term, examsMode:mode } = state;
+  const { examsSection:section, examsStage:stage, examsGrade:grade, examsClassroom:classroom, examsTerm:term, examsMode:mode, examsSubject:subject } = state;
 
   if(!term || !mode){
     area.innerHTML = `<div class="empty-state"><div class="seal-lg">🧮</div><h3>Choose an exam</h3><p>Use the "Exams Analysis" menu above to choose a Term, then Cycle 1, Cycle 2, or First Term / End-of-Year Exam Paper.</p></div>`;
@@ -3237,7 +3252,7 @@ function renderExamsTable(){
     return;
   }
 
-  const result = computeExamsAnalysis(section, stage, grade, classroom, term, mode);
+  const result = computeExamsAnalysis(section, stage, grade, classroom, term, mode, subject);
   if(result.invalid){
     area.innerHTML = `<div class="empty-state"><div class="seal-lg">ℹ️</div><h3>Not applicable</h3><p>${escapeHtml(result.reason)}</p></div>`;
     return;
