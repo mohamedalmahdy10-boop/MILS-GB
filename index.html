@@ -654,10 +654,10 @@ tbody tr:last-child td{border-bottom:none;}
 tbody tr:hover{background:var(--row-hover);}
 .name-col{text-align:left;padding-left:18px !important;font-weight:700;}
 
-/* ---------- Student Database table: wider name column, RTL Arabic-name column, freeze up through "2nd Language" ---------- */
-#dbTableHolder table{min-width:1360px;}
+/* ---------- Student Database table: wider name column, RTL Arabic-name column, freeze up through "Class" ---------- */
+#dbTableHolder table{min-width:1500px;}
 #dbTableHolder th.name-col,
-#dbTableHolder td.name-col{min-width:190px;}
+#dbTableHolder td.name-col{min-width:260px;}
 #dbTableHolder th:nth-child(4),
 #dbTableHolder td:nth-child(4){text-align:right;}
 #dbTableHolder td:nth-child(4) input{text-align:right;}
@@ -666,25 +666,27 @@ tbody tr:hover{background:var(--row-hover);}
 #dbTableHolder th:nth-child(2){left:40px;}
 #dbTableHolder td:nth-child(2){left:40px;min-width:70px;}
 #dbTableHolder th:nth-child(3){left:110px;}
-#dbTableHolder td:nth-child(3){left:110px;min-width:190px;}
-#dbTableHolder th:nth-child(4){left:300px;}
-#dbTableHolder td:nth-child(4){left:300px;min-width:150px;}
-#dbTableHolder th:nth-child(5){left:450px;}
-#dbTableHolder td:nth-child(5){left:450px;min-width:110px;}
-#dbTableHolder th:nth-child(6){left:560px;}
-#dbTableHolder td:nth-child(6){left:560px;min-width:90px;}
+#dbTableHolder td:nth-child(3){left:110px;min-width:260px;}
+#dbTableHolder th:nth-child(4){left:370px;}
+#dbTableHolder td:nth-child(4){left:370px;min-width:220px;}
+#dbTableHolder th:nth-child(5){left:590px;}
+#dbTableHolder td:nth-child(5){left:590px;min-width:110px;}
+#dbTableHolder th:nth-child(6){left:700px;}
+#dbTableHolder td:nth-child(6){left:700px;min-width:90px;}
 #dbTableHolder th:nth-child(7),
-#dbTableHolder td:nth-child(7){position:sticky;left:650px;min-width:110px;background:var(--paper);z-index:9;border-right:1px solid var(--border);}
+#dbTableHolder td:nth-child(7){position:sticky;left:790px;min-width:110px;background:var(--paper);z-index:9;border-right:1px solid var(--border);}
 #dbTableHolder thead th:nth-child(7){z-index:12;background:var(--ink);color:#fff;border-right:1px solid rgba(0,0,0,0.12);}
+/* Freeze zone now ends after the "Class" column (8th column): Religion and
+   2nd Language (9th/10th) scroll normally like the rest of the table. */
 #dbTableHolder th:nth-child(8),
-#dbTableHolder td:nth-child(8){position:sticky;left:760px;min-width:90px;background:var(--paper);z-index:9;border-right:1px solid var(--border);}
-#dbTableHolder thead th:nth-child(8){z-index:12;background:var(--ink);color:#fff;border-right:1px solid rgba(0,0,0,0.12);}
+#dbTableHolder td:nth-child(8){position:sticky;left:900px;min-width:90px;background:var(--paper);z-index:9;border-right:2px solid var(--gold);}
+#dbTableHolder thead th:nth-child(8){z-index:12;background:var(--ink);color:#fff;border-right:2px solid var(--gold);}
 #dbTableHolder th:nth-child(9),
-#dbTableHolder td:nth-child(9){position:sticky;left:850px;min-width:90px;background:var(--paper);z-index:9;border-right:1px solid var(--border);}
-#dbTableHolder thead th:nth-child(9){z-index:12;background:var(--ink);color:#fff;border-right:1px solid rgba(0,0,0,0.12);}
+#dbTableHolder td:nth-child(9){min-width:90px;}
 #dbTableHolder th:nth-child(10),
-#dbTableHolder td:nth-child(10){position:sticky;left:940px;min-width:100px;background:var(--paper);z-index:9;border-right:2px solid var(--gold);}
-#dbTableHolder thead th:nth-child(10){z-index:12;background:var(--ink);color:#fff;border-right:2px solid var(--gold);}
+#dbTableHolder td:nth-child(10){min-width:100px;}
+#dbTableHolder td[data-dob-auto="1"]{background:var(--green-bg);}
+#dbTableHolder td[data-dob-auto="1"] input{background:transparent;cursor:not-allowed;}
 .seat-badge{
   display:inline-block;background:var(--bg);border:1px solid var(--border);border-radius:6px;
   padding:2px 8px;font-size:12px;color:var(--ink-soft);
@@ -2344,25 +2346,25 @@ function subjectWithIcon(subject){
 
 const STAGES = {
   primary:  { label: "Primary Stage", grades: [
-      {id:'g1', label:'Grade 1 Primary'},
-      {id:'g2', label:'Grade 2 Primary'},
-      {id:'g3', label:'Grade 3 Primary'},
-      {id:'g4', label:'Grade 4 Primary'},
-      {id:'g5', label:'Grade 5 Primary'},
-      {id:'g6', label:'Grade 6 Primary'}
+      {id:'g1', label:'Grade 1'},
+      {id:'g2', label:'Grade 2'},
+      {id:'g3', label:'Grade 3'},
+      {id:'g4', label:'Grade 4'},
+      {id:'g5', label:'Grade 5'},
+      {id:'g6', label:'Grade 6'}
     ],
     subjects: ["Arabic","English O.L.","Mathematics","Science","Social","English A.L.","Religion","Ch-Religion","French","German","ICT"]
   },
   prep:     { label: "Prep Stage", grades: [
-      {id:'g7', label:'Grade 7 Prep'},
-      {id:'g8', label:'Grade 8 Prep'},
-      {id:'g9', label:'Grade 9 Prep'}
+      {id:'g7', label:'Grade 7'},
+      {id:'g8', label:'Grade 8'},
+      {id:'g9', label:'Grade 9'}
     ],
     subjects: ["Arabic","English O.L.","Mathematics","Science","Social","English A.L.","Religion","Ch-Religion","French","German","Art","ICT"]
   },
   secondary:{ label: "Secondary Stage", grades: [
-      {id:'g10', label:'Grade 10 Secondary'},
-      {id:'g11', label:'Grade 11 Secondary'}
+      {id:'g10', label:'Grade 10'},
+      {id:'g11', label:'Grade 11'}
     ],
     subjects: ["Arabic","English O.L.","Mathematics","Integrated Sciences","History","Philosophy","English A.L.","Religion","Ch-Religion","French O.L.","German O.L.","French A.L.","German A.L.","ICT"]
   }
@@ -2472,6 +2474,18 @@ function isPrimary(){ return state.stage === 'primary'; }
 // Grade 1 & Grade 2 Primary use an extended mark-entry structure (Q.Av./C.W./H.W./Oral out of 20/20/20/10, Total out of 75).
 function isJuniorPrimary(){ return isPrimary() && (state.grade==='g1' || state.grade==='g2'); }
 function nextDisplayId(){ return 'STU-' + String(studentIdCounter++).padStart(4,'0'); }
+// Formats an ID that was typed/pasted into the uploaded Excel sheet into the
+// on-screen display format: "MILS-" followed by the last 4 digits (from the
+// right) of the value that was in the file. Non-digit characters (dashes,
+// spaces, letters) are stripped first, so "800401-00001058" or "ID 1058"
+// both become "MILS-1058". If fewer than 4 digits are found, it's padded
+// with leading zeros.
+function formatMilsId(rawId){
+  const digits = (rawId||'').toString().replace(/\D/g,'');
+  if(!digits) return '';
+  const last4 = digits.slice(-4).padStart(4,'0');
+  return 'MILS-' + last4;
+}
 // Attendance is tracked per Class within its own Academic Term + Month selection (attState),
 // fully independent of the Grade Book tab. Each Term × Month combination is its own table.
 function attClassKey(){ return `${attState.section}|${attState.stage}|${attState.grade}|${attState.termPeriod}|${attState.term}|${attState.subject}|${attState.academicTerm}`; }
@@ -2741,6 +2755,7 @@ function buildStepperHTML(holderId, cfgs, idPrefix, prominentCount){
         renderReportsStepper();
         renderAttendanceStepper();
         renderPerfFilterStepper();
+        renderClassListsStepper();
       };
     }
     row.appendChild(div);
@@ -2816,6 +2831,7 @@ function selectValue(key, id, targetState){
   renderWorkspace();
   renderReportWorkspace();
   renderAttendanceWorkspace();
+  if(st === state){ renderClassListsStepper(); renderClassListsWorkspace(); }
   if(st && st.__isPerfFilter) renderPerfAlerts();
 }
 
@@ -5963,7 +5979,7 @@ function importExcel(file){
         if(!/^(french|german|english)$/i.test(lang2)) lang2 = lang2 || '-';
         const providedId = (row['ID']||row['id']||'').toString().trim();
         const id = uid();
-        const displayId = providedId || nextDisplayId();
+        const displayId = providedId ? formatMilsId(providedId) : nextDisplayId();
         roster.push({id, displayId, name, classroom, religion, lang2});
 
         if(isPrimary()){
@@ -6480,12 +6496,16 @@ function renderDatabase(){
     return;
   }
 
+  let dobAutoUpdated = false;
   const rows = list.map(s=>{
     const availableClasses = classesForKey(s.classKey);
     const classOptions = [`<option value="" ${!s.classroom?'selected':''}>— None —</option>`]
       .concat(availableClasses.map(c=> `<option value="${c.replace(/"/g,'&quot;')}" ${s.classroom===c?'selected':''}>${c}</option>`))
       .concat([`<option value="__new__">+ Add new class…</option>`])
       .join('');
+    // Date of Birth is derived automatically from the 14-digit Egyptian National ID whenever possible
+    const autoDob = calcDobFromNationalId(s.nationalId);
+    if(autoDob && s.dob!==autoDob){ s.dob = autoDob; dobAutoUpdated = true; }
     return `
     <tr>
       <td><input type="checkbox" class="dbStudentCheckbox" value="${s.classKey}::${s.id}"></td>
@@ -6530,12 +6550,14 @@ function renderDatabase(){
       <td>
         <input type="text" class="db-edit-select" value="${(s.nationality||'').replace(/"/g,'&quot;')}" placeholder="Nationality" onchange="flashInlineSaved(this);updateStudentField('${s.classKey}','${s.id}','nationality',this.value)">
       </td>
-      <td>
-        <input type="text" class="db-edit-select" value="${(s.dob||'').replace(/"/g,'&quot;')}" placeholder="DD/MM/YY" maxlength="8" onchange="flashInlineSaved(this);updateStudentField('${s.classKey}','${s.id}','dob',this.value)">
+      <td${autoDob?' data-dob-auto="1"':''}>
+        <input type="text" class="db-edit-select" value="${(s.dob||'').replace(/"/g,'&quot;')}" placeholder="DD/MM/YY" maxlength="8" ${autoDob?'readonly title="Calculated automatically from the National ID"':''} onchange="flashInlineSaved(this);updateStudentField('${s.classKey}','${s.id}','dob',this.value)">
       </td>
       <td><button class="del-btn" onclick="deleteStudentFromDb('${s.classKey}','${s.id}')" title="Delete">✕</button></td>
     </tr>`;
   }).join('');
+
+  if(dobAutoUpdated) saveState();
 
   holder.innerHTML = `
     <table>
@@ -6562,11 +6584,37 @@ function renderDatabase(){
     </table>`;
 }
 
+// Derives DD/MM/YY date of birth from a 14-digit Egyptian National ID.
+// Digit 1 = century (2 -> 1900s, 3 -> 2000s), digits 2-3 = year, 4-5 = month, 6-7 = day.
+// Returns '' if the ID isn't a valid 14-digit number or the embedded date is not valid.
+function calcDobFromNationalId(nationalId){
+  const digits = (nationalId||'').replace(/\D/g,'');
+  if(digits.length!==14) return '';
+  const centuryDigit = digits.charAt(0);
+  const centuryPrefix = centuryDigit==='2' ? '19' : (centuryDigit==='3' ? '20' : '');
+  if(!centuryPrefix) return '';
+  const yy = digits.substr(1,2);
+  const mm = digits.substr(3,2);
+  const dd = digits.substr(5,2);
+  const monthNum = parseInt(mm,10);
+  const dayNum = parseInt(dd,10);
+  if(monthNum<1 || monthNum>12) return '';
+  if(dayNum<1 || dayNum>31) return '';
+  const fullYear = parseInt(centuryPrefix+yy,10);
+  const checkDate = new Date(fullYear, monthNum-1, dayNum);
+  if(checkDate.getFullYear()!==fullYear || (checkDate.getMonth()+1)!==monthNum || checkDate.getDate()!==dayNum) return '';
+  return `${dd}/${mm}/${yy}`;
+}
+
 function updateStudentField(ck, studentId, field, value){
   const roster = students[ck]||[];
   const s = roster.find(s=>s.id===studentId);
   if(!s) return;
   s[field] = value;
+  if(field==='nationalId'){
+    const autoDob = calcDobFromNationalId(value);
+    if(autoDob) s.dob = autoDob;
+  }
   saveState();
   renderDatabase();
 }
@@ -6785,12 +6833,20 @@ function importDatabaseExcel(file){
         const stageLabel = getRowField(row, 'Stage');
         const gradeLabel = getRowField(row, 'Grade');
         const classroom = getRowField(row, 'Class', 'Classroom');
+        const nameAr = getRowField(row, 'اسم الطالب', 'Arabic Name', 'Student Name (Arabic)');
+        const nationalId = getRowField(row, 'National ID', 'National Id', 'NationalID');
+        const nationality = getRowField(row, 'Nationality');
+        const dob = getRowField(row, 'Date of Birth (DD/MM/YY)', 'Date of Birth', 'DOB', 'dob');
         let religion = getRowField(row, 'Religion') || '-';
         if(!/^(muslim|christian)$/i.test(religion)) religion = '-';
         else religion = religion.charAt(0).toUpperCase() + religion.slice(1).toLowerCase();
         let lang2 = getRowField(row, 'Second Language') || '-';
         if(!/^(french|german|english)$/i.test(lang2)) lang2 = '-';
         else lang2 = lang2.charAt(0).toUpperCase() + lang2.slice(1).toLowerCase();
+        let gender = getRowField(row, 'Gender', 'Sex', 'النوع', 'الجنس') || '-';
+        if(!/^(male|female|m|f|ذكر|أنثى|انثى)$/i.test(gender)) gender = '-';
+        else if(/^(male|m|ذكر)$/i.test(gender)) gender = 'Male';
+        else gender = 'Female';
 
         if(!name){ problems.push(`Row ${idx+2}: missing student name`); return; }
         const sectionId = findSectionId(sectionLabel);
@@ -6818,8 +6874,12 @@ function importDatabaseExcel(file){
 
         const ck = `${sectionId}|${stageId}|${gradeId}`;
         if(!students[ck]) students[ck]=[];
-        const displayId = providedId || nextDisplayId();
-        students[ck].push({id:uid(), displayId, name, classroom, religion, lang2});
+        const displayId = providedId ? formatMilsId(providedId) : nextDisplayId();
+        students[ck].push({id:uid(), displayId, name, nameAr, classroom, religion, lang2, gender, nationalId, nationality, dob});
+        {
+          const autoDob = calcDobFromNationalId(nationalId);
+          if(autoDob) students[ck][students[ck].length-1].dob = autoDob;
+        }
         if(providedId) existingIds.set(providedId.toLowerCase(), name);
         added++;
       });
@@ -6855,8 +6915,8 @@ function importDatabaseExcel(file){
 
 function downloadTemplate(){
   const sample = [
-    { "ID":"", "Section":"English Section", "Stage":"Primary Stage", "Grade":"Grade 3 Primary", "Student Name":"Ahmed Mohamed Ali", "Class":"3/1", "Religion":"Muslim", "Second Language":"French" },
-    { "ID":"", "Section":"", "Stage":"", "Grade":"", "Student Name":"", "Class":"", "Religion":"", "Second Language":"" }
+    { "ID":"", "Section":"English Section", "Stage":"Primary Stage", "Grade":"Grade 3", "Student Name":"Ahmed Mohamed Ali", "اسم الطالب":"أحمد محمد علي", "Class":"3/1", "Gender":"Male", "Religion":"Muslim", "Second Language":"French", "National ID":"", "Nationality":"Egyptian" },
+    { "ID":"", "Section":"", "Stage":"", "Grade":"", "Student Name":"", "اسم الطالب":"", "Class":"", "Gender":"", "Religion":"", "Second Language":"", "National ID":"", "Nationality":"" }
   ];
   const wsData = XLSX.utils.json_to_sheet(sample);
 
@@ -6867,8 +6927,12 @@ function downloadTemplate(){
     { "Field":"Section", "Allowed Values":"English Section / French Section" },
     { "Field":"Stage", "Allowed Values":"Primary Stage / Prep Stage / Secondary Stage" },
     { "Field":"Grade", "Allowed Values": allGrades.join(' | ') },
+    { "Field":"اسم الطالب (optional)", "Allowed Values":"Student's name in Arabic — leave blank if not available" },
+    { "Field":"Gender (optional)", "Allowed Values":"Male / Female / leave blank" },
     { "Field":"Religion (optional)", "Allowed Values":"Muslim / Christian / leave blank" },
-    { "Field":"Second Language (optional)", "Allowed Values":"French / German / English / leave blank" }
+    { "Field":"Second Language (optional)", "Allowed Values":"French / German / English / leave blank" },
+    { "Field":"National ID (optional)", "Allowed Values":"14-digit Egyptian national ID — Date of Birth is calculated automatically from it, so there is no separate Date of Birth column to fill in" },
+    { "Field":"Nationality (optional)", "Allowed Values":"Free text, e.g. Egyptian" }
   ];
   const wsGuide = XLSX.utils.json_to_sheet(guide);
 
@@ -7843,7 +7907,7 @@ function downloadSeatAssignmentTemplate(){
   const { term, type } = examScheduleCurrent;
   loadExamSeatAssignments();
   const list = (examSeatAssignments[term] && examSeatAssignments[term][type]) || [];
-  const flat = allStudentsFlat();
+  const flat = allStudentsFlatRaw();
   const rows = list.length ? list.map(r=>{
     const s = flat.find(x=> x.id===r.studentId);
     return {
@@ -7880,7 +7944,7 @@ function handleSeatAssignmentExcelFile(file){
         document.getElementById('seatAssignmentExcelInput').value = '';
         return;
       }
-      const flat = allStudentsFlat();
+      const flat = allStudentsFlatRaw();
       const byDisplayId = new Map();
       flat.forEach(s=>{
         if(!s.displayId) return;
@@ -7952,7 +8016,7 @@ function renderExamSeatCards(){
   const { term, type } = examScheduleCurrent;
   loadExamSeatAssignments();
   const seatList = (examSeatAssignments[term] && examSeatAssignments[term][type]) || [];
-  const flat = allStudentsFlat();
+  const flat = allStudentsFlatRaw();
   const cardsHtml = ids.map(sid=>{
     const s = flat.find(x=> x.id===sid);
     if(!s) return '';
@@ -8065,7 +8129,7 @@ function renderBlockedStudentsPicker(){
   const wrap = document.getElementById('bsStudentsWrap');
   if(!wrap) return;
   const q = (document.getElementById('bsSearch').value||'').trim().toLowerCase();
-  let list = allStudentsFlat();
+  let list = allStudentsFlatRaw();
   if(q) list = list.filter(s=> s.name.toLowerCase().includes(q) || (s.displayId||'').toLowerCase().includes(q));
   list.sort((a,b)=> a.name.localeCompare(b.name));
   wrap.innerHTML = list.map(s=>{
@@ -8103,7 +8167,7 @@ function renderBlockedStudentsChips(){
     chipsWrap.innerHTML = `<p class="foot-note" style="margin:0;">No students blocked yet.</p>`;
     return;
   }
-  const all = allStudentsFlat();
+  const all = allStudentsFlatRaw();
   const byId = {};
   all.forEach(s=> byId[s.id]=s);
   chipsWrap.innerHTML = blockedStudentIds.map(id=>{
@@ -8566,27 +8630,27 @@ function getEffectivePermissions(user){
   const role = user.role || 'parent';
   if(role==='admin'){
     // Admin: Full System Access
-    return { database:true, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, examSchedule:true, perfAlerts:true, settings:true, edit:true,
+    return { database:true, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, examSchedule:true, perfAlerts:true, classLists:true, settings:true, edit:true,
       sectionScope:null, stageScope:null, classroomScope:null };
   }
   if(role==='hos'){
     // HOS/Deputy: Can View their relevant Section and Stage - Can View or edit Grade Book, Can View or Edit Absence, Can View Reports, Can View Dashboard, Can View Exam Analysis
-    return { database:false, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, examSchedule:true, perfAlerts:true, settings:false, edit:true,
+    return { database:false, grades:true, attendance:true, reports:true, dashboard:true, examsAnalysis:true, examSchedule:true, perfAlerts:true, classLists:false, settings:false, edit:true,
       sectionScope:user.section||null, stageScope:user.stages||[], classroomScope:null };
   }
   if(role==='hod'){
     // Head of Department: Can view OR edit their subject's grade book within their stage (and their section).
-    return { database:false, grades:true, attendance:false, reports:true, dashboard:false, examsAnalysis:false, examSchedule:false, perfAlerts:false, settings:false, edit:true,
+    return { database:false, grades:true, attendance:false, reports:true, dashboard:false, examsAnalysis:false, examSchedule:false, perfAlerts:false, classLists:false, settings:false, edit:true,
       sectionScope:user.section||null, stageScope:user.stages||[], classroomScope:null, subjectScope:user.subjects||[] };
   }
   if(role==='teacher'){
     // Teacher: Can view or edit the grade form for their own subjects and classes only
-    return { database:false, grades:true, attendance:false, reports:false, dashboard:false, examsAnalysis:false, examSchedule:false, perfAlerts:false, settings:false, edit:true,
+    return { database:false, grades:true, attendance:false, reports:false, dashboard:false, examsAnalysis:false, examSchedule:false, perfAlerts:false, classLists:false, settings:false, edit:true,
       sectionScope:user.section||null, stageScope:null, classroomScope:user.classrooms||[], subjectScope:user.subjects||[] };
   }
   // Parent/Student: Can View ONLY Reports, Dashboard and the Exams Schedule
   const hasStudentLink = Array.isArray(user.studentIds);
-  return { database:false, grades:false, attendance:false, reports:true, dashboard:true, examsAnalysis:false, examSchedule:true, perfAlerts:false, settings:false, edit:false,
+  return { database:false, grades:false, attendance:false, reports:true, dashboard:true, examsAnalysis:false, examSchedule:true, perfAlerts:false, classLists:false, settings:false, edit:false,
     // Once a specific student link exists, section/stage/classroom no longer restrict anything —
     // the exact student-ID scope below is what keeps a parent from seeing classmates' data.
     // Legacy accounts (saved before this feature existed, so `studentIds` is still undefined)
@@ -8797,6 +8861,7 @@ function firstAllowedTab(){
   if(currentUser.effective.dashboard) return 'dashboard';
   if(currentUser.effective.examsAnalysis) return 'examsAnalysis';
   if(currentUser.effective.perfAlerts) return 'perfAlerts';
+  if(currentUser.effective.classLists) return 'classLists';
   return null;
 }
 
@@ -8818,6 +8883,12 @@ function applyPermissionsUI(){
   if(examSchedWrap) examSchedWrap.style.display = eff.examSchedule ? '' : 'none';
   const perfWrap = document.getElementById('perfDropdownWrap');
   if(perfWrap) perfWrap.style.display = eff.perfAlerts ? '' : 'none';
+  // Class Lists should be visible for admin (since it's under Students database)
+  const databaseMenu = document.getElementById('databaseMenu');
+  if(databaseMenu){
+    const classListsBtn = databaseMenu.querySelector('[onclick*="classLists"]');
+    if(classListsBtn) classListsBtn.style.display = eff.database ? '' : 'none';
+  }
   const configWrap = document.getElementById('configDropdownWrap');
   if(configWrap) configWrap.style.display = eff.settings ? '' : 'none';
   const toolbar = document.getElementById('gradesToolbar');
@@ -8861,9 +8932,18 @@ function closeUsersModal(){
   document.getElementById('usersOverlay').classList.remove('show');
 }
 // Flattens the `students` store into one list, tagging each student with
-// where they belong, so the "Linked Student(s)" picker can search across
+// where they belong (raw section/stage/grade IDs, not labels), so the
+// "Linked Student(s)" picker and similar id-based lookups can search across
 // every section/stage/grade/class at once.
-function allStudentsFlat(){
+// NOTE: this used to be named allStudentsFlat(), which duplicated (and,
+// due to function-declaration hoisting, silently overwrote) the earlier
+// allStudentsFlat() defined above renderDatabase(). That name collision is
+// why the Student Database's "Class" column stopped reflecting each
+// student's classroom (renderDatabase() ended up working with raw ids
+// instead of the {classKey, sectionId, stageId, gradeId, section, stage,
+// grade} shape it actually needs) — including right after a bulk Excel
+// import. Kept as a distinctly-named function to avoid reintroducing that bug.
+function allStudentsFlatRaw(){
   const list = [];
   Object.entries(students).forEach(([ck, roster])=>{
     const [section, stage, grade] = ck.split('|');
@@ -8879,7 +8959,7 @@ function renderUfStudentPicker(){
   const note = document.getElementById('ufStudentsSelectedNote');
   if(!wrap) return;
   const q = (document.getElementById('ufStudentSearch').value||'').trim().toLowerCase();
-  let list = allStudentsFlat();
+  let list = allStudentsFlatRaw();
   if(q) list = list.filter(s=> s.name.toLowerCase().includes(q) || (s.displayId||'').toLowerCase().includes(q));
   list.sort((a,b)=> a.name.localeCompare(b.name));
   const shown = list.slice(0,80);
@@ -10195,19 +10275,36 @@ function handleBulkGradesExcelFile(file){
 }
 
 /* ============ CLASS LISTS ============ */
-function renderClassListsStepper(){
+// Class Lists only needs Section / Stage / Grade / Class (the roster doesn't depend on
+// Academic Term, Mark Entry, or Subject), so it gets its own short stepper config —
+// same pattern as perfFilterStepConfig() — instead of reusing the full 7-step Grade Book config.
+function classListsStepConfig(){
   const st = state;
-  const config = makeStepConfig(st, SECTIONS, STAGES);
-  renderStepper('classListsStepper', config, () => {
-    renderClassListsWorkspace();
-  });
+  return [
+    { key:'section', title:'Section', state: st, getLabel:()=> st.section ? SECTIONS[st.section].label : null,
+      options: Object.entries(SECTIONS).filter(([id])=>scopeSectionAllowed(id)).map(([id,v])=>({id,label:v.label})) },
+    { key:'stage', title:'Stage', state: st, getLabel:()=> st.stage ? STAGES[st.stage].label : null,
+      options: Object.entries(STAGES).filter(([id])=>scopeStageAllowed(id)).map(([id,v])=>({id,label:v.label})), requires:['section'] },
+    { key:'grade', title:'Grade', state: st, getLabel:()=>{
+        if(!st.grade) return null;
+        const g = STAGES[st.stage].grades.find(g=>g.id===st.grade);
+        return g ? g.label : null;
+      }, options: ()=> st.stage ? STAGES[st.stage].grades.map(g=>({id:g.id,label:g.label})) : [], requires:['section','stage'] },
+    { key:'term', title:'Class', state: st, getLabel:()=> st.term ? st.term : null,
+      options: ()=> getClassesInGrade(st).filter(c=>scopeClassroomAllowed(c)).map(c=>({id:c,label:c})), requires:['section','stage','grade'] }
+  ];
+}
+function renderClassListsStepper(){
+  const holder = document.getElementById('classListsStepper');
+  if(!holder) return;
+  buildStepperHTML('classListsStepper', classListsStepConfig(), 'cl-');
 }
 
 function renderClassListsWorkspace(){
   const classListsIntro = document.getElementById('classListsIntroState');
   const classListsWs = document.getElementById('classListsWorkspace');
   
-  if(!state.section || !state.stage || !state.grade || !state.classroom){
+  if(!state.section || !state.stage || !state.grade || !state.term){
     classListsWs.style.display = 'none';
     classListsIntro.style.display = '';
     return;
@@ -10218,17 +10315,18 @@ function renderClassListsWorkspace(){
   
   const classKey_ = `${state.section}|${state.stage}|${state.grade}`;
   const roster = students[classKey_] || [];
-  const classStudents = roster.filter(s => s.classroom === state.classroom).sort((a, b) => 
+  const classStudents = roster.filter(s => s.classroom === state.term).sort((a, b) => 
     (a.displayId || '').localeCompare(b.displayId || '')
   );
   
   // Update breadcrumbs
   const crumbs = document.getElementById('classListsCrumbs');
+  const gradeObj = STAGES[state.stage].grades.find(g=>g.id===state.grade);
   crumbs.innerHTML = `
-    <span class="crumb">${SECTION_LABELS[state.section]}</span>
-    <span class="crumb">${STAGE_LABELS[state.stage]}</span>
-    <span class="crumb">Grade ${state.grade}</span>
-    <span class="crumb">${state.classroom}</span>
+    <span class="crumb">${SECTIONS[state.section].label}</span>
+    <span class="crumb">${STAGES[state.stage].label}</span>
+    <span class="crumb">${gradeObj ? gradeObj.label : state.grade}</span>
+    <span class="crumb">${state.term}</span>
   `;
   
   // Build the table
@@ -10278,7 +10376,7 @@ function renderClassListsWorkspace(){
 function downloadClassListExcel(){
   const classKey_ = `${state.section}|${state.stage}|${state.grade}`;
   const roster = students[classKey_] || [];
-  const classStudents = roster.filter(s => s.classroom === state.classroom).sort((a, b) => 
+  const classStudents = roster.filter(s => s.classroom === state.term).sort((a, b) => 
     (a.displayId || '').localeCompare(b.displayId || '')
   );
   
@@ -10310,10 +10408,10 @@ function downloadClassListExcel(){
   
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Class List');
-  const filename = `ClassList_${SECTION_LABELS[state.section]}_Grade${state.grade}_${state.classroom}_${new Date().toISOString().split('T')[0]}.xlsx`;
+  const filename = `ClassList_${SECTIONS[state.section].label}_Grade${state.grade}_${state.term}_${new Date().toISOString().split('T')[0]}.xlsx`;
   XLSX.writeFile(wb, filename);
   
-  logActivity('export', `Exported class list for ${SECTION_LABELS[state.section]} Grade ${state.grade} (${state.classroom})`);
+  logActivity('export', `Exported class list for ${SECTIONS[state.section].label} Grade ${state.grade} (${state.term})`);
 }
 
 function downloadClassListPDF(){
