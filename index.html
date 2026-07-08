@@ -1427,6 +1427,99 @@ body.dark-mode .att-table tbody tr:hover .att-name-col{ background:var(--paper-2
   </div>
 </div>
 
+<!-- ================= TERM & MONTH DATES MODAL ================= -->
+<div class="overlay-bg" id="termMonthDatesOverlay">
+  <div class="users-modal" style="max-width:640px;">
+    <button class="close-x" onclick="closeTermMonthDatesModal()">✕</button>
+    <h2>🗓 Term &amp; Month Dates</h2>
+    <p class="sub">Set the Start and End date of the 1st and 2nd Month for each Term (Admin only). Set once — it will not change automatically, and stays visible to every user until the Admin updates it again.</p>
+
+    <div class="modal-form">
+      <h3 style="margin-top:0;">Term 1</h3>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div class="field" style="flex:1;min-width:220px;">
+          <label>1st Month — Start Date</label>
+          <input type="date" id="tmdT1M1Start" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;">
+        </div>
+        <div class="field" style="flex:1;min-width:220px;">
+          <label>1st Month — End Date</label>
+          <input type="date" id="tmdT1M1End" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;">
+        </div>
+      </div>
+      <div class="field">
+        <label>1st Month — Exclude a Day (Holiday)</label>
+        <div class="att-excl-add-row">
+          <input type="date" id="tmdT1M1ExclInput">
+          <button type="button" class="btn btn-outline att-excl-add-btn" onclick="addTmdHoliday('term1','month1')">＋ Add</button>
+        </div>
+        <div class="att-excl-chips" id="tmdT1M1ExclChips"></div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div class="field" style="flex:1;min-width:220px;">
+          <label>2nd Month — Start Date</label>
+          <input type="date" id="tmdT1M2Start" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;">
+        </div>
+        <div class="field" style="flex:1;min-width:220px;">
+          <label>2nd Month — End Date</label>
+          <input type="date" id="tmdT1M2End" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;">
+        </div>
+      </div>
+      <div class="field">
+        <label>2nd Month — Exclude a Day (Holiday)</label>
+        <div class="att-excl-add-row">
+          <input type="date" id="tmdT1M2ExclInput">
+          <button type="button" class="btn btn-outline att-excl-add-btn" onclick="addTmdHoliday('term1','month2')">＋ Add</button>
+        </div>
+        <div class="att-excl-chips" id="tmdT1M2ExclChips"></div>
+      </div>
+
+      <h3>Term 2</h3>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div class="field" style="flex:1;min-width:220px;">
+          <label>1st Month — Start Date</label>
+          <input type="date" id="tmdT2M1Start" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;">
+        </div>
+        <div class="field" style="flex:1;min-width:220px;">
+          <label>1st Month — End Date</label>
+          <input type="date" id="tmdT2M1End" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;">
+        </div>
+      </div>
+      <div class="field">
+        <label>1st Month — Exclude a Day (Holiday)</label>
+        <div class="att-excl-add-row">
+          <input type="date" id="tmdT2M1ExclInput">
+          <button type="button" class="btn btn-outline att-excl-add-btn" onclick="addTmdHoliday('term2','month1')">＋ Add</button>
+        </div>
+        <div class="att-excl-chips" id="tmdT2M1ExclChips"></div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div class="field" style="flex:1;min-width:220px;">
+          <label>2nd Month — Start Date</label>
+          <input type="date" id="tmdT2M2Start" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;">
+        </div>
+        <div class="field" style="flex:1;min-width:220px;">
+          <label>2nd Month — End Date</label>
+          <input type="date" id="tmdT2M2End" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;width:100%;">
+        </div>
+      </div>
+      <div class="field">
+        <label>2nd Month — Exclude a Day (Holiday)</label>
+        <div class="att-excl-add-row">
+          <input type="date" id="tmdT2M2ExclInput">
+          <button type="button" class="btn btn-outline att-excl-add-btn" onclick="addTmdHoliday('term2','month2')">＋ Add</button>
+        </div>
+        <div class="att-excl-chips" id="tmdT2M2ExclChips"></div>
+      </div>
+
+      <p class="foot-note">Friday and Saturday are always excluded automatically. Any holiday dates added here apply to every Section, Stage, Grade, Class and Subject for that Term's Month — no need to set them again per class.</p>
+      <div class="perm-grid" style="margin-top:16px;">
+        <button class="btn btn-gold" onclick="saveTermMonthDates()">💾 Save Dates</button>
+      </div>
+      <p class="foot-note" id="termMonthDatesStatus" style="margin-top:10px;"></p>
+    </div>
+  </div>
+</div>
+
 <div class="wrap" id="appWrap" style="display:none;">
 
   <div class="masthead">
@@ -1594,6 +1687,7 @@ body.dark-mode .att-table tbody tr:hover .att-name-col{ background:var(--paper-2
       <div class="nav-dropdown-menu" id="configMenu">
         <button class="opt-btn" onclick="openUsersModal()">👤 Manage Users</button>
         <button class="opt-btn" onclick="openReportCardReleaseModal()">📋 Report Card Release</button>
+        <button class="opt-btn" onclick="openTermMonthDatesModal()">🗓 Term &amp; Month Dates</button>
         <button class="opt-btn" onclick="openActivityLogModal()">🕒 Activity &amp; Login Log</button>
         <div style="height:1px;background:var(--border);margin:6px 2px;"></div>
         <button class="opt-btn" onclick="downloadBackup()">⬇ Full Backup</button>
@@ -4784,8 +4878,18 @@ function renderAttendanceWorkspace(){
   intro.style.display = ready ? 'none' : '';
   if(!ready){ updateIntroState('attendanceIntroState', cfgs); return; }
 
+  // If the Admin has already set this Term's Month Start/End dates (and holidays) globally
+  // via "Term & Month Dates", use them automatically — no need to ask the teacher to re-enter
+  // a Start/End or holiday list here. The table is created (once) straight from that global
+  // range/holiday list the first time this class/subject/month is opened, so it appears
+  // immediately with no manual setup step at all.
+  const globalRange = termMonthDates && termMonthDates[attState.termPeriod] && termMonthDates[attState.termPeriod][attState.academicTerm];
+  const hasGlobalRange = !!(globalRange && globalRange.start && globalRange.end);
+  autoCreateAttendanceFromGlobalRange(globalRange, hasGlobalRange);
+
   const gradeLabel = ATT_STAGES[attState.stage].grades.find(g=>g.id===attState.grade).label;
   const monthLabel = attState.academicTerm==='month1' ? '1st Month' : '2nd Month';
+  const monthRange = formatTermMonthRange(attState.termPeriod, attState.academicTerm);
   document.getElementById('attendanceCrumbs').innerHTML = `
     <span class="crumb">${TERM_LABELS[attState.termPeriod]}</span>
     <span class="crumb">${ATT_SECTIONS[attState.section].label}</span>
@@ -4793,11 +4897,14 @@ function renderAttendanceWorkspace(){
     <span class="crumb">${gradeLabel}</span>
     <span class="crumb">${attState.term}</span>
     <span class="crumb subj">${subjectWithIcon(attState.subject)}</span>
-    <span class="crumb">${monthLabel}</span>
+    <span class="crumb">${monthLabel}${monthRange ? ` <small style="opacity:.7;font-weight:600;">(${monthRange})</small>` : ''}</span>
   `;
   const canEdit = !!(currentUser && currentUser.effective && currentUser.effective.edit);
+  // Once the Admin has configured this Term's Month (dates + holidays) globally, the whole
+  // manual Start/End/Exclude-a-Day bar is unnecessary here — everything already came from
+  // "Configuration ▸ Term & Month Dates" and the table just appears directly.
   const addBar = document.getElementById('attAddMonthBar');
-  if(addBar) addBar.style.display = canEdit ? '' : 'none';
+  if(addBar) addBar.style.display = (canEdit && !hasGlobalRange) ? '' : 'none';
 
   const ck = attClassKey();
   const month = attendance[ck];
@@ -4814,6 +4921,26 @@ function renderAttendanceWorkspace(){
   if(applyAllChk) applyAllChk.checked = false;
 
   renderAttendanceTable();
+}
+
+// Creates this class/subject/month's attendance table straight from the Admin's globally
+// configured Term & Month dates & holidays, the first time it's opened (only if it doesn't
+// already exist and the current user has edit rights) — so the table shows up directly with
+// no manual Start/End/holiday entry needed. Does nothing if the Admin hasn't set that range yet,
+// or the table already exists (holiday updates made later propagate via
+// regenerateAttendanceForGlobalMonth when the Admin edits them again).
+function autoCreateAttendanceFromGlobalRange(globalRange, hasGlobalRange){
+  if(!hasGlobalRange) return false;
+  const ck = attClassKey();
+  if(attendance[ck]) return false;
+  const canEdit = !!(currentUser && currentUser.effective && currentUser.effective.edit);
+  if(!canEdit) return false;
+  const holidays = globalRange.holidays || [];
+  const dates = generateAttendanceDates(globalRange.start, globalRange.end, new Set(holidays));
+  if(!dates || !dates.length) return false;
+  applyAttendanceDateRangeToClass(attState.section, attState.stage, attState.grade, attState.term, attState.subject, attState.termPeriod, attState.academicTerm, globalRange.start, globalRange.end, dates, holidays);
+  pushAttendanceChangeNow();
+  return true;
 }
 
 // Immediately (not debounced) pushes to Firebase after a critical write like creating/updating
@@ -5983,7 +6110,7 @@ function flashInlineSaved(el){
 }
 
 function downloadBackup(){
-  const payload = { students, scores, studentIdCounter, attendance, teachers, teacherIdCounter, savedAt: new Date().toISOString() };
+  const payload = { students, scores, studentIdCounter, attendance, teachers, teacherIdCounter, termMonthDates, savedAt: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -6004,6 +6131,10 @@ function restoreBackup(file){
       attendance = payload.attendance || {};
       teachers = payload.teachers || [];
       teacherIdCounter = payload.teacherIdCounter || teacherIdCounter;
+      if(payload.termMonthDates && payload.termMonthDates.term1 && payload.termMonthDates.term2){
+        termMonthDates = normalizeTermMonthDates(payload.termMonthDates);
+        saveTermMonthDatesLocalOnly();
+      }
       renderTable();
       renderDatabase();
       renderTeachersDatabase();
@@ -6906,6 +7037,189 @@ function downloadActivityLogExcel(){
   XLSX.writeFile(wb, `Activity_Log_${new Date().toISOString().split('T')[0]}.xlsx`);
   
   logActivity('export', 'Downloaded Activity Log as Excel');
+}
+
+/* ========== TERM & MONTH DATES ==========
+   The Start/End date (and excluded Holiday days) of the 1st and 2nd Month of each Term, set
+   once by the Admin (typically at the start of the school year) and shown to every user —
+   Teachers, Parents & Students included — wherever a Month is selected in the Grade Book or
+   Absence tabs. It never changes on its own; only an Admin editing it again through this modal
+   updates it. Holidays are set here ONCE per Term's Month and apply automatically to every
+   Section, Stage, Grade, Class & Subject — there's no need to add them again per class in the
+   Absence tab. Synced through the same Firebase document as the rest of the app's data so every
+   device sees the same dates. */
+let termMonthDates = {
+  term1: { month1:{start:'',end:'',holidays:[]}, month2:{start:'',end:'',holidays:[]} },
+  term2: { month1:{start:'',end:'',holidays:[]}, month2:{start:'',end:'',holidays:[]} }
+};
+const TERM_MONTH_DATES_LS_KEY = 'termMonthDates_v1';
+// Holidays being edited in the modal before Save is pressed — staged separately so Cancel/close
+// without saving doesn't touch the live data.
+let tmdStagedHolidays = { term1:{month1:[],month2:[]}, term2:{month1:[],month2:[]} };
+
+function normalizeTermMonthDates(data){
+  ['term1','term2'].forEach(term=>{
+    ['month1','month2'].forEach(m=>{
+      if(!data[term][m]) data[term][m] = { start:'', end:'', holidays:[] };
+      if(!Array.isArray(data[term][m].holidays)) data[term][m].holidays = [];
+    });
+  });
+  return data;
+}
+
+function loadTermMonthDates(){
+  try{
+    const raw = localStorage.getItem(TERM_MONTH_DATES_LS_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(parsed && parsed.term1 && parsed.term2) termMonthDates = parsed;
+    }
+  }catch(err){ console.warn('Could not load Term & Month Dates', err); }
+  // Backfill holidays arrays for data saved before this field existed.
+  normalizeTermMonthDates(termMonthDates);
+}
+
+function saveTermMonthDatesLocalOnly(){
+  try{ localStorage.setItem(TERM_MONTH_DATES_LS_KEY, JSON.stringify(termMonthDates)); }
+  catch(err){ console.warn('Could not save Term & Month Dates', err); }
+}
+
+// Formats a saved {start,end} range as "12 Sep – 20 Oct", or '' if not set yet.
+function formatTermMonthRange(termPeriod, monthKey){
+  const r = termMonthDates && termMonthDates[termPeriod] && termMonthDates[termPeriod][monthKey];
+  if(!r || !r.start || !r.end) return '';
+  const fmt = d => {
+    const dt = new Date(d + 'T00:00:00');
+    if(isNaN(dt)) return d;
+    return dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short' });
+  };
+  return `${fmt(r.start)} – ${fmt(r.end)}`;
+}
+
+const TMD_HOLIDAY_IDS = {
+  term1: { month1:{input:'tmdT1M1ExclInput', chips:'tmdT1M1ExclChips'}, month2:{input:'tmdT1M2ExclInput', chips:'tmdT1M2ExclChips'} },
+  term2: { month1:{input:'tmdT2M1ExclInput', chips:'tmdT2M1ExclChips'}, month2:{input:'tmdT2M2ExclInput', chips:'tmdT2M2ExclChips'} }
+};
+
+function renderTmdHolidayChips(term, monthKey){
+  const ids = TMD_HOLIDAY_IDS[term][monthKey];
+  const holder = document.getElementById(ids.chips);
+  if(!holder) return;
+  const isAdmin = !!(currentUser && currentUser.role==='admin');
+  const list = [...tmdStagedHolidays[term][monthKey]].sort();
+  if(!list.length){ holder.innerHTML=''; return; }
+  holder.innerHTML = list.map(ds=>{
+    const d = new Date(ds+'T00:00:00');
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const label = `${dd}/${mm}/${d.getFullYear()}`;
+    return `<span class="att-excl-chip">🚫 ${label}${isAdmin ? `<button type="button" class="att-excl-chip-x" title="Remove this holiday" onclick="removeTmdHoliday('${term}','${monthKey}','${ds}')">×</button>` : ''}</span>`;
+  }).join('');
+}
+
+function addTmdHoliday(term, monthKey){
+  if(!currentUser || currentUser.role!=='admin') return;
+  const ids = TMD_HOLIDAY_IDS[term][monthKey];
+  const input = document.getElementById(ids.input);
+  if(!input || !input.value) return;
+  if(!tmdStagedHolidays[term][monthKey].includes(input.value)) tmdStagedHolidays[term][monthKey].push(input.value);
+  input.value = '';
+  renderTmdHolidayChips(term, monthKey);
+}
+
+function removeTmdHoliday(term, monthKey, dateStr){
+  tmdStagedHolidays[term][monthKey] = tmdStagedHolidays[term][monthKey].filter(d=>d!==dateStr);
+  renderTmdHolidayChips(term, monthKey);
+}
+
+function openTermMonthDatesModal(){
+  loadTermMonthDates();
+  const t1m1 = termMonthDates.term1.month1, t1m2 = termMonthDates.term1.month2;
+  const t2m1 = termMonthDates.term2.month1, t2m2 = termMonthDates.term2.month2;
+  document.getElementById('tmdT1M1Start').value = t1m1.start || '';
+  document.getElementById('tmdT1M1End').value   = t1m1.end   || '';
+  document.getElementById('tmdT1M2Start').value = t1m2.start || '';
+  document.getElementById('tmdT1M2End').value   = t1m2.end   || '';
+  document.getElementById('tmdT2M1Start').value = t2m1.start || '';
+  document.getElementById('tmdT2M1End').value   = t2m1.end   || '';
+  document.getElementById('tmdT2M2Start').value = t2m2.start || '';
+  document.getElementById('tmdT2M2End').value   = t2m2.end   || '';
+  tmdStagedHolidays = {
+    term1: { month1:[...(t1m1.holidays||[])], month2:[...(t1m2.holidays||[])] },
+    term2: { month1:[...(t2m1.holidays||[])], month2:[...(t2m2.holidays||[])] }
+  };
+  ['term1','term2'].forEach(term=> ['month1','month2'].forEach(m=> renderTmdHolidayChips(term,m)));
+  const statusEl = document.getElementById('termMonthDatesStatus');
+  if(statusEl) statusEl.textContent = (currentUser && currentUser.role==='admin')
+    ? ''
+    : 'Only the Admin can edit these dates — you can view them here, but the fields are read-only.';
+  const isAdmin = !!(currentUser && currentUser.role==='admin');
+  ['tmdT1M1Start','tmdT1M1End','tmdT1M2Start','tmdT1M2End','tmdT2M1Start','tmdT2M1End','tmdT2M2Start','tmdT2M2End',
+   'tmdT1M1ExclInput','tmdT1M2ExclInput','tmdT2M1ExclInput','tmdT2M2ExclInput'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.disabled = !isAdmin;
+  });
+  document.querySelectorAll('#termMonthDatesOverlay .att-excl-add-btn').forEach(btn=> btn.style.display = isAdmin ? '' : 'none');
+  const saveBtn = document.querySelector('#termMonthDatesOverlay .btn-gold');
+  if(saveBtn) saveBtn.style.display = isAdmin ? '' : 'none';
+  document.getElementById('termMonthDatesOverlay').classList.add('show');
+}
+
+function closeTermMonthDatesModal(){
+  document.getElementById('termMonthDatesOverlay').classList.remove('show');
+}
+
+// After the dates/holidays for a Term's Month are saved, regenerates every already-existing
+// attendance table for that exact Term+Month (across every Section/Stage/Grade/Class/Subject)
+// using the (possibly new) Start/End & holiday list — so a holiday added after tables were
+// already auto-created still takes effect everywhere immediately, without visiting each class.
+function regenerateAttendanceForGlobalMonth(termPeriod, monthKey){
+  const range = termMonthDates[termPeriod][monthKey];
+  if(!range || !range.start || !range.end) return;
+  const dates = generateAttendanceDates(range.start, range.end, new Set(range.holidays||[]));
+  if(!dates) return;
+  Object.keys(attendance).forEach(ck=>{
+    const parts = ck.split('|');
+    if(parts.length!==7) return;
+    const [section, stage, grade, tp, term, subject, at] = parts;
+    if(tp!==termPeriod || at!==monthKey) return;
+    applyAttendanceDateRangeToClass(section, stage, grade, term, subject, tp, at, range.start, range.end, dates, range.holidays||[]);
+  });
+}
+
+function saveTermMonthDates(){
+  if(!currentUser || currentUser.role!=='admin'){ alert('Only the Admin can set the Term & Month dates.'); return; }
+  const getVal = id => document.getElementById(id).value || '';
+  const next = {
+    term1: {
+      month1: { start:getVal('tmdT1M1Start'), end:getVal('tmdT1M1End'), holidays:[...tmdStagedHolidays.term1.month1] },
+      month2: { start:getVal('tmdT1M2Start'), end:getVal('tmdT1M2End'), holidays:[...tmdStagedHolidays.term1.month2] }
+    },
+    term2: {
+      month1: { start:getVal('tmdT2M1Start'), end:getVal('tmdT2M1End'), holidays:[...tmdStagedHolidays.term2.month1] },
+      month2: { start:getVal('tmdT2M2Start'), end:getVal('tmdT2M2End'), holidays:[...tmdStagedHolidays.term2.month2] }
+    }
+  };
+  // Validate any range that has both dates filled in
+  for(const term of ['term1','term2']){
+    for(const m of ['month1','month2']){
+      const r = next[term][m];
+      if(r.start && r.end && r.end < r.start){
+        alert(`${TERM_LABELS[term]} — ${m==='month1'?'1st':'2nd'} Month: the End date must be on or after the Start date.`);
+        return;
+      }
+    }
+  }
+  termMonthDates = next;
+  saveTermMonthDatesLocalOnly();
+  ['term1','term2'].forEach(term=> ['month1','month2'].forEach(m=> regenerateAttendanceForGlobalMonth(term, m)));
+  saveStateLocalOnly();
+  scheduleGithubPush();
+  logActivity('edit', 'Updated Term & Month Dates');
+  const statusEl = document.getElementById('termMonthDatesStatus');
+  if(statusEl) statusEl.textContent = 'Saved — visible to everyone now.';
+  if(typeof renderTable==='function') renderTable();
+  if(typeof renderAttendanceWorkspace==='function') renderAttendanceWorkspace();
 }
 
 /* ========== REPORT CARD RELEASE ========== */
@@ -8153,6 +8467,10 @@ function applyRemotePayload(payload){
     activityLog = Object.values(map).sort((a,b)=> b.ts-a.ts).slice(0, ACTIVITY_LOG_MAX);
     saveActivityLogLocalOnly();
   }
+  if(payload.termMonthDates && payload.termMonthDates.term1 && payload.termMonthDates.term2){
+    termMonthDates = normalizeTermMonthDates(payload.termMonthDates);
+    saveTermMonthDatesLocalOnly();
+  }
   if(payload.presenceBucket && !presenceBucket){
     presenceBucket = payload.presenceBucket;
     try{ localStorage.setItem(PRESENCE_BUCKET_LS_KEY, presenceBucket); }catch(err){}
@@ -8215,7 +8533,7 @@ async function pushToGithub(){
     // to send — the eventual echo/snapshot for THIS push carries the older, lower version and
     // gets ignored by the listener instead of overwriting those newer edits.
     const versionToPush = knownDataVersion + 1;
-    const payload = { students, scores, studentIdCounter, attendance, teachers, teacherIdCounter, users, activityLog, presenceBucket: presenceBucket || null, dataVersion: versionToPush, savedAt: new Date().toISOString() };
+    const payload = { students, scores, studentIdCounter, attendance, teachers, teacherIdCounter, users, activityLog, termMonthDates, presenceBucket: presenceBucket || null, dataVersion: versionToPush, savedAt: new Date().toISOString() };
     knownDataVersion = versionToPush;
     fbLastPushedAt = Date.now();
     await FB_DOC_REF.set(payload, { merge:false });
@@ -8442,6 +8760,7 @@ setTimeout(updateStickySpacing, 0);
 loadState();
 loadActivityLog();
 loadReportCardReleases();
+loadTermMonthDates();
 loadGithubConfig();
 loadLastGradebookSelection();
 renderStepper();
