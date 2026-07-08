@@ -1902,8 +1902,8 @@ body.dark-mode .att-table tbody tr:hover .att-name-col{ background:var(--paper-2
         <label>Second Language</label>
         <select id="newLang2" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;min-width:140px;">
           <option value="-">None</option>
-          <option value="French">French</option>
-          <option value="German">German</option>
+          <option value="French">🇫🇷 French</option>
+          <option value="German">🇩🇪 German</option>
           <option value="English">English</option>
         </select>
       </div>
@@ -2122,8 +2122,8 @@ body.dark-mode .att-table tbody tr:hover .att-name-col{ background:var(--paper-2
         <label>Second Language</label>
         <select id="dbFilterLang" onchange="renderDatabase()">
           <option value="">All</option>
-          <option value="French">French</option>
-          <option value="German">German</option>
+          <option value="French">🇫🇷 French</option>
+          <option value="German">🇩🇪 German</option>
           <option value="English">English</option>
           <option value="-">None</option>
         </select>
@@ -6532,8 +6532,8 @@ function renderDatabase(){
       <td>
         <select class="db-edit-select" onchange="flashInlineSaved(this);updateStudentField('${s.classKey}','${s.id}','lang2',this.value)">
           <option value="-" ${(!s.lang2||s.lang2==='-')?'selected':''}>None</option>
-          <option value="French" ${s.lang2==='French'?'selected':''}>French</option>
-          <option value="German" ${s.lang2==='German'?'selected':''}>German</option>
+          <option value="French" ${s.lang2==='French'?'selected':''}>🇫🇷 French</option>
+          <option value="German" ${s.lang2==='German'?'selected':''}>🇩🇪 German</option>
           <option value="English" ${s.lang2==='English'?'selected':''}>English</option>
         </select>
       </td>
@@ -6548,7 +6548,7 @@ function renderDatabase(){
         </select>
       </td>
       <td>
-        <input type="text" class="db-edit-select" value="${(s.nationality||'').replace(/"/g,'&quot;')}" placeholder="Nationality" onchange="flashInlineSaved(this);updateStudentField('${s.classKey}','${s.id}','nationality',this.value)">
+        <span class="nat-flag" style="margin-right:4px;">${nationalityFlag(s.nationality)}</span><input type="text" class="db-edit-select" style="width:calc(100% - 26px);" value="${(s.nationality||'').replace(/"/g,'&quot;')}" placeholder="Nationality" oninput="this.previousElementSibling.textContent=nationalityFlag(this.value)" onchange="flashInlineSaved(this);updateStudentField('${s.classKey}','${s.id}','nationality',this.value)">
       </td>
       <td${autoDob?' data-dob-auto="1"':''}>
         <input type="text" class="db-edit-select" value="${(s.dob||'').replace(/"/g,'&quot;')}" placeholder="DD/MM/YY" maxlength="8" ${autoDob?'readonly title="Calculated automatically from the National ID"':''} onchange="flashInlineSaved(this);updateStudentField('${s.classKey}','${s.id}','dob',this.value)">
@@ -6584,7 +6584,50 @@ function renderDatabase(){
     </table>`;
 }
 
-// Derives DD/MM/YY date of birth from a 14-digit Egyptian National ID.
+// Maps a free-typed Nationality value to a country flag emoji, using
+// tolerant keyword matching (English or Arabic, any casing/word order).
+// Returns '' when the text doesn't match anything recognized, so unusual
+// or misspelled nationalities just show with no flag rather than a wrong one.
+const NATIONALITY_FLAGS = [
+  [/egypt|مصر/i, '🇪🇬'],
+  [/saudi|سعود/i, '🇸🇦'],
+  [/emirat|uae|إمارات|امارات/i, '🇦🇪'],
+  [/kuwait|كويت/i, '🇰🇼'],
+  [/qatar|قطر/i, '🇶🇦'],
+  [/bahrain|بحرين/i, '🇧🇭'],
+  [/oman|عُمان|عمان/i, '🇴🇲'],
+  [/jordan|أردن|اردن/i, '🇯🇴'],
+  [/palestin|فلسطين/i, '🇵🇸'],
+  [/syria|سوريا|سوري/i, '🇸🇾'],
+  [/lebanon|لبنان/i, '🇱🇧'],
+  [/iraq|عراق/i, '🇮🇶'],
+  [/yemen|يمن/i, '🇾🇪'],
+  [/sudan|سودان/i, '🇸🇩'],
+  [/libya|ليبيا/i, '🇱🇾'],
+  [/morocc|مغرب/i, '🇲🇦'],
+  [/algeria|جزائر/i, '🇩🇿'],
+  [/tunisia|تونس/i, '🇹🇳'],
+  [/american|usa|united states|أمريك/i, '🇺🇸'],
+  [/british|uk|united kingdom|بريطان/i, '🇬🇧'],
+  [/french|france|فرنس/i, '🇫🇷'],
+  [/german|germany|ألماني|الماني/i, '🇩🇪'],
+  [/canad|كندا/i, '🇨🇦'],
+  [/italia|إيطال|ايطال/i, '🇮🇹'],
+  [/spain|spanish|إسبان|اسبان/i, '🇪🇸'],
+  [/chin|صيني/i, '🇨🇳'],
+  [/india|هند/i, '🇮🇳'],
+  [/turk|تركي/i, '🇹🇷'],
+  [/russia|روس/i, '🇷🇺'],
+  [/nigeria|نيجير/i, '🇳🇬'],
+];
+function nationalityFlag(nat){
+  const text = (nat||'').toString().trim();
+  if(!text) return '';
+  const hit = NATIONALITY_FLAGS.find(([re])=> re.test(text));
+  return hit ? hit[1] : '';
+}
+
+
 // Digit 1 = century (2 -> 1900s, 3 -> 2000s), digits 2-3 = year, 4-5 = month, 6-7 = day.
 // Returns '' if the ID isn't a valid 14-digit number or the embedded date is not valid.
 function calcDobFromNationalId(nationalId){
