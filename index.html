@@ -1495,6 +1495,30 @@ body.dark-mode .stats-table tbody tr.stats-grand-total{
 .perm-grid{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 4px;}
 .perm-check{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink);}
 .perm-check input{width:15px;height:15px;}
+
+/* ---------- Grade Entry Control (rule builder) ---------- */
+.ge-target-btn, .ge-when-btn{ flex:1; min-width:150px; background:#fff; border:1.5px solid var(--border); color:var(--ink); cursor:pointer; padding:9px 12px; border-radius:8px; font-family:'Tajawal'; font-weight:700; font-size:13px; transition:.15s; }
+.ge-target-btn.active, .ge-when-btn.active{ background:var(--gold); border-color:var(--gold); }
+.ge-rule-card{ border-bottom:1px solid var(--border); padding:12px 14px; display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+.ge-rule-card:last-child{ border-bottom:none; }
+.ge-rule-badge{ display:inline-block; font-size:10.5px; font-weight:800; padding:2px 9px; border-radius:20px; margin-inline-end:6px; white-space:nowrap; }
+.ge-rule-badge.on{ background:var(--red-bg); color:var(--red); }
+.ge-rule-badge.scheduled{ background:var(--gold-light); color:var(--ink); }
+.ge-rule-badge.expired{ background:var(--paper-2); color:var(--ink-soft); }
+.ge-rule-title{ font-weight:800; color:var(--ink); margin-bottom:4px; }
+.ge-rule-meta{ font-size:12px; color:var(--ink-soft); line-height:1.6; }
+.ge-rule-actions{ display:flex; gap:6px; flex-shrink:0; }
+.ge-rule-actions button{ border:none; background:none; cursor:pointer; font-size:15px; padding:4px 6px; border-radius:6px; }
+.ge-rule-actions button:hover{ background:var(--paper-2); }
+.ge-empty-note{ padding:18px 14px; text-align:center; color:var(--ink-soft); font-size:13px; }
+.ge-summary-box{ border-radius:10px; padding:12px 14px; border:1.5px solid var(--border); }
+.ge-summary-box.ge-summary-empty{ background:var(--green-bg); color:var(--green); border-color:var(--green); font-weight:700; font-size:13.5px; text-align:center; }
+.ge-summary-box:not(.ge-summary-empty){ background:var(--red-bg); border-color:var(--red); }
+.ge-summary-head{ font-weight:800; color:var(--red); font-size:13.5px; margin-bottom:8px; }
+.ge-summary-row{ display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:4px 0; border-top:1px dashed rgba(178,58,58,.25); }
+.ge-summary-row:first-of-type{ border-top:none; }
+.ge-summary-name{ font-weight:700; color:var(--ink); }
+.ge-summary-scope{ color:var(--ink-soft); text-align:right; }
 .user-form-row{
   display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;background:var(--bg);
   border-radius:10px;padding:14px;margin-bottom:18px;border:1px dashed var(--border);
@@ -1805,6 +1829,83 @@ body.dark-mode .stats-table tbody tr.stats-grand-total{
     <div class="perm-grid" style="margin-top:16px;">
       <button class="btn btn-gold" onclick="saveBlockedStudents()">💾 Save</button>
       <button class="btn btn-outline" onclick="closeBlockedStudentsModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= GRADE ENTRY CONTROL MODAL ================= -->
+<div class="overlay-bg" id="gradeEntryControlOverlay">
+  <div class="users-modal" style="max-width:840px;">
+    <button class="close-x" onclick="closeGradeEntryControlModal()">✕</button>
+    <h2>🔒 Grade Entry Control</h2>
+    <p class="sub">Stop Grade Book score entry — for everyone, for specific accounts, or for every teacher of a chosen subject — right now or starting at a scheduled date/time, and for one Mark Entry item or all of them (Admin only).</p>
+
+    <div class="modal-form">
+      <div id="geActiveSummary" style="margin-bottom:14px;"></div>
+
+      <div class="users-list" id="geRulesList" style="max-height:280px;overflow:auto;margin-bottom:14px;"></div>
+
+      <button type="button" class="btn btn-outline" onclick="openGeRuleForm()">➕ Add Lock Rule</button>
+
+      <!-- ---- Rule builder (hidden until Add / Edit) ---- -->
+      <div id="geRuleForm" style="display:none;margin-top:16px;border:1.5px dashed var(--border);border-radius:10px;padding:16px;background:var(--paper-2);">
+        <h3 id="geRuleFormTitle" style="margin:0 0 12px;font-size:15px;">New Lock Rule</h3>
+
+        <label style="display:block;font-weight:700;margin-bottom:6px;">Who is locked out?</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+          <button type="button" class="ge-target-btn" data-target="all" onclick="setGeRuleTarget('all')">🌐 All Accounts</button>
+          <button type="button" class="ge-target-btn" data-target="users" onclick="setGeRuleTarget('users')">👤 Specific Accounts</button>
+          <button type="button" class="ge-target-btn" data-target="subjects" onclick="setGeRuleTarget('subjects')">📚 Teachers of a Subject</button>
+        </div>
+
+        <div id="geTargetUsersWrap" style="display:none;">
+          <input type="text" id="geRuleUserSearch" placeholder="Search by username or display name" oninput="renderGeRuleUsersList()" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;margin-bottom:8px;">
+          <div class="users-list" id="geRuleUsersList" style="max-height:220px;overflow:auto;"></div>
+          <p class="foot-note" style="margin-top:8px;">Only accounts with Grade Book edit access are listed here (Admin, HOS/Deputy, Head of Department, Teacher).</p>
+        </div>
+
+        <div id="geTargetSubjectsWrap" style="display:none;">
+          <p class="foot-note" style="margin:0 0 8px;">Locks the account of every teacher / HOD assigned to any subject checked below.</p>
+          <div class="perm-grid" id="geRuleSubjectsWrap"></div>
+        </div>
+
+        <label style="display:block;font-weight:700;margin:16px 0 6px;">Which Mark Entry item(s)?</label>
+        <div class="perm-grid" id="geRuleItemsWrap"></div>
+        <p class="foot-note" style="margin:4px 0 0;">Leave all unchecked to lock every Mark Entry item for the selected accounts.</p>
+
+        <label style="display:block;font-weight:700;margin:16px 0 6px;">When?</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+          <button type="button" class="ge-when-btn" data-when="now" onclick="setGeRuleWhen('now')">⏻ Lock now</button>
+          <button type="button" class="ge-when-btn" data-when="scheduled" onclick="setGeRuleWhen('scheduled')">⏱ Schedule for later</button>
+        </div>
+        <div id="geScheduleStartWrap" style="display:none;margin-bottom:12px;">
+          <label style="display:block;margin-bottom:4px;">Start locking at</label>
+          <input type="datetime-local" id="geRuleStartAt" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'Tajawal';">
+        </div>
+
+        <label class="perm-check" style="margin-bottom:8px;">
+          <input type="checkbox" id="geRuleHasEnd" onchange="onGeRuleHasEndToggle(this.checked)">
+          Automatically unlock at a set date/time
+        </label>
+        <div id="geScheduleEndWrap" style="display:none;margin-bottom:12px;">
+          <input type="datetime-local" id="geRuleEndAt" style="border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'Tajawal';">
+        </div>
+
+        <label style="display:block;margin:10px 0 4px;">Note (optional)</label>
+        <input type="text" id="geRuleNote" placeholder="e.g. Closed for Term 1 finalization" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'Tajawal';font-size:14px;">
+
+        <div class="perm-grid" style="margin-top:16px;">
+          <button class="btn btn-gold" onclick="commitGeRuleForm()">✓ Add to List</button>
+          <button class="btn btn-outline" onclick="closeGeRuleForm()">Cancel</button>
+        </div>
+      </div>
+
+      <p class="foot-note" style="margin-top:14px;">Parent / Student accounts are never listed here because they already cannot enter grades.</p>
+
+      <div class="perm-grid" style="margin-top:16px;">
+        <button class="btn btn-gold" onclick="saveGradeEntryControl()">💾 Save</button>
+        <button class="btn btn-outline" onclick="closeGradeEntryControlModal()">Cancel</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2259,6 +2360,7 @@ body.dark-mode .stats-table tbody tr.stats-grand-total{
       <div class="nav-dropdown-menu" id="configMenu">
         <button class="opt-btn" onclick="openUsersModal()">👤 Manage Users</button>
         <button class="opt-btn" onclick="openBlockedStudentsModal()">🚫 Blocked Students</button>
+        <button class="opt-btn" onclick="openGradeEntryControlModal()">🔒 Grade Entry Control</button>
         <button class="opt-btn" onclick="openReportCardReleaseModal()">📋 Report Card Release</button>
         <button class="opt-btn" onclick="openTermMonthDatesModal()">🗓 Term &amp; Month Dates</button>
         <button class="opt-btn" onclick="openBellTimesModal()">🔔 Bell Times</button>
@@ -2591,6 +2693,7 @@ body.dark-mode .stats-table tbody tr.stats-grand-total{
       <button class="btn btn-outline" onclick="downloadTeachersTemplate()">⬇ Download Blank Template</button>
       <button class="btn btn-outline" onclick="exportTeachersDatabase()">⇩ Export Full Database</button>
       <button class="btn btn-outline" onclick="deleteSelectedTeachers()">🗑 Delete Selected</button>
+      <button class="btn btn-outline" onclick="syncTeachersFromUserAccounts()" title="Add/refresh a Teachers Database row for every Manage Users account with role Teacher or Head of Department">🔄 Import from Teacher/HOD Accounts</button>
     </div>
 
     <div class="add-form" id="addTeacherForm">
@@ -2654,7 +2757,7 @@ body.dark-mode .stats-table tbody tr.stats-grand-total{
       <div id="teachersTableHolder"></div>
     </div>
     <p class="foot-note">
-      Add teachers one by one with the "Add Teacher" button, or bulk-import them all at once from an Excel/CSV sheet using "Bulk Import from Excel" (download the blank template first to see the required columns: ID, Teachers Name, Section, Subject, Classes).
+      Add teachers one by one with the "Add Teacher" button, bulk-import them all at once from an Excel/CSV sheet using "Bulk Import from Excel" (download the blank template first to see the required columns: ID, Teachers Name, Section, Subject, Classes), or click "🔄 Import from Teacher/HOD Accounts" to pull in every Manage Users account whose role is Teacher or Head of Department. New Teacher/HOD accounts are also added here automatically the moment they're created or edited in Manage Users — the button is only needed to catch up any that were created before this linking existed.
     </p>
   </div>
 
@@ -5321,6 +5424,7 @@ function computePrimaryTotals(sc){
 }
 
 function updateScore(studentId, field, value, max){
+  if(isCurrentUserGradeEntryLocked()) return;
   const map = getScoreMap();
   if(!map[studentId]) map[studentId]=emptyScoreObj();
   map[studentId][field] = (value===''||value===null||value===undefined) ? null : clamp(value, max);
@@ -5340,7 +5444,7 @@ function scoreInputGroupClass(field){
 function scoreInputHtml(studentId, field, value, max){
   const v = (value===null||value===undefined) ? '' : value;
   const groupClass = scoreInputGroupClass(field);
-  const readOnly = currentUser && currentUser.effective && currentUser.effective.edit===false;
+  const readOnly = (currentUser && currentUser.effective && currentUser.effective.edit===false) || isCurrentUserGradeEntryLocked();
   if(readOnly){
     return `<input class="score-input ${groupClass}" type="number" value="${v}" disabled style="opacity:.65;">`;
   }
@@ -5355,6 +5459,13 @@ let lastEditRect = null;
 let lastEditTime = 0;
 
 function handleScoreChange(el, studentId, field, max){
+  if(isCurrentUserGradeEntryLocked()){
+    const map = getScoreMap();
+    const prev = (map[studentId] && map[studentId][field]!=null) ? map[studentId][field] : '';
+    el.value = prev;
+    gradeEntryLockAlert();
+    return;
+  }
   const raw = el.value===''? null : parseFloat(el.value);
   if(raw!==null && !isNaN(raw) && raw>max){
     flashScoreError(el, max);
@@ -6634,11 +6745,15 @@ function editableFieldsForCurrentScreen(){
 }
 
 function gradeItemUploadReadOnly(){
-  return !!(currentUser && currentUser.effective && currentUser.effective.edit===false);
+  return !!(currentUser && currentUser.effective && currentUser.effective.edit===false) || isCurrentUserGradeEntryLocked();
 }
 
 function openGradeItemUploadModal(){
-  if(gradeItemUploadReadOnly()){ alert('Your account does not have edit access to the Grade Book.'); return; }
+  if(gradeItemUploadReadOnly()){
+    if(isCurrentUserGradeEntryLocked()) gradeEntryLockAlert();
+    else alert('Your account does not have edit access to the Grade Book.');
+    return;
+  }
   const fields = editableFieldsForCurrentScreen();
   const sel = document.getElementById('gradeItemSelect');
   if(fields.length===0){
@@ -6695,6 +6810,7 @@ function downloadGradeItemTemplate(){
 
 function handleGradeItemExcelFile(file){
   if(!file) return;
+  if(gradeItemUploadReadOnly()){ gradeEntryLockAlert(); document.getElementById('gradeItemExcelInput').value=''; return; }
   const def = currentGradeItemFieldDef();
   if(!def){
     alert('There is no editable item to upload on the current Mark Entry screen.');
@@ -6822,7 +6938,7 @@ function flashInlineSaved(el){
 }
 
 function downloadBackup(){
-  const payload = { students, scores, studentIdCounter, attendance, teachers, teacherIdCounter, termMonthDates, examSchedules, examSeatAssignments, bellTimes, savedAt: new Date().toISOString() };
+  const payload = { students, scores, studentIdCounter, attendance, teachers, teacherIdCounter, termMonthDates, examSchedules, examSeatAssignments, bellTimes, gradeEntryLockRules: normalizeGradeEntryLockRules(gradeEntryLockRules), savedAt: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -6858,6 +6974,10 @@ function restoreBackup(file){
       if(payload.bellTimes){
         bellTimes = normalizeBellTimes(payload.bellTimes);
         saveBellTimesLocalOnly();
+      }
+      if(payload.gradeEntryLockRules || payload.gradeEntryLockConfig){
+        gradeEntryLockRules = gradeEntryLockRulesFromPayload(payload) || [];
+        saveGradeEntryLockConfigLocalOnly();
       }
       renderTable();
       renderDatabase();
@@ -7726,6 +7846,47 @@ function deleteSelectedTeachers(){
   renderTeachersDatabase();
   saveState();
   logActivity('delete', `Permanently deleted ${ids.length} teacher(s) from the Teachers Database`);
+}
+
+// One-click catch-up sync: adds (or refreshes) a Teachers Database row for every Manage
+// Users account whose role is Teacher or Head of Department. New accounts are already kept
+// in sync automatically the moment they're created/edited/deleted (see saveUserFromForm /
+// deleteUserRow), so this button mainly matters for accounts that existed before that
+// linking was added, or that were brought in some other way (e.g. a Manage Users bulk
+// import) without ever being saved again through the normal form.
+function syncTeachersFromUserAccounts(){
+  // Teachers Database access restricted to Admin users only
+  if(!currentUser || currentUser.role !== 'admin'){
+    alert('⛔ Teachers Database is only available to Administrators.');
+    return;
+  }
+  const eligible = (users||[]).filter(u=> u.role==='teacher' || u.role==='hod');
+  if(!eligible.length){ alert('No accounts with role Teacher or Head of Department were found in Manage Users.'); return; }
+
+  let added = 0, updated = 0;
+  eligible.forEach(u=>{
+    let teacher = teachers.find(t=> t.username===u.username);
+    if(!teacher) teacher = teachers.find(t=> !t.username && (t.name===u.displayName || t.name===u.username));
+    if(!teacher){
+      teacher = { id: uid(), displayId: nextTeacherDisplayId(), classes:'' };
+      teachers.push(teacher);
+      added++;
+    } else {
+      updated++;
+    }
+    teacher.username = u.username;
+    teacher.name = u.displayName || u.username;
+    teacher.section = sectionLabelFromCode(u.section);
+    teacher.subject = (u.subjects||[]).join(', ');
+    // Classes are left untouched if the row already had some (HOD accounts don't carry
+    // classrooms in Manage Users, and existing manual entries shouldn't be wiped out).
+    teacher.classes = (u.classrooms && u.classrooms.length) ? u.classrooms.join(', ') : (teacher.classes || '');
+  });
+
+  saveState();
+  renderTeachersDatabase();
+  logActivity('edit', `Synced Teachers Database from Teacher/HOD accounts (${added} added, ${updated} refreshed)`);
+  alert(`Sync complete: ${added} new row(s) added, ${updated} existing row(s) refreshed from Manage Users.`);
 }
 
 function renderTeachersDatabase(){
@@ -8971,6 +9132,443 @@ function saveBlockedStudents(){
   if(currentView==='reports') switchView('reports');
 }
 
+/* ========== GRADE ENTRY CONTROL ========== */
+// v2: a list of independent lock "rules" instead of one all-or-nothing switch.
+// Each rule can target all accounts / specific accounts / every teacher assigned to
+// chosen subject(s); can be scoped to one or more Mark Entry items (First Month,
+// Second Month, Total Coursework, Exam Paper) instead of always locking everything;
+// and can start immediately or at a scheduled date/time, with an optional automatic
+// unlock date/time. v1 ("lock all" / "lock these usernames", always-on, all items)
+// is migrated into an equivalent rule the first time this loads.
+const GRADE_ENTRY_LOCK_CFG_LS_KEY = 'gradeEntryLockConfig_v2';
+const GRADE_ENTRY_LOCK_CFG_LEGACY_KEY = 'gradeEntryLockConfig_v1';
+
+const GE_MARK_ITEMS = [
+  { id:'month1',    label:'First Month Mark Entry' },
+  { id:'month2',    label:'Second Month Mark Entry' },
+  { id:'coursework', label:'Total Coursework Mark Entry' },
+  { id:'examPaper', label:'Exam Paper (Term Total)' }
+];
+
+let gradeEntryLockRules = [];        // saved rules
+let stagedGradeEntryLockRules = [];  // working copy edited inside the modal
+let geRuleDraft = null;              // rule currently being built/edited in the sub-form (or null)
+
+function newGeRuleId(){ return 'ge_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+function normalizeGradeEntryLockRule(r){
+  r = (r && typeof r==='object') ? r : {};
+  const target = ['all','users','subjects'].includes(r.target) ? r.target : 'users';
+  return {
+    id: r.id || newGeRuleId(),
+    target,
+    usernames: Array.isArray(r.usernames) ? [...new Set(r.usernames.map(u=>(u||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)) : [],
+    subjects: Array.isArray(r.subjects) ? [...new Set(r.subjects.map(s=>(s||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b)) : [],
+    items: Array.isArray(r.items) ? r.items.filter(i=> GE_MARK_ITEMS.some(m=>m.id===i)) : [],
+    startAt: r.startAt || '',
+    endAt: r.endAt || '',
+    note: (r.note||'').trim(),
+    createdBy: r.createdBy || (currentUser ? currentUser.username : ''),
+    createdAt: r.createdAt || new Date().toISOString()
+  };
+}
+function normalizeGradeEntryLockRules(list){
+  return Array.isArray(list) ? list.map(normalizeGradeEntryLockRule) : [];
+}
+
+// Turns the old single-switch shape ({enabledForAll, usernames}) into one equivalent
+// rule so accounts/schools that already saved a v1 config keep behaving the same way.
+function migrateLegacyGradeEntryLockConfig(raw){
+  if(!raw || typeof raw!=='object') return [];
+  if(raw.enabledForAll){
+    return [normalizeGradeEntryLockRule({ target:'all', note:'Migrated from previous version' })];
+  }
+  if(Array.isArray(raw.usernames) && raw.usernames.length){
+    return [normalizeGradeEntryLockRule({ target:'users', usernames:raw.usernames, note:'Migrated from previous version' })];
+  }
+  return [];
+}
+
+function loadGradeEntryLockConfig(){
+  try{
+    const raw = localStorage.getItem(GRADE_ENTRY_LOCK_CFG_LS_KEY);
+    if(raw){
+      gradeEntryLockRules = normalizeGradeEntryLockRules(JSON.parse(raw));
+      return;
+    }
+    const legacyRaw = localStorage.getItem(GRADE_ENTRY_LOCK_CFG_LEGACY_KEY);
+    gradeEntryLockRules = legacyRaw ? migrateLegacyGradeEntryLockConfig(JSON.parse(legacyRaw)) : [];
+  }catch(err){
+    console.warn('Could not load Grade Entry Control', err);
+    gradeEntryLockRules = [];
+  }
+}
+
+function saveGradeEntryLockConfigLocalOnly(){
+  try{ localStorage.setItem(GRADE_ENTRY_LOCK_CFG_LS_KEY, JSON.stringify(gradeEntryLockRules)); }
+  catch(err){ console.warn('Could not save Grade Entry Control', err); }
+}
+
+function saveGradeEntryLockConfig(){
+  gradeEntryLockRules = normalizeGradeEntryLockRules(gradeEntryLockRules);
+  saveGradeEntryLockConfigLocalOnly();
+  scheduleGithubPush();
+}
+
+// Used when applying a Firebase snapshot or a restored backup file: accepts either the
+// current shape (payload.gradeEntryLockRules, an array of rules) or an older payload that
+// still only has payload.gradeEntryLockConfig (the pre-rules {enabledForAll, usernames}
+// switch), so syncing with / restoring from an older save never throws and never silently
+// drops an existing lock.
+function gradeEntryLockRulesFromPayload(payload){
+  if(!payload) return null;
+  if(Array.isArray(payload.gradeEntryLockRules)) return normalizeGradeEntryLockRules(payload.gradeEntryLockRules);
+  if(payload.gradeEntryLockConfig) return migrateLegacyGradeEntryLockConfig(payload.gradeEntryLockConfig);
+  return null;
+}
+
+function usersEligibleForGradeEntryLock(){
+  return (users||[]).filter(u=>{
+    const eff = getEffectivePermissions(u);
+    return !!(eff && eff.grades && eff.edit);
+  }).sort((a,b)=> (a.displayName||a.username).localeCompare(b.displayName||b.username));
+}
+
+// 'active' = enforced right now | 'scheduled' = will start later | 'expired' = past its auto-unlock time
+function geRuleTimingState(rule, now){
+  now = now || new Date();
+  const start = rule.startAt ? new Date(rule.startAt) : null;
+  const end = rule.endAt ? new Date(rule.endAt) : null;
+  if(end && !isNaN(end) && now > end) return 'expired';
+  if(start && !isNaN(start) && now < start) return 'scheduled';
+  return 'active';
+}
+function isGeRuleEnforcedNow(rule){
+  return geRuleTimingState(rule)==='active';
+}
+
+function geRuleMatchesUser(rule, user){
+  if(!user || !user.username) return false;
+  if(rule.target==='all') return true;
+  if(rule.target==='users') return rule.usernames.includes(user.username);
+  if(rule.target==='subjects'){
+    if(!Array.isArray(user.subjects) || !user.subjects.length || !rule.subjects.length) return false;
+    const set = rule.subjects.map(s=>s.toLowerCase());
+    return user.subjects.some(s=> set.includes(String(s||'').trim().toLowerCase()));
+  }
+  return false;
+}
+function geRuleMatchesItem(rule, item){
+  if(!rule.items || !rule.items.length) return true; // no items chosen = applies to every Mark Entry screen
+  if(!item) return true; // unknown/whole-app context (e.g. bulk tools) — be safe and treat as locked
+  return rule.items.includes(item);
+}
+
+// Every currently-enforced rule that would lock this user for the given Mark Entry item
+// (defaults to whichever item is on-screen right now via academicSubMode()).
+function activeGradeEntryLockRulesForUser(user, item){
+  const currentItem = item!==undefined ? item : (typeof academicSubMode==='function' ? academicSubMode() : null);
+  return (gradeEntryLockRules||[]).filter(rule=> isGeRuleEnforcedNow(rule) && geRuleMatchesUser(rule, user) && geRuleMatchesItem(rule, currentItem));
+}
+
+function isGradeEntryLockedForUser(user, item){
+  return activeGradeEntryLockRulesForUser(user, item).length > 0;
+}
+
+function isCurrentUserGradeEntryLocked(item){
+  return isGradeEntryLockedForUser(currentUser, item);
+}
+
+function gradeEntryLockAlert(item){
+  const hits = activeGradeEntryLockRulesForUser(currentUser, item);
+  const itemIds = [...new Set(hits.flatMap(r=> r.items && r.items.length ? r.items : []))];
+  if(itemIds.length && !hits.some(r=> !r.items || !r.items.length)){
+    const labels = itemIds.map(id=> (GE_MARK_ITEMS.find(m=>m.id===id)||{}).label || id).join(', ');
+    alert(`Grade entry is currently locked for your account for: ${labels}. Please contact the system administrator.`);
+    return;
+  }
+  alert('Grade entry is currently locked for your account. Please contact the system administrator.');
+}
+
+function openGradeEntryControlModal(){
+  if(!currentUser || currentUser.role!=='admin'){
+    alert('Only Admin can manage Grade Entry Control.');
+    return;
+  }
+  loadGradeEntryLockConfig();
+  stagedGradeEntryLockRules = normalizeGradeEntryLockRules(gradeEntryLockRules);
+  closeGeRuleForm();
+  renderGradeEntryControlRules();
+  document.getElementById('gradeEntryControlOverlay').classList.add('show');
+}
+
+function closeGradeEntryControlModal(){
+  document.getElementById('gradeEntryControlOverlay').classList.remove('show');
+}
+
+function geRuleSummaryText(rule){
+  const items = (rule.items && rule.items.length)
+    ? rule.items.map(id=> (GE_MARK_ITEMS.find(m=>m.id===id)||{}).label || id).join(', ')
+    : 'All Mark Entry items';
+  let who;
+  if(rule.target==='all') who = 'All grade-entry accounts';
+  else if(rule.target==='users') who = `${rule.usernames.length} selected account(s)`;
+  else who = rule.subjects.length ? `Teachers of: ${rule.subjects.join(', ')}` : 'Teachers of (no subject picked)';
+  return { who, items };
+}
+
+function geRuleTimingText(rule){
+  const state = geRuleTimingState(rule);
+  const startTxt = rule.startAt ? new Date(rule.startAt).toLocaleString() : null;
+  const endTxt = rule.endAt ? new Date(rule.endAt).toLocaleString() : null;
+  if(state==='scheduled') return { state, text: `Scheduled to start ${startTxt}${endTxt ? ` → auto-unlock ${endTxt}` : ''}` };
+  if(state==='expired') return { state, text: `Expired — auto-unlocked ${endTxt}` };
+  return { state, text: `Locked now${startTxt ? ` (since ${startTxt})` : ''}${endTxt ? ` → auto-unlock ${endTxt}` : ''}` };
+}
+
+// Resolves every currently-enforced rule down to the concrete list of accounts it is
+// actually blocking right now (expanding 'all' / 'subjects' targets into real users), so
+// the admin can see at a glance who is locked out at this exact moment — not just which
+// rules exist. Scheduled and expired rules are ignored here; only 'active' ones count.
+function computeActiveGeLockedUsers(){
+  const activeRules = (stagedGradeEntryLockRules||[]).filter(isGeRuleEnforcedNow);
+  if(!activeRules.length) return [];
+  const eligible = usersEligibleForGradeEntryLock();
+  const map = new Map(); // username -> { user, items:Set, allItems:boolean }
+  eligible.forEach(u=>{
+    activeRules.forEach(rule=>{
+      if(!geRuleMatchesUser(rule, u)) return;
+      const entry = map.get(u.username) || { user:u, items:new Set(), allItems:false };
+      if(!rule.items || !rule.items.length) entry.allItems = true;
+      else rule.items.forEach(i=> entry.items.add(i));
+      map.set(u.username, entry);
+    });
+  });
+  return [...map.values()].sort((a,b)=> (a.user.displayName||a.user.username).localeCompare(b.user.displayName||b.user.username));
+}
+
+function renderGeActiveSummary(){
+  const wrap = document.getElementById('geActiveSummary');
+  if(!wrap) return;
+  const locked = computeActiveGeLockedUsers();
+  if(!locked.length){
+    wrap.innerHTML = `<div class="ge-summary-box ge-summary-empty">✅ No one is locked right now.</div>`;
+    return;
+  }
+  const rows = locked.map(entry=>{
+    const scope = entry.allItems
+      ? 'All Mark Entry items'
+      : [...entry.items].map(id=> (GE_MARK_ITEMS.find(m=>m.id===id)||{}).label || id).join(', ');
+    const roleLabel = ROLE_LABELS[entry.user.role] || entry.user.role || 'User';
+    return `<div class="ge-summary-row"><span class="ge-summary-name">${escapeHtml(entry.user.displayName||entry.user.username)} <span style="font-weight:500;color:var(--ink-soft);">(${escapeHtml(roleLabel)})</span></span><span class="ge-summary-scope">${escapeHtml(scope)}</span></div>`;
+  }).join('');
+  wrap.innerHTML = `<div class="ge-summary-box"><div class="ge-summary-head">🔴 Locked right now — ${locked.length} account(s)</div>${rows}</div>`;
+}
+
+function renderGradeEntryControlRules(){
+  renderGeActiveSummary();
+  const wrap = document.getElementById('geRulesList');
+  if(!wrap) return;
+  if(!stagedGradeEntryLockRules.length){
+    wrap.innerHTML = `<p class="ge-empty-note">No lock rules yet. Grade entry is fully open for everyone. Click "➕ Add Lock Rule" to close entry for all accounts, specific accounts, or teachers of a subject.</p>`;
+    return;
+  }
+  wrap.innerHTML = stagedGradeEntryLockRules.map(rule=>{
+    const { who, items } = geRuleSummaryText(rule);
+    const timing = geRuleTimingText(rule);
+    const badgeClass = timing.state==='active' ? 'on' : timing.state;
+    const badgeLabel = timing.state==='active' ? 'Locked now' : (timing.state==='scheduled' ? 'Scheduled' : 'Expired');
+    return `
+      <div class="ge-rule-card">
+        <div>
+          <div class="ge-rule-title"><span class="ge-rule-badge ${badgeClass}">${badgeLabel}</span>${escapeHtml(who)}</div>
+          <div class="ge-rule-meta">
+            📋 ${escapeHtml(items)}<br>
+            🕒 ${escapeHtml(timing.text)}
+            ${rule.note ? `<br>📝 ${escapeHtml(rule.note)}` : ''}
+          </div>
+        </div>
+        <div class="ge-rule-actions">
+          <button type="button" title="Edit" onclick="openGeRuleForm('${rule.id}')">✏️</button>
+          <button type="button" title="Delete" onclick="deleteGeRule('${rule.id}')">🗑️</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function deleteGeRule(id){
+  stagedGradeEntryLockRules = stagedGradeEntryLockRules.filter(r=> r.id!==id);
+  renderGradeEntryControlRules();
+}
+
+/* ---- Rule builder sub-form ---- */
+function openGeRuleForm(ruleId){
+  const existing = ruleId ? stagedGradeEntryLockRules.find(r=> r.id===ruleId) : null;
+  geRuleDraft = existing ? normalizeGradeEntryLockRule(existing) : normalizeGradeEntryLockRule({ target:'users' });
+
+  document.getElementById('geRuleFormTitle').textContent = existing ? 'Edit Lock Rule' : 'New Lock Rule';
+  document.getElementById('geRuleUserSearch').value = '';
+  document.getElementById('geRuleNote').value = geRuleDraft.note || '';
+  document.getElementById('geRuleStartAt').value = geRuleDraft.startAt || '';
+  document.getElementById('geRuleEndAt').value = geRuleDraft.endAt || '';
+  document.getElementById('geRuleHasEnd').checked = !!geRuleDraft.endAt;
+  onGeRuleHasEndToggle(!!geRuleDraft.endAt);
+  setGeRuleWhen(geRuleDraft.startAt ? 'scheduled' : 'now', true);
+
+  renderGeRuleSubjectsList();
+  renderGeRuleItemsList();
+  setGeRuleTarget(geRuleDraft.target);
+
+  document.getElementById('geRuleForm').style.display = 'block';
+  document.getElementById('geRuleForm').scrollIntoView({ block:'nearest', behavior:'smooth' });
+}
+
+function closeGeRuleForm(){
+  geRuleDraft = null;
+  const form = document.getElementById('geRuleForm');
+  if(form) form.style.display = 'none';
+}
+
+function setGeRuleTarget(target){
+  if(!geRuleDraft) return;
+  geRuleDraft.target = target;
+  document.querySelectorAll('.ge-target-btn').forEach(b=> b.classList.toggle('active', b.dataset.target===target));
+  document.getElementById('geTargetUsersWrap').style.display = target==='users' ? 'block' : 'none';
+  document.getElementById('geTargetSubjectsWrap').style.display = target==='subjects' ? 'block' : 'none';
+  if(target==='users') renderGeRuleUsersList();
+}
+
+function setGeRuleWhen(when, silent){
+  if(!geRuleDraft) return;
+  document.querySelectorAll('.ge-when-btn').forEach(b=> b.classList.toggle('active', b.dataset.when===when));
+  document.getElementById('geScheduleStartWrap').style.display = when==='scheduled' ? 'block' : 'none';
+  if(when==='now' && !silent){
+    geRuleDraft.startAt = '';
+    document.getElementById('geRuleStartAt').value = '';
+  }
+}
+
+function onGeRuleHasEndToggle(checked){
+  document.getElementById('geScheduleEndWrap').style.display = checked ? 'block' : 'none';
+  if(!checked) document.getElementById('geRuleEndAt').value = '';
+}
+
+function renderGeRuleUsersList(){
+  const wrap = document.getElementById('geRuleUsersList');
+  if(!wrap || !geRuleDraft) return;
+  const q = (document.getElementById('geRuleUserSearch').value||'').trim().toLowerCase();
+  let list = usersEligibleForGradeEntryLock();
+  if(q) list = list.filter(u=> (u.username||'').toLowerCase().includes(q) || (u.displayName||'').toLowerCase().includes(q));
+  if(!list.length){
+    wrap.innerHTML = `<p class="foot-note" style="margin:12px;">No matching grade-entry user found.</p>`;
+    return;
+  }
+  wrap.innerHTML = list.map(u=>{
+    const checked = geRuleDraft.usernames.includes(u.username) ? 'checked' : '';
+    const roleLabel = ROLE_LABELS[u.role] || u.role || 'User';
+    const sectionLabel = u.section && SECTIONS[u.section] ? ` — ${SECTIONS[u.section].label}` : '';
+    return `
+      <label class="user-item" style="gap:12px;align-items:flex-start;">
+        <input type="checkbox" value="${escapeXml(u.username)}" onchange='toggleGeRuleUser(${JSON.stringify(u.username)}, this.checked)' ${checked}>
+        <div class="user-info">
+          <div class="user-name">${escapeHtml(u.displayName||u.username)}</div>
+          <div class="user-role">${escapeHtml(u.username)} — ${escapeHtml(roleLabel + sectionLabel)}</div>
+        </div>
+      </label>`;
+  }).join('');
+}
+function toggleGeRuleUser(username, checked){
+  if(!geRuleDraft) return;
+  const set = new Set(geRuleDraft.usernames);
+  if(checked) set.add(username); else set.delete(username);
+  geRuleDraft.usernames = [...set].sort((a,b)=>a.localeCompare(b));
+}
+
+function renderGeRuleSubjectsList(){
+  const wrap = document.getElementById('geRuleSubjectsWrap');
+  if(!wrap || !geRuleDraft) return;
+  const list = (typeof ALL_SUBJECTS!=='undefined' ? ALL_SUBJECTS : []);
+  wrap.innerHTML = list.map(s=>{
+    const id = 'geSubj_' + s.replace(/[^a-zA-Z0-9]/g,'_');
+    const checked = geRuleDraft.subjects.includes(s) ? 'checked' : '';
+    return `<label class="perm-check"><input type="checkbox" id="${id}" onchange="toggleGeRuleSubject(${JSON.stringify(s)}, this.checked)" ${checked}> ${escapeHtml(typeof subjectWithIcon==='function' ? subjectWithIcon(s) : s)}</label>`;
+  }).join('');
+}
+function toggleGeRuleSubject(subject, checked){
+  if(!geRuleDraft) return;
+  const set = new Set(geRuleDraft.subjects);
+  if(checked) set.add(subject); else set.delete(subject);
+  geRuleDraft.subjects = [...set].sort((a,b)=>a.localeCompare(b));
+}
+
+function renderGeRuleItemsList(){
+  const wrap = document.getElementById('geRuleItemsWrap');
+  if(!wrap || !geRuleDraft) return;
+  wrap.innerHTML = GE_MARK_ITEMS.map(m=>{
+    const checked = geRuleDraft.items.includes(m.id) ? 'checked' : '';
+    return `<label class="perm-check"><input type="checkbox" onchange="toggleGeRuleItem('${m.id}', this.checked)" ${checked}> ${escapeHtml(m.label)}</label>`;
+  }).join('');
+}
+function toggleGeRuleItem(itemId, checked){
+  if(!geRuleDraft) return;
+  const set = new Set(geRuleDraft.items);
+  if(checked) set.add(itemId); else set.delete(itemId);
+  geRuleDraft.items = [...set];
+}
+
+function commitGeRuleForm(){
+  if(!geRuleDraft) return;
+  if(geRuleDraft.target==='users' && !geRuleDraft.usernames.length){
+    alert('Pick at least one account to lock.');
+    return;
+  }
+  if(geRuleDraft.target==='subjects' && !geRuleDraft.subjects.length){
+    alert('Pick at least one subject.');
+    return;
+  }
+  const whenScheduled = document.querySelector('.ge-when-btn[data-when="scheduled"]').classList.contains('active');
+  geRuleDraft.startAt = whenScheduled ? (document.getElementById('geRuleStartAt').value || '') : '';
+  if(whenScheduled && !geRuleDraft.startAt){
+    alert('Pick a start date/time, or switch back to "Lock now".');
+    return;
+  }
+  geRuleDraft.endAt = document.getElementById('geRuleHasEnd').checked ? (document.getElementById('geRuleEndAt').value || '') : '';
+  geRuleDraft.note = document.getElementById('geRuleNote').value || '';
+
+  const normalized = normalizeGradeEntryLockRule(geRuleDraft);
+  const idx = stagedGradeEntryLockRules.findIndex(r=> r.id===normalized.id);
+  if(idx>=0) stagedGradeEntryLockRules[idx] = normalized;
+  else stagedGradeEntryLockRules.push(normalized);
+
+  closeGeRuleForm();
+  renderGradeEntryControlRules();
+}
+
+function saveGradeEntryControl(){
+  if(!currentUser || currentUser.role!=='admin'){
+    alert('Only Admin can manage Grade Entry Control.');
+    return;
+  }
+  gradeEntryLockRules = normalizeGradeEntryLockRules(stagedGradeEntryLockRules);
+  saveGradeEntryLockConfig();
+  if(currentUser){
+    currentUser.effective = getEffectivePermissions(currentUser);
+    applyPermissionsUI();
+  }
+  if(typeof renderTable==='function') renderTable();
+  logActivity('edit', `Updated Grade Entry Control (${gradeEntryLockRules.length} rule(s))`);
+  closeGradeEntryControlModal();
+}
+
+// Scheduled rules need no page reload to kick in / expire: while the Grade Book is open,
+// or the Grade Entry Control modal itself is open, re-check every 30s so a scheduled lock
+// disables the score inputs (and an auto-unlock re-enables them) without user action.
+setInterval(function(){
+  if(typeof currentView!=='undefined' && currentView==='grades' && typeof renderTable==='function') renderTable();
+  const modal = document.getElementById('gradeEntryControlOverlay');
+  if(modal && modal.classList.contains('show')) renderGradeEntryControlRules();
+}, 30000);
+
 /* ========== REPORT CARD RELEASE ========== */
 let reportCardReleases = [];
 const REPORT_CARD_RELEASES_LS_KEY = 'reportCardReleases';
@@ -10000,11 +10598,12 @@ function saveUserFromForm(){
     const previousRole = user.role;
     Object.assign(user, userObj);
     
-    // Auto-sync the Teachers Database whenever this account is (or becomes) a Teacher.
-    // Match primarily by the linked username (reliable even if the name changes later);
-    // fall back to matching by name for teacher rows that pre-date this linking, and
-    // as a last resort create a fresh Teachers Database row (e.g. role just switched to Teacher).
-    if(role === 'teacher'){
+    // Auto-sync the Teachers Database whenever this account is (or becomes) a Teacher or a
+    // Head of Department. Match primarily by the linked username (reliable even if the name
+    // changes later); fall back to matching by name for teacher rows that pre-date this
+    // linking, and as a last resort create a fresh Teachers Database row (e.g. role just
+    // switched to Teacher/HOD).
+    if(role === 'teacher' || role === 'hod'){
       let teacher = teachers.find(t => t.username === editing) || teachers.find(t => t.username === username);
       if(!teacher) teacher = teachers.find(t => !t.username && (t.name === editing || t.name === displayName));
       if(!teacher){
@@ -10016,10 +10615,11 @@ function saveUserFromForm(){
       teacher.section = sectionLabelFromCode(section);
       teacher.subject = subjects.join(', ');
       // Classes stay whatever was picked in Manage Users; admins can also add/adjust
-      // them later directly from the Teachers Database "Classes" column.
+      // them later directly from the Teachers Database "Classes" column. HOD accounts
+      // don't collect classrooms in Manage Users, so this simply leaves Classes as-is for them.
       teacher.classes = classrooms.length ? classrooms.join(', ') : (teacher.classes || '');
-    } else if(previousRole === 'teacher'){
-      // Role changed away from Teacher: drop the linked Teachers Database row.
+    } else if(previousRole === 'teacher' || previousRole === 'hod'){
+      // Role changed away from Teacher/HOD: drop the linked Teachers Database row.
       teachers = teachers.filter(t => !(t.username===editing || t.username===username));
     }
     
@@ -10033,16 +10633,16 @@ function saveUserFromForm(){
     renderTeachersDatabase();
     resetUserForm();
     if(currentUser){ currentUser.effective = getEffectivePermissions(currentUser); sanitizeScopedState(); applyPermissionsUI(); }
-    logActivity('edit', `Updated user account "${username}" (${ROLE_LABELS[role]||role})${role==='teacher' ? ' + updated Teachers Database' : ''}`);
+    logActivity('edit', `Updated user account "${username}" (${ROLE_LABELS[role]||role})${(role==='teacher'||role==='hod') ? ' + updated Teachers Database' : ''}`);
   } else {
     if(findUser(username)){ alert('This username already exists.'); return; }
     users.push(userObj);
     
-    // Auto-import teacher to Teachers Database, filling Section & Subject from what was
-    // just entered in Manage Users. Classes can be left blank here and added/edited later
-    // directly in the Teachers Database. New rows are appended to the end of the manually
-    // orderable list, ready to be moved with the ▲▼ buttons.
-    if(role === 'teacher'){
+    // Auto-import Teacher/HOD accounts to Teachers Database, filling Section & Subject from
+    // what was just entered in Manage Users. Classes can be left blank here and added/edited
+    // later directly in the Teachers Database. New rows are appended to the end of the
+    // manually orderable list, ready to be moved with the ▲▼ buttons.
+    if(role === 'teacher' || role === 'hod'){
       const teacherEntry = {
         id: uid(),
         displayId: nextTeacherDisplayId(),
@@ -10060,7 +10660,7 @@ function saveUserFromForm(){
     renderUsersTable();
     resetUserForm();
     if(currentUser){ currentUser.effective = getEffectivePermissions(currentUser); sanitizeScopedState(); applyPermissionsUI(); }
-    logActivity('add', `Created user account "${username}" (${ROLE_LABELS[role]||role})${role==='teacher' ? ' + added to Teachers Database' : ''}`);
+    logActivity('add', `Created user account "${username}" (${ROLE_LABELS[role]||role})${(role==='teacher'||role==='hod') ? ' + added to Teachers Database' : ''}`);
   }
 }
 function deleteUserRow(username){
@@ -10072,9 +10672,9 @@ function deleteUserRow(username){
   }
   if(!confirm(`Delete user "${username}"?`)) return;
   
-  // Delete from Teachers Database if user was a teacher (match by linked username first,
-  // falling back to name-matching for legacy rows created before linking existed)
-  if(user && user.role === 'teacher'){
+  // Delete from Teachers Database if user was a Teacher or HOD (match by linked username
+  // first, falling back to name-matching for legacy rows created before linking existed)
+  if(user && (user.role === 'teacher' || user.role === 'hod')){
     const displayName = user.displayName || username;
     teachers = teachers.filter(t => t.username ? t.username !== username : (t.name !== displayName && t.name !== username));
   }
@@ -10084,7 +10684,7 @@ function deleteUserRow(username){
   saveState(); // Save teachers as well
   renderUsersTable();
   renderTeachersDatabase();
-  logActivity('delete', `Deleted user account "${username}"${user && user.role === 'teacher' ? ' + removed from Teachers Database' : ''}`);
+  logActivity('delete', `Deleted user account "${username}"${user && (user.role === 'teacher' || user.role === 'hod') ? ' + removed from Teachers Database' : ''}`);
 }
 function renderUsersTable(){
   const body = document.getElementById('usersTableBody');
@@ -10451,6 +11051,10 @@ function applyRemotePayload(payload){
     blockedStudentIds = payload.blockedStudentIds;
     saveBlockedStudentsLocalOnly();
   }
+  if(payload.gradeEntryLockRules || payload.gradeEntryLockConfig){
+    gradeEntryLockRules = gradeEntryLockRulesFromPayload(payload) || [];
+    saveGradeEntryLockConfigLocalOnly();
+  }
   if(payload.presenceBucket && !presenceBucket){
     presenceBucket = payload.presenceBucket;
     try{ localStorage.setItem(PRESENCE_BUCKET_LS_KEY, presenceBucket); }catch(err){}
@@ -10525,7 +11129,7 @@ async function pushToGithub(){
     // to send — the eventual echo/snapshot for THIS push carries the older, lower version and
     // gets ignored by the listener instead of overwriting those newer edits.
     const versionToPush = knownDataVersion + 1;
-    const payload = { students, scores, studentIdCounter, attendance, teachers, teacherIdCounter, users, activityLog, termMonthDates, examSchedules, examSeatAssignments, bellTimes, blockedStudentIds, presenceBucket: presenceBucket || null, dataVersion: versionToPush, savedAt: new Date().toISOString() };
+    const payload = { students, scores, studentIdCounter, attendance, teachers, teacherIdCounter, users, activityLog, termMonthDates, examSchedules, examSeatAssignments, bellTimes, blockedStudentIds, gradeEntryLockRules: normalizeGradeEntryLockRules(gradeEntryLockRules), presenceBucket: presenceBucket || null, dataVersion: versionToPush, savedAt: new Date().toISOString() };
     knownDataVersion = versionToPush;
     fbLastPushedAt = Date.now();
     await FB_DOC_REF.set(payload, { merge:false });
@@ -10757,6 +11361,7 @@ loadState();
 loadActivityLog();
 loadReportCardReleases();
 loadBlockedStudentsLocalOnly();
+loadGradeEntryLockConfig();
 loadTermMonthDates();
 loadExamSchedules();
 loadGithubConfig();
@@ -10900,6 +11505,7 @@ pullFromGithub(true).then(()=>{ if(githubReady()) startFirebaseLiveSync(); refre
 let bulkImportState = { mode: null, subjects: [] };
 
 function openBulkGradesImportModal(){
+  if(gradeItemUploadReadOnly()){ gradeEntryLockAlert(); return; }
   bulkImportState = { mode: null, subjects: [] };
   document.getElementById('bulkGradesImportOverlay').classList.add('show');
   // Clear all mode displays and inputs
@@ -11049,6 +11655,7 @@ function bulkImportFieldDef(){
 
 function handleBulkGradesExcelFile(file){
   if(!file) return;
+  if(gradeItemUploadReadOnly()){ gradeEntryLockAlert(); document.getElementById('bulkGradesExcelInput').value = ''; return; }
   
   const mode = bulkImportState.mode;
   const subjects = bulkImportState.subjects;
@@ -11663,5 +12270,6 @@ function downloadStatisticsPDF(){
   alert('PDF export is coming soon. For now, you can use the Print function (Ctrl+P or Cmd+P) to save as PDF.');
 }
 </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
