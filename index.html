@@ -545,6 +545,26 @@ body.dark-mode .masthead-text h1{
 }
 .modal-select:focus{outline:none;border-color:var(--gold);}
 
+/* ---------- Dashboard: linked-children quick switch (parents w/ multiple kids) ---------- */
+.db-children-switch{
+  display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--paper);
+  border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);margin-bottom:14px;
+}
+.db-children-switch .dcs-label{font-size:12px;font-weight:700;color:var(--ink-soft);margin-inline-end:2px;white-space:nowrap;}
+.db-child-tab{
+  display:flex;align-items:center;gap:8px;border:1.5px solid var(--border);background:var(--paper-2);
+  color:var(--ink);border-radius:999px;padding:6px 14px 6px 6px;font-family:'Tajawal';font-size:13px;
+  font-weight:700;cursor:pointer;transition:background .15s,border-color .15s,color .15s;
+}
+[dir="rtl"] .db-child-tab{padding:6px 6px 6px 14px;}
+.db-child-tab:hover{border-color:var(--gold);}
+.db-child-tab .dcs-avatar{
+  width:24px;height:24px;border-radius:50%;background:var(--blue-bg);color:var(--blue);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;
+}
+.db-child-tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.db-child-tab.active .dcs-avatar{background:var(--gold);color:var(--ink);}
+
 /* ---------- Database filters ---------- */
 .db-filters{
   display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;background:var(--paper);
@@ -598,6 +618,25 @@ body.dark-mode .exam-analysis-table th, body.dark-mode .exam-analysis-table td{ 
 }
 .db-student-name{ font-weight:800; font-size:15.5px; color:var(--ink); }
 .db-student-meta{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+.db-motivation-badge{
+  display:inline-flex; align-items:center; gap:6px; margin-inline-start:auto;
+  background:var(--gold-light); color:var(--gold-deep); font-weight:800; font-size:12.5px;
+  padding:6px 12px; border-radius:20px; white-space:nowrap;
+}
+/* ---------- Parent/Student motivational layer: encouragement message + "since last visit" ---------- */
+.db-encourage-card{
+  display:flex; align-items:flex-start; gap:12px; background:var(--paper); border-radius:12px;
+  padding:14px 18px; box-shadow:var(--shadow); margin-bottom:16px; border-inline-start:4px solid var(--gold);
+}
+.db-encourage-card .db-enc-icon{ font-size:22px; line-height:1; flex-shrink:0; }
+.db-encourage-card .db-enc-text{ font-size:13.5px; color:var(--ink); line-height:1.5; }
+.db-lastvisit-card{
+  display:flex; align-items:flex-start; gap:12px; background:var(--paper); border-radius:12px;
+  padding:12px 18px; box-shadow:var(--shadow); margin-bottom:16px; border-inline-start:4px solid var(--blue);
+  font-size:13px; color:var(--ink-soft);
+}
+.db-lastvisit-card b{ color:var(--ink); }
+.db-lastvisit-card .db-enc-icon{ font-size:18px; line-height:1.3; flex-shrink:0; }
 
 /* ---------- Breadcrumb Stepper ---------- */
 .stepper{
@@ -2596,10 +2635,10 @@ body.dark-mode .login-card{box-shadow:0 18px 50px rgba(0,0,0,0.45);}
           <button class="user-badge-pw-btn" onclick="openChangePasswordModal()" title="Change your password">🔑 Password</button>
           <button onclick="logoutUser()">Logout</button>
         </div>
-        <span class="save-indicator" id="saveIndicator">✓ Saved</span>
-        <span id="githubSyncStatus" style="font-size:12px;font-weight:800;display:none;align-items:center;">☁ Not synced yet</span>
       </div>
       <div class="masthead-right-row">
+        <span class="save-indicator" id="saveIndicator">✓ Saved</span>
+        <span id="githubSyncStatus" style="font-size:12px;font-weight:800;display:none;align-items:center;">☁ Not synced yet</span>
         <div class="quick-stats" id="quickStatsWidget" title="Live system overview">
           <div class="qs-item"><span class="qs-num" id="qsStudents">—</span><span class="qs-label">Students</span></div>
           <div class="qs-item"><span class="qs-num" id="qsAvg">—</span><span class="qs-label">Avg. grade</span></div>
@@ -2954,6 +2993,7 @@ body.dark-mode .login-card{box-shadow:0 18px 50px rgba(0,0,0,0.45);}
       <div class="classbar-crumbs" id="dashboardCrumbs"></div>
     </div>
     <div class="workspace show" id="dashboardWorkspace">
+      <div id="dashboardChildSwitch"></div>
       <div class="db-filters" id="dashboardFilters"></div>
       <div id="dashboardChartsArea"></div>
     </div>
@@ -4156,8 +4196,56 @@ function renderDashboard(){
   const modeLabel = DASHBOARD_MODE_LABELS[state.dashboardMode] || 'Cycle 1';
   const crumbs = document.getElementById('dashboardCrumbs');
   if(crumbs) crumbs.innerHTML = `<span class="crumb subj">${label}</span><span class="crumb subj">${modeLabel}</span>`;
+  renderDashboardChildSwitch();
   renderDashboardFilters();
   renderDashboardCharts();
+}
+
+/* ---------- Cycle Dashboard: linked-children quick switch ----------
+   Parents/students linked to more than one child (siblings) get a small
+   row of tappable tabs above the stepper so they can jump straight to a
+   sibling's dashboard instead of re-walking Section -> Stage -> Grade ->
+   Class -> Student every time. Only rendered when the account is scoped
+   to 2+ students (currentUser.effective.studentScope). */
+function getLinkedDashboardChildren(){
+  if(!currentUser || !currentUser.effective) return [];
+  const scope = currentUser.effective.studentScope;
+  if(!Array.isArray(scope) || scope.length < 2) return [];
+  const flat = allStudentsFlatRaw();
+  return scope
+    .map(id=> flat.find(s=> s.id===id))
+    .filter(Boolean)
+    .sort((a,b)=> a.name.localeCompare(b.name));
+}
+
+function renderDashboardChildSwitch(){
+  const wrap = document.getElementById('dashboardChildSwitch');
+  if(!wrap) return;
+  const children = getLinkedDashboardChildren();
+  if(!children.length){ wrap.innerHTML = ''; return; }
+  const tabs = children.map(c=>{
+    const active = state.dashboardStudent===c.id;
+    const initial = (c.name||'?').trim().charAt(0).toUpperCase();
+    const gradeObj = STAGES[c.stage] ? STAGES[c.stage].grades.find(g=>g.id===c.grade) : null;
+    const gradeLabel = gradeObj ? gradeObj.label : (c.grade||'');
+    const sub = [gradeLabel, c.classroom].filter(Boolean).join(' · ');
+    return `<button type="button" class="db-child-tab${active?' active':''}" onclick="selectDashboardChild('${c.id}')" title="${sub.replace(/"/g,'&quot;')}">
+      <span class="dcs-avatar">${initial}</span><span>${c.name}</span>
+    </button>`;
+  }).join('');
+  wrap.innerHTML = `<div class="db-children-switch"><span class="dcs-label">My children:</span>${tabs}</div>`;
+}
+
+function selectDashboardChild(studentId){
+  const flat = allStudentsFlatRaw();
+  const s = flat.find(x=> x.id===studentId);
+  if(!s) return;
+  state.dashboardSection = s.section || null;
+  state.dashboardStage = s.stage || null;
+  state.dashboardGrade = s.grade || null;
+  state.dashboardClassroom = s.classroom || null;
+  state.dashboardStudent = s.id;
+  renderDashboard();
 }
 
 /* ---------- Cycle Dashboard: filters ---------- */
@@ -4176,7 +4264,11 @@ function renderDashboardFilters(){
   const classReady = state.dashboardSection && state.dashboardStage && state.dashboardGrade;
   if(classReady){
     const ck = `${state.dashboardSection}|${state.dashboardStage}|${state.dashboardGrade}`;
-    const roster = students[ck] || [];
+    // A Parent/Student account linked to a specific child is NOT restricted by
+    // section/stage/classroom (those scopes are null for linked parents — see
+    // getEffectivePermissions), so studentScope is the ONLY thing standing between
+    // this list and every other student's grades. Never drop this filter.
+    const roster = (students[ck] || []).filter(s=>scopeStudentAllowed(s.id));
     const classes = getClassesInGrade({ section: state.dashboardSection, stage: state.dashboardStage, grade: state.dashboardGrade })
       .filter(c=>scopeClassroomAllowed(c));
     classOpts = classes.map(c=>`<option value="${String(c).replace(/"/g,'&quot;')}" ${state.dashboardClassroom===c?'selected':''}>${c}</option>`).join('');
@@ -4226,6 +4318,7 @@ function setDashboardFilter(kind, value){
   if(kind==='grade'){ state.dashboardGrade = value || null; state.dashboardClassroom=null; state.dashboardStudent=null; }
   if(kind==='classroom'){ state.dashboardClassroom = value || null; state.dashboardStudent=null; }
   if(kind==='student') state.dashboardStudent = value || null;
+  renderDashboardChildSwitch();
   renderDashboardFilters();
   renderDashboardCharts();
 }
@@ -4236,7 +4329,10 @@ function computeCycleStats(section, stage, grade, term, studentId){
   const subjects = STAGES[stage].subjects;
   const ck = `${section}|${stage}|${grade}`;
   const roster = students[ck] || [];
-  const student = roster.find(s=>s.id===studentId);
+  // Defense in depth: even if a stale/tampered studentId ever reaches this function,
+  // never compute or return another student's grades to an account that isn't
+  // scoped to see them (e.g. a linked Parent account viewing a classmate).
+  const student = (studentId && scopeStudentAllowed(studentId)) ? roster.find(s=>s.id===studentId) : null;
   if(junior || !roster.length || !student){
     return { junior, empty: !roster.length, noStudent: !student, perSubject: [] };
   }
@@ -4275,6 +4371,111 @@ const CYCLE_BANDS = [
   { key:'weak',      label:'Weak (below 2)',     color:'#B23A3A', test:v=>v<2 }
 ];
 
+/* ================== Parent/Student Dashboard: motivational layer ==================
+   Purely presentational, additive, and Parent/Student-only: an admin/teacher looking at
+   the same Cycle Dashboard never sees any of this — they get the plain analytics as
+   before. None of it touches scores/students storage; the "since last visit" snapshot
+   lives in localStorage under the parent's own username, so it stays private per device
+   and never needs a backend round-trip. */
+function isParentDashboardViewer(){ return !!(currentUser && currentUser.role==='parent'); }
+
+function cycleBandOf(v){ return CYCLE_BANDS.find(b=>b.test(v)) || null; }
+
+function computeSimpleAvg(vals){ return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null; }
+
+/* Badge: 🏆 for a clear, meaningful jump between Cycle 1 and Cycle 2; ⭐ for staying in
+   the Excellent band consistently (either across most subjects in a single cycle, or in
+   both cycles when comparing). Returns null when neither is earned — no badge is better
+   than a hollow one. */
+function getMotivationBadge(mode, perSubject){
+  if(mode==='cycle1vs2'){
+    const both = perSubject.filter(p=>p.hasV1 && p.hasV2);
+    if(!both.length) return null;
+    const a1 = computeSimpleAvg(both.map(p=>p.v1));
+    const a2 = computeSimpleAvg(both.map(p=>p.v2));
+    const diff = a2 - a1;
+    if(diff >= 0.3) return { icon:'🏆', label:'Most Improved' };
+    if(a1>=4.5 && a2>=4.5) return { icon:'⭐', label:'Excellent Consistency' };
+    return null;
+  }
+  const withV1 = perSubject.filter(p=>p.hasV1);
+  if(!withV1.length) return null;
+  const excellentCount = withV1.filter(p=> cycleBandOf(p.v1) && cycleBandOf(p.v1).key==='excellent').length;
+  if(excellentCount === withV1.length && withV1.length>=2) return { icon:'⭐', label:'Excellent Consistency' };
+  if(excellentCount >= Math.ceil(withV1.length*0.6) && withV1.length>=2) return { icon:'🏆', label:'Strong Performance' };
+  return null;
+}
+
+/* Encouragement message: always framed positively, even (especially) for a Weak band —
+   the goal is to make the Dashboard feel like a source of motivation for the student, not
+   just a monitoring tool for the parent. */
+function getEncouragementMessage(band, weakestSubjects){
+  const weakest = (weakestSubjects && weakestSubjects.length) ? weakestSubjects[0] : null;
+  switch(band && band.key){
+    case 'excellent':
+      return { icon:'🌟', text:'Outstanding work! This is an excellent, well-rounded performance — keep celebrating the effort behind it.' };
+    case 'verygood':
+      return { icon:'👏', text:'Great job! This is very strong performance — just a little more consistency to reach the very top.' };
+    case 'good':
+      return { icon:'💪', text:`Solid, steady progress! A bit more focus${weakest?` on ${weakest}`:''} could push things even higher next cycle.` };
+    case 'accept':
+      return { icon:'🙂', text:`A comfortable pass — with a steady push${weakest?` in ${weakest}`:''}, the next cycle can look noticeably better.` };
+    case 'weak':
+      return { icon:'🌱', text:`Every strong result starts with a first step. There's real room to grow${weakest?`, especially in ${weakest}`:''} — a little steady effort now will show up fast. We're here to help along the way.` };
+    default:
+      return null;
+  }
+}
+
+/* "Since your last visit" — compares this render's per-subject values against the last
+   snapshot this same parent account saved for this exact student/term/mode, then stores
+   the new snapshot. First-ever visit has nothing to compare against, so it stays silent. */
+function parentDashSnapshotKey(section, stage, grade, studentId, term, mode){
+  const who = currentUser ? currentUser.username : 'anon';
+  return `parentDashSnap_v1__${who}__${section}|${stage}|${grade}|${studentId}|${term}|${mode}`;
+}
+function loadParentDashSnapshot(key){
+  try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }catch(err){ return null; }
+}
+function saveParentDashSnapshot(key, perSubject, mode){
+  try{
+    const data = {};
+    perSubject.forEach(p=>{ data[p.subject] = mode==='cycle1vs2' ? p.v2 : p.v1; });
+    localStorage.setItem(key, JSON.stringify({ ts: Date.now(), values: data }));
+  }catch(err){}
+}
+function renderSinceLastVisit(section, stage, grade, studentId, term, mode, perSubject){
+  const key = parentDashSnapshotKey(section, stage, grade, studentId, term, mode);
+  const prev = loadParentDashSnapshot(key);
+  saveParentDashSnapshot(key, perSubject, mode);
+  if(!prev || !prev.values) return '';
+
+  let improved = [], declined = [];
+  perSubject.forEach(p=>{
+    const cur = mode==='cycle1vs2' ? p.v2 : p.v1;
+    if(cur===null || cur===undefined) return;
+    const prevVal = prev.values[p.subject];
+    if(prevVal===null || prevVal===undefined) return;
+    if(cur > prevVal) improved.push(p.subject);
+    else if(cur < prevVal) declined.push(p.subject);
+  });
+  if(!improved.length && !declined.length) return '';
+
+  const parts = [];
+  if(improved.length) parts.push(`improved in <b>${improved.length}</b> subject${improved.length>1?'s':''} (${escapeHtml(improved.join(', '))})`);
+  if(declined.length) parts.push(`dipped in <b>${declined.length}</b> subject${declined.length>1?'s':''} (${escapeHtml(declined.join(', '))})`);
+  return `<div class="db-lastvisit-card"><span class="db-enc-icon">🔄</span><span>Since your last visit, your child's performance ${parts.join(' and ')}.</span></div>`;
+}
+
+/* Assembles the full motivational block (badge is returned separately so it can sit
+   inline in the name banner; message + since-last-visit render as their own cards). */
+function renderParentMotivationCards(mode, perSubject, band, weakestSubjects, section, stage, grade, studentId, term){
+  let html = renderSinceLastVisit(section, stage, grade, studentId, term, mode, perSubject);
+  const enc = getEncouragementMessage(band, weakestSubjects);
+  if(enc) html += `<div class="db-encourage-card"><span class="db-enc-icon">${enc.icon}</span><span class="db-enc-text">${enc.text}</span></div>`;
+  return html;
+}
+
 function renderDashboardCharts(){
   const area = document.getElementById('dashboardChartsArea');
   if(!area) return;
@@ -4303,12 +4504,25 @@ function renderDashboardCharts(){
     return;
   }
 
-  const nameBanner = `<div class="db-student-banner"><span class="seal-lg" style="width:38px;height:38px;font-size:16px;">🎓</span><div><div class="db-student-name">${escapeXml(stats.student.name)}</div><div class="db-student-meta">${STAGES[stage].grades.find(g=>g.id===grade).label} • ${SECTIONS[section].label}${stats.student.classroom?' • '+escapeXml(stats.student.classroom):''}</div></div></div>`;
+  const isParent = isParentDashboardViewer();
+  const badge = isParent ? getMotivationBadge(mode, withData) : null;
+  const badgeHtml = badge ? `<span class="db-motivation-badge">${badge.icon} ${badge.label}</span>` : '';
+  const nameBanner = `<div class="db-student-banner"><span class="seal-lg" style="width:38px;height:38px;font-size:16px;">🎓</span><div><div class="db-student-name">${escapeXml(stats.student.name)}</div><div class="db-student-meta">${STAGES[stage].grades.find(g=>g.id===grade).label} • ${SECTIONS[section].label}${stats.student.classroom?' • '+escapeXml(stats.student.classroom):''}</div></div>${badgeHtml}</div>`;
+
+  let motivationHtml = '';
+  if(isParent){
+    const curVals = withData.map(p=> mode==='cycle1vs2' ? (p.hasV2?p.v2:p.v1) : p.v1).filter(v=>v!==null && v!==undefined && !isNaN(v));
+    const avg = computeSimpleAvg(curVals);
+    const band = avg!==null ? cycleBandOf(avg) : null;
+    const minV = curVals.length ? Math.min(...curVals) : null;
+    const weakestSubjects = minV===null ? [] : withData.filter(p=>{ const cv = mode==='cycle1vs2' ? (p.hasV2?p.v2:p.v1) : p.v1; return cv===minV; }).map(p=>p.subject);
+    motivationHtml = renderParentMotivationCards(mode, withData, band, weakestSubjects, section, stage, grade, studentId, term);
+  }
 
   if(mode==='cycle1vs2'){
-    area.innerHTML = nameBanner + renderCycleCompareView(stats.perSubject);
+    area.innerHTML = nameBanner + motivationHtml + renderCycleCompareView(stats.perSubject);
   } else {
-    area.innerHTML = nameBanner + renderCycle1View(stats.perSubject);
+    area.innerHTML = nameBanner + motivationHtml + renderCycle1View(stats.perSubject);
   }
 }
 
@@ -6100,7 +6314,7 @@ function updateScore(studentId, field, value, max){
   renderTable(true);
   saveState();
   const stu = getRoster().find(s=>s.id===studentId);
-  logActivity('edit', `Set "${field}" = ${value===''?'—':value} for ${stu?stu.name:'a student'} — ${state.subject||''} (${state.term||'—'})`);
+  logActivity('edit', `Set "${field}" = ${value===''?'—':value} for ${stu?stu.name:'a student'} — ${state.subject||''} (${state.term||'—'})`, { studentId });
 }
 
 function scoreInputGroupClass(field){
@@ -7597,7 +7811,7 @@ function handleGradeItemExcelFile(file){
       document.getElementById('importMsg').textContent =
         `${updated} score(s) updated for "${def.label}".` +
         (notFound.length ? ` ${notFound.length} row(s) could not be matched to a student in the current list: ${notFound.slice(0,10).join(', ')}${notFound.length>10?'…':''}.` : '');
-      logActivity('edit', `Bulk-uploaded "${def.label}" via Excel for ${updated} student(s) — ${state.subject||''} (${state.term||'—'})`);
+      logActivity('edit', `Bulk-uploaded "${def.label}" via Excel for ${updated} student(s) — ${state.subject||''} (${state.term||'—'})`, { studentIds: Object.keys(scoreMap) });
       document.getElementById('importResultOverlay').classList.add('show');
     }catch(err){
       alert('Could not read the file. Make sure it is a valid Excel file with an ID or Student Name column, and a matching score column.');
@@ -8864,14 +9078,18 @@ function saveActivityLogLocalOnly(){
   catch(err){ console.warn('Could not save activity log', err); }
 }
 // type: 'login' | 'logout' | 'add' | 'edit' | 'delete' | 'import'
-function logActivity(type, message){
+function logActivity(type, message, meta){
   const entry = {
     id: uid(),
     username: currentUser ? currentUser.username : 'system',
     displayName: currentUser ? (currentUser.displayName || currentUser.username) : 'System',
     role: currentUser ? currentUser.role : '',
     type, message,
-    ts: Date.now()
+    ts: Date.now(),
+    // Optional extra context (e.g. studentId) so notification consumers — like a
+    // Parent/Student account's own bell — can filter entries down to just their child
+    // without having to re-parse the free-text message.
+    ...(meta || {})
   };
   activityLog.unshift(entry);
   if(activityLog.length > ACTIVITY_LOG_MAX) activityLog.length = ACTIVITY_LOG_MAX;
@@ -10720,6 +10938,24 @@ function notifTimeAgo(ts){
 }
 const NOTIF_TYPE_ICONS = { add:'➕', edit:'✏️', delete:'🗑️', import:'📥' };
 
+/* A Parent/Student account only cares about activity log entries that actually touch
+   their own linked child (grade edits tagged with studentId/studentIds — see logActivity
+   calls in updateScore() and the Excel bulk-upload flow). Everything else (other classes,
+   user management, settings…) is noise they were never meant to see. */
+function notifEntryMatchesLinkedStudent(entry, studentIds){
+  if(!entry || !studentIds || !studentIds.length) return false;
+  if(entry.studentId) return studentIds.includes(entry.studentId);
+  if(Array.isArray(entry.studentIds)) return entry.studentIds.some(id=> studentIds.includes(id));
+  return false;
+}
+function notifRelevantLog(){
+  if(currentUser && currentUser.role==='parent'){
+    const ids = Array.isArray(currentUser.studentIds) ? currentUser.studentIds : [];
+    return visibleActivityLog().filter(e=> NOTIF_VISIBLE_TYPES.includes(e.type) && notifEntryMatchesLinkedStudent(e, ids));
+  }
+  return visibleActivityLog().filter(e=> NOTIF_VISIBLE_TYPES.includes(e.type));
+}
+
 /* Birthdays get their own "seen today" flag (they have no timestamp to compare
    against getNotifLastSeen, since the same birthday is still "new" every day). */
 const NOTIF_BIRTHDAY_SEEN_LS_KEY = 'notifBirthdaySeenDate_v1';
@@ -10736,11 +10972,14 @@ function updateNotifBadge(){
   const badge = document.getElementById('notifBadge');
   const bellBtn = document.getElementById('notifBellBtn');
   if(!badge) return;
-  if(!currentUser || currentUser.role!=='admin'){ badge.style.display = 'none'; if(bellBtn) bellBtn.classList.remove('has-unread'); return; }
+  const canSeeBell = !!(currentUser && (currentUser.role==='admin' || currentUser.role==='parent'));
+  if(!canSeeBell){ badge.style.display = 'none'; if(bellBtn) bellBtn.classList.remove('has-unread'); return; }
   const lastSeen = getNotifLastSeen();
-  const list = visibleActivityLog().filter(e=> NOTIF_VISIBLE_TYPES.includes(e.type));
+  const list = notifRelevantLog();
   let unread = list.filter(e=> e.ts > lastSeen).length;
-  const todaysBirthdays = getTodaysBirthdays();
+  // Birthday reminders in the bell stay Admin-only — a parent already sees their own
+  // child's birthday elsewhere and doesn't need a system-wide birthday feed.
+  const todaysBirthdays = currentUser.role==='admin' ? getTodaysBirthdays() : [];
   if(todaysBirthdays.length && !isBirthdayNotifSeenToday()) unread += todaysBirthdays.length;
   if(unread > 0){
     badge.style.display = 'flex';
@@ -10755,9 +10994,10 @@ function updateNotifBadge(){
 function renderNotifDropdown(){
   const holder = document.getElementById('notifList');
   if(!holder) return;
+  const isParentBell = !!(currentUser && currentUser.role==='parent');
 
   let html = '';
-  const todaysBirthdays = getTodaysBirthdays();
+  const todaysBirthdays = isParentBell ? [] : getTodaysBirthdays();
   if(todaysBirthdays.length){
     const names = todaysBirthdays.map(b=> formatBirthdayNameWithClass(b)).join(', ');
     const msg = todaysBirthdays.length===1
@@ -10782,15 +11022,17 @@ function renderNotifDropdown(){
       </div>`;
   }
 
-  const activityItems = visibleActivityLog().filter(e=> NOTIF_VISIBLE_TYPES.includes(e.type)).slice(0, 10);
+  const activityItems = notifRelevantLog().slice(0, 10);
   if(activityItems.length === 0 && upcoming.length === 0 && todaysBirthdays.length === 0){
-    holder.innerHTML = `<span class="notif-empty">No notifications yet.</span>`;
+    holder.innerHTML = isParentBell
+      ? `<span class="notif-empty">No new grades for your child yet — you'll see it here as soon as one is entered.</span>`
+      : `<span class="notif-empty">No notifications yet.</span>`;
     return;
   }
   html += activityItems.map(e=> `
     <div class="notif-item">
-      <span class="notif-icon">${NOTIF_TYPE_ICONS[e.type]||'•'}</span>
-      <span class="notif-msg">${escapeHtml(e.message||'')}</span>
+      <span class="notif-icon">${isParentBell ? '📝' : (NOTIF_TYPE_ICONS[e.type]||'•')}</span>
+      <span class="notif-msg">${isParentBell ? 'A new Cycle grade was recorded for your child' : escapeHtml(e.message||'')}</span>
       <span class="notif-time">${notifTimeAgo(e.ts)}</span>
     </div>`).join('');
 
@@ -10799,7 +11041,7 @@ function renderNotifDropdown(){
 
 function toggleNotifDropdown(e){
   e.stopPropagation();
-  if(!currentUser || currentUser.role!=='admin') return;
+  if(!currentUser || (currentUser.role!=='admin' && currentUser.role!=='parent')) return;
   const dd = document.getElementById('notifDropdown');
   if(!dd) return;
   const opening = !dd.classList.contains('open');
@@ -11068,6 +11310,9 @@ function sanitizeScopedState(){
   } else if(state.dashboardClassroom && !scopeClassroomAllowed(state.dashboardClassroom)){
     state.dashboardClassroom = null; state.dashboardStudent = null;
   }
+  if(state.dashboardStudent && !scopeStudentAllowed(state.dashboardStudent)){
+    state.dashboardStudent = null;
+  }
 
   // Exams Analysis filters
   if(state.examsSection && !scopeSectionAllowed(state.examsSection)){
@@ -11327,7 +11572,7 @@ function applyPermissionsUI(){
   const delAllBtn = document.getElementById('dbDeleteAllBtn');
   if(delAllBtn) delAllBtn.style.display = currentUser.role==='admin' ? '' : 'none';
   const notifWrap = document.getElementById('notifBellWrap');
-  if(notifWrap) notifWrap.style.display = currentUser.role==='admin' ? '' : 'none';
+  if(notifWrap) notifWrap.style.display = (currentUser.role==='admin' || currentUser.role==='parent') ? '' : 'none';
   const syncEl = document.getElementById('githubSyncStatus');
   if(syncEl && currentUser.role!=='admin') syncEl.style.display = 'none';
   const quickStatsEl = document.getElementById('quickStatsWidget');
